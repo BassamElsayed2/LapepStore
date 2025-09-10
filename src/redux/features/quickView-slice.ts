@@ -16,7 +16,7 @@ const initialState = {
     discountedPrice: 0,
     id: 0,
     image_url: "",
-    stock: 0,
+    stock_quantity: 0,
     description_en: "",
     description_ar: "",
     imgs: { thumbnails: [], previews: [] },

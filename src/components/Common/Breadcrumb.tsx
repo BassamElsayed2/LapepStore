@@ -2,7 +2,7 @@ import { useLocale } from "next-intl";
 import Link from "next/link";
 import React from "react";
 
-const Breadcrumb = ({ title, pages }) => {
+const Breadcrumb = ({ title, pages }: { title: string; pages?: any[] }) => {
   const locale = useLocale();
 
   return (
@@ -19,7 +19,8 @@ const Breadcrumb = ({ title, pages }) => {
                 <Link href="/">{locale === "ar" ? "الرئيسية" : "Home"} /</Link>
               </li>
 
-              {pages.length > 0 &&
+              {pages &&
+                pages.length > 0 &&
                 pages.map((page, key) => (
                   <li
                     className="text-custom-sm last:text-blue capitalize"

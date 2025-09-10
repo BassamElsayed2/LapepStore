@@ -10,7 +10,7 @@ import Image from "next/image";
 import { Link } from "@/app/i18n/navigation";
 import { useLocale } from "next-intl";
 
-const SingleItem = ({ item }) => {
+const SingleItem = ({ item }: { item: any }) => {
   const [quantity, setQuantity] = useState(item.quantity);
 
   const dispatch = useDispatch<AppDispatch>();

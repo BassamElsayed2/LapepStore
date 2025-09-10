@@ -204,8 +204,8 @@ export const useAuth = () => {
             // Sign out the user
             await supabase.auth.signOut();
 
-            // Redirect to signup page
-            router.push(`/signup`);
+            // Note: signup page removed - redirect to home instead
+            router.push(`/`);
             return { success: false, error: { message: "No profile found" } };
           } else if (profileError) {
             console.error("Error checking profile:", profileError);
@@ -260,17 +260,8 @@ export const useAuth = () => {
     [authState.user, authState.loading, router]
   );
 
-  const requireAuth = useCallback(
-    (redirectTo: string = `/signin`) => {
-      if (!authState.user && !authState.loading) {
-        console.log("Redirecting unauthenticated user to:", redirectTo);
-        router.push(redirectTo);
-        return false;
-      }
-      return true;
-    },
-    [authState.user, authState.loading, router]
-  );
+  // Removed requireAuth function since the app now supports guest checkout
+  // and no authentication is required for purchases
 
   return {
     user: authState.user,
@@ -280,6 +271,6 @@ export const useAuth = () => {
     signIn,
     signOut,
     redirectIfAuthenticated,
-    requireAuth,
+    // requireAuth removed - no longer needed for guest checkout
   };
 };

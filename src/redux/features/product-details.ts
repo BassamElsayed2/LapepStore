@@ -22,7 +22,7 @@ const initialState = {
     description: "",
     description_ar: "",
     description_en: "",
-    stock: 0,
+    stock_quantity: 0,
     attributes: [],
   },
 } as InitialState;

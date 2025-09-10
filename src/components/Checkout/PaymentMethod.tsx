@@ -70,14 +70,11 @@ const PaymentMethod = ({
             </div>
           </label>
 
-          {/* معلومات إضافية حول الدفع عند الاستلام */}
+          {/* Payment information */}
           <div className="mt-3 p-4 bg-gray-1 rounded-md border border-gray-3">
             <p className="text-sm text-dark-4">
               {selectedPayment === "cod" && (
-                <span>
-                  ستقوم بدفع قيمة الطلب نقداً عند استلام المنتجات من المندوب.
-                  يرجى التأكد من توفر المبلغ كاملاً.
-                </span>
+                <span>{t("cashOnDeliveryInfo")}</span>
               )}
             </p>
           </div>

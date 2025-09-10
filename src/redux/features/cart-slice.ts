@@ -11,6 +11,7 @@ type CartItem = {
   price: number;
   discountedPrice: number;
   quantity: number;
+  stock: number;
   imgs?: {
     thumbnails: string[];
     previews: string[];
@@ -26,21 +27,30 @@ export const cart = createSlice({
   initialState,
   reducers: {
     addItemToCart: (state, action: PayloadAction<CartItem>) => {
-      const { id, title, price, quantity, discountedPrice, imgs } =
+      const { id, title, price, quantity, discountedPrice, stock, imgs } =
         action.payload;
       const existingItem = state.items.find((item) => item.id === id);
 
       if (existingItem) {
-        existingItem.quantity += quantity;
+        // Check if adding this quantity would exceed stock
+        if (existingItem.quantity + quantity <= stock) {
+          existingItem.quantity += quantity;
+        }
+        // If stock is exceeded, don't add to cart
       } else {
-        state.items.push({
-          id,
-          title,
-          price,
-          quantity,
-          discountedPrice,
-          imgs,
-        });
+        // Check if the requested quantity is available in stock
+        if (quantity <= stock) {
+          state.items.push({
+            id,
+            title,
+            price,
+            quantity,
+            discountedPrice,
+            stock,
+            imgs,
+          });
+        }
+        // If stock is insufficient, don't add to cart
       }
     },
     removeItemFromCart: (state, action: PayloadAction<number>) => {
@@ -55,7 +65,11 @@ export const cart = createSlice({
       const existingItem = state.items.find((item) => item.id === id);
 
       if (existingItem) {
-        existingItem.quantity = quantity;
+        // Check if the new quantity doesn't exceed stock
+        if (quantity <= existingItem.stock) {
+          existingItem.quantity = quantity;
+        }
+        // If stock is exceeded, don't update quantity
       }
     },
 

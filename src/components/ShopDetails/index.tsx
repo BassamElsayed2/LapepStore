@@ -81,7 +81,7 @@ const ShopDetails = ({ productId }: ShopDetailsProps) => {
           locale === "ar"
             ? fetchedProduct.description_ar || ""
             : fetchedProduct.description_en || "",
-        stock: fetchedProduct.stock || 0,
+        stock_quantity: fetchedProduct.stock_quantity || 0,
         attributes: fetchedProduct.attributes || [],
       };
       dispatch(updateproductDetails(productDetails));
@@ -117,6 +117,11 @@ const ShopDetails = ({ productId }: ShopDetailsProps) => {
 
   // add to cart functionality
   const handleAddToCart = () => {
+    // Check if product is in stock and quantity doesn't exceed stock
+    if (product.stock_quantity <= 0 || quantity > product.stock_quantity) {
+      return;
+    }
+
     const cartItem = {
       id: product.id,
       title:
@@ -124,6 +129,7 @@ const ShopDetails = ({ productId }: ShopDetailsProps) => {
       price: product.price || 0,
       discountedPrice: product.discountedPrice || product.price || 0,
       quantity: quantity,
+      stock: product.stock_quantity || 0,
       imgs: product.imgs || {
         thumbnails: Array.isArray(product.image_url)
           ? product.image_url
@@ -300,7 +306,7 @@ const ShopDetails = ({ productId }: ShopDetailsProps) => {
                       (Array.isArray(product.image_url)
                         ? product.image_url
                         : [product.image_url])
-                    ).map((item, key) => (
+                    ).map((item: any, key: number) => (
                       <button
                         onClick={() => setPreviewImg(key)}
                         key={key}
@@ -358,11 +364,15 @@ const ShopDetails = ({ productId }: ShopDetailsProps) => {
                         <g clipPath="url(#clip0_375_9221)">
                           <path
                             d="M10 0.5625C4.78125 0.5625 0.5625 4.78125 0.5625 10C0.5625 15.2188 4.78125 19.4688 10 19.4688C15.2188 19.4688 19.4688 15.2188 19.4688 10C19.4688 4.78125 15.2188 0.5625 10 0.5625ZM10 18.0625C5.5625 18.0625 1.96875 14.4375 1.96875 10C1.96875 5.5625 5.5625 1.96875 10 1.96875C14.4375 1.96875 18.0625 5.59375 18.0625 10.0312C18.0625 14.4375 14.4375 18.0625 10 18.0625Z"
-                            fill={product.stock > 0 ? "#22AD5C" : "#FF4444"}
+                            fill={
+                              product.stock_quantity > 0 ? "#22AD5C" : "#FF4444"
+                            }
                           />
                           <path
                             d="M12.6875 7.09374L8.9688 10.7187L7.2813 9.06249C7.00005 8.78124 6.56255 8.81249 6.2813 9.06249C6.00005 9.34374 6.0313 9.78124 6.2813 10.0625L8.2813 12C8.4688 12.1875 8.7188 12.2812 8.9688 12.2812C9.2188 12.2812 9.4688 12.1875 9.6563 12L13.6875 8.12499C13.9688 7.84374 13.9688 7.40624 13.6875 7.12499C13.4063 6.84374 12.9688 6.84374 12.6875 7.09374Z"
-                            fill={product.stock > 0 ? "#22AD5C" : "#FF4444"}
+                            fill={
+                              product.stock_quantity > 0 ? "#22AD5C" : "#FF4444"
+                            }
                           />
                         </g>
                         <defs>
@@ -374,13 +384,15 @@ const ShopDetails = ({ productId }: ShopDetailsProps) => {
 
                       <span
                         className={
-                          (product.stock || 0) > 0 ? "text-green" : "text-red"
+                          (product.stock_quantity || 0) > 0
+                            ? "text-green"
+                            : "text-red"
                         }
                       >
-                        {(product.stock || 0) > 0
+                        {(product.stock_quantity || 0) > 0
                           ? locale === "ar"
-                            ? `متوفر (${product.stock || 0})`
-                            : `In Stock (${product.stock || 0})`
+                            ? `متوفر (${product.stock_quantity || 0})`
+                            : `In Stock (${product.stock_quantity || 0})`
                           : locale === "ar"
                           ? "غير متوفر"
                           : "Out of Stock"}
@@ -493,8 +505,13 @@ const ShopDetails = ({ productId }: ShopDetailsProps) => {
 
                         <button
                           onClick={() => setQuantity(quantity + 1)}
+                          disabled={quantity >= product.stock_quantity}
                           aria-label="button for add product"
-                          className="flex items-center justify-center w-12 h-12 ease-out duration-200 hover:text-blue"
+                          className={`flex items-center justify-center w-12 h-12 ease-out duration-200 ${
+                            quantity >= product.stock_quantity
+                              ? "text-gray-400 cursor-not-allowed"
+                              : "hover:text-blue"
+                          }`}
                         >
                           <svg
                             className="fill-current"
@@ -518,9 +535,28 @@ const ShopDetails = ({ productId }: ShopDetailsProps) => {
 
                       <button
                         onClick={handleAddToCart}
-                        className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"
+                        disabled={
+                          product.stock_quantity <= 0 ||
+                          quantity > product.stock_quantity
+                        }
+                        className={`inline-flex font-medium py-3 px-7 rounded-md ease-out duration-200 ${
+                          product.stock_quantity <= 0 ||
+                          quantity > product.stock_quantity
+                            ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                            : "text-white bg-blue hover:bg-blue-dark"
+                        }`}
                       >
-                        {locale === "ar" ? "إضافة إلى السلة" : "Add to Cart"}
+                        {product.stock_quantity <= 0
+                          ? locale === "ar"
+                            ? "غير متوفر"
+                            : "Out of Stock"
+                          : quantity > product.stock_quantity
+                          ? locale === "ar"
+                            ? "الكمية غير متوفرة"
+                            : "Quantity not available"
+                          : locale === "ar"
+                          ? "إضافة إلى السلة"
+                          : "Add to Cart"}
                       </button>
                     </div>
                   </form>

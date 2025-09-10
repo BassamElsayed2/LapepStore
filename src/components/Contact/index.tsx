@@ -1,10 +1,14 @@
 import React from "react";
 import Breadcrumb from "../Common/Breadcrumb";
+import { useTranslations } from "next-intl";
 
 const Contact = () => {
+  const t = useTranslations("contact");
+  const commonT = useTranslations("common");
+
   return (
     <>
-      <Breadcrumb title={"Contact"} pages={["contact"]} />
+      <Breadcrumb title={t("title")} pages={["contact"]} />
 
       <section className="overflow-hidden py-20 bg-gray-2">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
@@ -12,7 +16,7 @@ const Contact = () => {
             <div className="xl:max-w-[370px] w-full bg-white rounded-xl shadow-1">
               <div className="py-5 px-4 sm:px-7.5 border-b border-gray-3">
                 <p className="font-medium text-xl text-dark">
-                  Contact Information
+                  {t("contactInformation")}
                 </p>
               </div>
 
@@ -33,7 +37,7 @@ const Contact = () => {
                         fill="#3C50E0"
                       />
                     </svg>
-                    Name: James Septimus
+                    {t("name")}
                   </p>
 
                   <p className="flex items-center gap-4">
@@ -61,7 +65,7 @@ const Contact = () => {
                         fill="#3C50E0"
                       />
                     </svg>
-                    Phone: 1234 567890
+                    {t("phone")}
                   </p>
 
                   <p className="flex gap-4">
@@ -80,7 +84,7 @@ const Contact = () => {
                         fill="#3C50E0"
                       />
                     </svg>
-                    Address: 7398 Smoke Ranch RoadLas Vegas, Nevada 89128
+                    {t("address")}
                   </p>
                 </div>
               </div>
@@ -91,28 +95,30 @@ const Contact = () => {
                 <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
                   <div className="w-full">
                     <label htmlFor="firstName" className="block mb-2.5">
-                      First Name <span className="text-red">*</span>
+                      {t("firstName")}{" "}
+                      <span className="text-red">{t("required")}</span>
                     </label>
 
                     <input
                       type="text"
                       name="firstName"
                       id="firstName"
-                      placeholder="Jhon"
+                      placeholder={t("firstNamePlaceholder")}
                       className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>
 
                   <div className="w-full">
                     <label htmlFor="lastName" className="block mb-2.5">
-                      Last Name <span className="text-red">*</span>
+                      {t("lastName")}{" "}
+                      <span className="text-red">{t("required")}</span>
                     </label>
 
                     <input
                       type="text"
                       name="lastName"
                       id="lastName"
-                      placeholder="Deo"
+                      placeholder={t("lastNamePlaceholder")}
                       className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>
@@ -121,28 +127,28 @@ const Contact = () => {
                 <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
                   <div className="w-full">
                     <label htmlFor="subject" className="block mb-2.5">
-                      Subject
+                      {t("subject")}
                     </label>
 
                     <input
                       type="text"
                       name="subject"
                       id="subject"
-                      placeholder="Type your subject"
+                      placeholder={t("subjectPlaceholder")}
                       className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>
 
                   <div className="w-full">
                     <label htmlFor="phone" className="block mb-2.5">
-                      Phone
+                      {t("phone")}
                     </label>
 
                     <input
                       type="text"
                       name="phone"
                       id="phone"
-                      placeholder="Enter your phone"
+                      placeholder={t("phonePlaceholder")}
                       className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>
@@ -150,14 +156,14 @@ const Contact = () => {
 
                 <div className="mb-7.5">
                   <label htmlFor="message" className="block mb-2.5">
-                    Message
+                    {t("message")}
                   </label>
 
                   <textarea
                     name="message"
                     id="message"
                     rows={5}
-                    placeholder="Type your message"
+                    placeholder={t("messagePlaceholder")}
                     className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                   ></textarea>
                 </div>
@@ -166,7 +172,7 @@ const Contact = () => {
                   type="submit"
                   className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"
                 >
-                  Send Message
+                  {t("sendMessage")}
                 </button>
               </form>
             </div>

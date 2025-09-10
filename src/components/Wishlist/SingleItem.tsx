@@ -9,7 +9,7 @@ import Image from "next/image";
 import { Link } from "@/app/i18n/navigation";
 import { useLocale } from "next-intl";
 
-const SingleItem = ({ item }) => {
+const SingleItem = ({ item }: { item: any }) => {
   const dispatch = useDispatch<AppDispatch>();
   const locale = useLocale();
 

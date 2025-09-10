@@ -2,9 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 
-const CustomSelect = ({ options, isLoading = false }) => {
+const CustomSelect = ({
+  options,
+  isLoading = false,
+}: {
+  options?: any[];
+  isLoading?: boolean;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(options[0]);
+  const [selectedOption, setSelectedOption] = useState(options?.[0]);
   const router = useRouter();
   const locale = useLocale();
 
@@ -12,7 +18,7 @@ const CustomSelect = ({ options, isLoading = false }) => {
     setIsOpen(!isOpen);
   };
 
-  const handleOptionClick = (option) => {
+  const handleOptionClick = (option: any) => {
     setSelectedOption(option);
     toggleDropdown();
 
@@ -33,7 +39,7 @@ const CustomSelect = ({ options, isLoading = false }) => {
 
   useEffect(() => {
     // closing modal while clicking outside
-    function handleClickOutside(event) {
+    function handleClickOutside(event: any) {
       if (!event.target.closest(".dropdown-content")) {
         toggleDropdown();
       }
@@ -62,7 +68,7 @@ const CustomSelect = ({ options, isLoading = false }) => {
         {isLoading ? "جاري التحميل..." : selectedOption.label}
       </div>
       <div className={`select-items ${isOpen ? "" : "select-hide"}`}>
-        {options.slice(1, -1).map((option, index) => (
+        {options?.slice(1, -1).map((option, index) => (
           <div
             key={index}
             onClick={() => handleOptionClick(option)}

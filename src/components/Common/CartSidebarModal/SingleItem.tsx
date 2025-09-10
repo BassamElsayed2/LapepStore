@@ -5,7 +5,13 @@ import Image from "next/image";
 import { Link } from "@/app/i18n/navigation";
 import { useTranslations, useLocale } from "next-intl";
 
-const SingleItem = ({ item, removeItemFromCart }) => {
+const SingleItem = ({
+  item,
+  removeItemFromCart,
+}: {
+  item: any;
+  removeItemFromCart: any;
+}) => {
   const dispatch = useDispatch<AppDispatch>();
   const t = useTranslations("cart");
   const locale = useLocale();

@@ -11,7 +11,7 @@ import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 import Image from "next/image";
 import LanguageSwitcher from "@/components/Common/LanguageSwitcher";
 import { useLocale, useTranslations } from "next-intl";
-import { useAuth } from "@/hooks/useAuth";
+// Removed authentication - now fully guest-based
 import { useQuery } from "@tanstack/react-query";
 import { getCategories } from "@/services/apiCat";
 
@@ -19,9 +19,7 @@ const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { openCartModal } = useCartModalContext();
-  const { user, signOut } = useAuth();
   const t = useTranslations("header");
   const commonT = useTranslations("common");
 
@@ -44,10 +42,7 @@ const Header = () => {
     openCartModal();
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-    setUserMenuOpen(false);
-  };
+  // Removed authentication handlers
 
   // Sticky menu
   const handleStickyMenu = () => {
@@ -62,20 +57,7 @@ const Header = () => {
     window.addEventListener("scroll", handleStickyMenu);
   });
 
-  // Close user menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
-      if (userMenuOpen && !target.closest(".user-menu")) {
-        setUserMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [userMenuOpen]);
+  // Removed user menu event handlers
 
   // Create options from categories data
   const options = React.useMemo(() => {
@@ -191,134 +173,33 @@ const Header = () => {
 
             <div className="flex w-full lg:w-auto justify-between items-center gap-5">
               <div className="flex items-center gap-5">
-                {/* User Menu */}
-                <div className="relative user-menu">
-                  {user ? (
-                    // Authenticated User Menu
-                    <div>
-                      <button
-                        onClick={() => setUserMenuOpen(!userMenuOpen)}
-                        className="flex items-center gap-2.5"
-                      >
-                        <svg
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            clipRule="evenodd"
-                            d="M12 1.25C9.37666 1.25 7.25001 3.37665 7.25001 6C7.25001 8.62335 9.37666 10.75 12 10.75C14.6234 10.75 16.75 8.62335 16.75 6C16.75 3.37665 14.6234 1.25 12 1.25ZM8.75001 6C8.75001 4.20507 10.2051 2.75 12 2.75C13.7949 2.75 15.25 4.20507 15.25 6C15.25 7.79493 13.7949 9.25 12 9.25C10.2051 9.25 8.75001 7.79493 8.75001 6Z"
-                            fill="#3C50E0"
-                          />
-                          <path
-                            fillRule="evenodd"
-                            clipRule="evenodd"
-                            d="M12 12.25C9.68646 12.25 7.55494 12.7759 5.97546 13.6643C4.4195 14.5396 3.25001 15.8661 3.25001 17.5L3.24995 17.602C3.24882 18.7638 3.2474 20.222 4.52642 21.2635C5.15589 21.7761 6.03649 22.1406 7.22622 22.3815C8.41927 22.6229 9.97424 22.75 12 22.75C14.0258 22.75 15.5808 22.6229 16.7738 22.3815C17.9635 22.1406 18.8441 21.7761 19.4736 21.2635C20.7526 20.222 20.7512 18.7638 20.7501 17.602L20.75 17.5C20.75 15.8661 19.5805 14.5396 18.0246 13.6643C16.4451 12.7759 14.3136 12.25 12 12.25ZM4.75001 17.5C4.75001 16.6487 5.37139 15.7251 6.71085 14.9717C8.02681 14.2315 9.89529 13.75 12 13.75C14.1047 13.75 15.9732 14.2315 17.2892 14.9717C18.6286 15.7251 19.25 16.6487 19.25 17.5C19.25 18.8078 19.2097 19.544 18.5264 20.1004C18.1559 20.4022 17.5365 20.6967 16.4762 20.9113C15.4193 21.1252 13.9742 21.25 12 21.25C10.0258 21.25 8.58075 21.1252 7.5238 20.9113C6.46354 20.6967 5.84413 20.4022 5.4736 20.1004C4.79033 19.544 4.75001 18.8078 4.75001 17.5Z"
-                            fill="#3C50E0"
-                          />
-                        </svg>
+                {/* Contact Info */}
+                <Link
+                  href={`/${locale}/contact`}
+                  className="flex items-center gap-2.5"
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+                      fill="#3C50E0"
+                    />
+                  </svg>
 
-                        <div>
-                          <span className="block text-2xs text-dark-4 uppercase">
-                            {commonT("account")}
-                          </span>
-                          <p className="font-medium text-custom-sm text-dark">
-                            {user.user_metadata?.full_name ||
-                              user.email?.split("@")[0] ||
-                              "User"}
-                          </p>
-                        </div>
-                      </button>
-
-                      {/* User Dropdown Menu */}
-                      {userMenuOpen && (
-                        <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-3 z-50">
-                          <div className="py-2">
-                            <Link
-                              href={`/${locale}/profile`}
-                              className="flex items-center px-4 py-2 text-sm text-dark hover:bg-gray-1"
-                              onClick={() => setUserMenuOpen(false)}
-                            >
-                              <svg
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="mr-2"
-                              >
-                                <path
-                                  d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-                                  fill="currentColor"
-                                />
-                              </svg>
-                              {commonT("profile")}
-                            </Link>
-                            <hr className="my-1" />
-                            <button
-                              onClick={handleSignOut}
-                              className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-1"
-                            >
-                              <svg
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="mr-2"
-                              >
-                                <path
-                                  d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"
-                                  fill="currentColor"
-                                />
-                              </svg>
-                              {commonT("logout")}
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    // Non-authenticated User - Show Sign In Link
-                    <Link
-                      href={`/${locale}/signin`}
-                      className="flex items-center gap-2.5"
-                    >
-                      <svg
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          clipRule="evenodd"
-                          d="M12 1.25C9.37666 1.25 7.25001 3.37665 7.25001 6C7.25001 8.62335 9.37666 10.75 12 10.75C14.6234 10.75 16.75 8.62335 16.75 6C16.75 3.37665 14.6234 1.25 12 1.25ZM8.75001 6C8.75001 4.20507 10.2051 2.75 12 2.75C13.7949 2.75 15.25 4.20507 15.25 6C15.25 7.79493 13.7949 9.25 12 9.25C10.2051 9.25 8.75001 7.79493 8.75001 6Z"
-                          fill="#3C50E0"
-                        />
-                        <path
-                          fillRule="evenodd"
-                          clipRule="evenodd"
-                          d="M12 12.25C9.68646 12.25 7.55494 12.7759 5.97546 13.6643C4.4195 14.5396 3.25001 15.8661 3.25001 17.5L3.24995 17.602C3.24882 18.7638 3.2474 20.222 4.52642 21.2635C5.15589 21.7761 6.03649 22.1406 7.22622 22.3815C8.41927 22.6229 9.97424 22.75 12 22.75C14.0258 22.75 15.5808 22.6229 16.7738 22.3815C17.9635 22.1406 18.8441 21.7761 19.4736 21.2635C20.7526 20.222 20.7512 18.7638 20.7501 17.602L20.75 17.5C20.75 15.8661 19.5805 14.5396 18.0246 13.6643C16.4451 12.7759 14.3136 12.25 12 12.25ZM4.75001 17.5C4.75001 16.6487 5.37139 15.7251 6.71085 14.9717C8.02681 14.2315 9.89529 13.75 12 13.75C14.1047 13.75 15.9732 14.2315 17.2892 14.9717C18.6286 15.7251 19.25 16.6487 19.25 17.5C19.25 18.8078 19.2097 19.544 18.5264 20.1004C18.1559 20.4022 17.5365 20.6967 16.4762 20.9113C15.4193 21.1252 13.9742 21.25 12 21.25C10.0258 21.25 8.58075 21.1252 7.5238 20.9113C6.46354 20.6967 5.84413 20.4022 5.4736 20.1004C4.79033 19.544 4.75001 18.8078 4.75001 17.5Z"
-                          fill="#3C50E0"
-                        />
-                      </svg>
-
-                      <div>
-                        <span className="block text-2xs text-dark-4 uppercase">
-                          {commonT("account")}
-                        </span>
-                        <p className="font-medium text-custom-sm text-dark">
-                          {t("signIn")}
-                        </p>
-                      </div>
-                    </Link>
-                  )}
-                </div>
+                  <div>
+                    <span className="block text-2xs text-dark-4 uppercase">
+                      {t("support")}
+                    </span>
+                    <p className="font-medium text-custom-sm text-dark">
+                      {t("contactUs")}
+                    </p>
+                  </div>
+                </Link>
 
                 <button
                   onClick={handleOpenCartModal}
@@ -466,100 +347,29 @@ const Header = () => {
                 <LanguageSwitcher />
               </div>
 
-              {/* <!-- Mobile Authentication Menu --> */}
+              {/* <!-- Mobile Contact Menu --> */}
               <div className="xl:hidden mt-4 pt-4 border-t border-gray-3">
-                {user ? (
-                  <div className="space-y-2">
-                    <div className="text-sm text-dark-4 mb-2">
-                      Welcome,{" "}
-                      {user.user_metadata?.full_name ||
-                        user.email?.split("@")[0] ||
-                        "User"}
-                    </div>
-
-                    <Link
-                      href={`/${locale}/profile`}
-                      className="flex items-center gap-2 text-sm text-dark hover:text-blue"
-                      onClick={() => setNavigationOpen(false)}
+                <div className="space-y-2">
+                  <Link
+                    href={`/${locale}/contact`}
+                    className="flex items-center gap-2 text-sm text-dark hover:text-blue"
+                    onClick={() => setNavigationOpen(false)}
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                      {commonT("profile")}
-                    </Link>
-                    <button
-                      onClick={() => {
-                        handleSignOut();
-                        setNavigationOpen(false);
-                      }}
-                      className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 w-full"
-                    >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                      {commonT("logout")}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <Link
-                      href={`/${locale}/signin`}
-                      className="flex items-center gap-2 text-sm text-dark hover:text-blue"
-                      onClick={() => setNavigationOpen(false)}
-                    >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                      {t("signIn")}
-                    </Link>
-                    <Link
-                      href={`/${locale}/signup`}
-                      className="flex items-center gap-2 text-sm text-dark hover:text-blue"
-                      onClick={() => setNavigationOpen(false)}
-                    >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                      {locale === "ar" ? "تسجيل حساب" : "Sign Up"}
-                    </Link>
-                  </div>
-                )}
+                      <path
+                        d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                    {t("contactUs")}
+                  </Link>
+                </div>
               </div>
             </div>
             {/* // <!--=== Main Nav End ===--> */}

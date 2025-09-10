@@ -12,7 +12,7 @@ import "swiper/css";
 import { useLocale } from "next-intl";
 
 const RecentlyViewdItems = () => {
-  const sliderRef = useRef(null);
+  const sliderRef = useRef<any>(null);
 
   const locale = useLocale();
 

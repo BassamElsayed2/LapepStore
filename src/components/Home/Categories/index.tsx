@@ -14,7 +14,7 @@ import { getCategories } from "@/services/apiCat";
 
 const Categories = () => {
   const locale = useLocale();
-  const sliderRef = useRef(null);
+  const sliderRef = useRef<any>(null);
 
   const handlePrev = useCallback(() => {
     if (!sliderRef.current) return;

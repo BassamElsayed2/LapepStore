@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const CategoryItem = ({ category }) => {
+const CategoryItem = ({ category }: { category: any }) => {
   const [selected, setSelected] = useState(false);
   return (
     <button
@@ -49,7 +49,7 @@ const CategoryItem = ({ category }) => {
   );
 };
 
-const CategoryDropdown = ({ categories }) => {
+const CategoryDropdown = ({ categories }: { categories?: any[] }) => {
   const [toggleDropdown, setToggleDropdown] = useState(true);
 
   return (
@@ -95,7 +95,7 @@ const CategoryDropdown = ({ categories }) => {
           toggleDropdown ? "flex" : "hidden"
         }`}
       >
-        {categories.map((category, key) => (
+        {categories?.map((category, key) => (
           <CategoryItem key={key} category={category} />
         ))}
       </div>

@@ -6,13 +6,26 @@ import { useRouter } from "@/app/i18n/navigation";
 import toast from "react-hot-toast";
 import Breadcrumb from "../Common/Breadcrumb";
 import PaymentMethod from "./PaymentMethod";
+import GuestCheckoutForm from "./GuestCheckoutForm";
 import {
   selectCartItems,
   selectTotalPrice,
   removeAllItemsFromCart,
 } from "../../redux/features/cart-slice";
 import { createOrder } from "../../services/apiOrders";
-import { useAuth } from "../../hooks/useAuth";
+import {
+  validateCustomerData,
+  hasValidationErrors,
+  sanitizeCustomerData,
+  createEmptyCustomerData,
+  type CustomerData,
+  type ValidationErrors,
+} from "../../utils/validation";
+import {
+  sendWhatsAppNotification,
+  sendWhatsAppNotificationDirect,
+  convertOrderToOrderDetails,
+} from "@/utils/whatsappNotification";
 
 const Checkout = () => {
   const t = useTranslations("checkout");
@@ -20,55 +33,66 @@ const Checkout = () => {
   const totalPrice = useSelector(selectTotalPrice);
   const router = useRouter();
   const dispatch = useDispatch();
-  const { user, loading } = useAuth();
   const locale = useLocale();
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [notes, setNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const shippingFee = 15.0;
-  const finalTotal = totalPrice + shippingFee;
+  // Customer data state (always required - no authentication)
+  const [customerData, setCustomerData] = useState<CustomerData>(
+    createEmptyCustomerData()
+  );
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>(
+    {}
+  );
 
-  // توجيه المستخدم لصفحة تسجيل الدخول إذا لم يكن مسجل
-  React.useEffect(() => {
-    if (!loading && !user) {
-      router.push("/signin");
-    }
-  }, [user, loading, router]);
-
-  // لا تعرض الصفحة إذا كان المستخدم غير مسجل أو في حالة تحميل
-  if (loading || !user) {
-    return null;
-  }
+  const shippingFee = 0.0;
+  const finalTotal = totalPrice;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
-    if (!user) {
-      setError(t("loginFirst"));
-      return;
-    }
 
     if (cartItems.length === 0) {
       setError(t("emptyCart"));
       return;
     }
 
+    // Validate customer data (always required now)
+    const sanitizedData = sanitizeCustomerData(customerData);
+    const errors = validateCustomerData(sanitizedData);
+
+    if (hasValidationErrors(errors)) {
+      setValidationErrors(errors);
+      setError(t("correctErrors"));
+      return;
+    }
+
+    setCustomerData(sanitizedData);
+    setValidationErrors({});
     setIsLoading(true);
     setError(null);
 
     try {
       const orderData = {
-        user_id: user.id,
-        total_price: finalTotal,
+        user_id: null, // Always null - no user authentication
+        total_price: totalPrice,
         payment_method: paymentMethod as "cod",
         notes: notes || undefined,
         items: cartItems.map((item) => ({
-          product_id: item.id.toString(), // تحويل إلى string لأن قاعدة البيانات تستخدم UUID
+          product_id: item.id.toString(),
           quantity: item.quantity,
           price: item.discountedPrice,
         })),
+        // Customer data (always included)
+        customer_first_name: customerData.firstName,
+        customer_last_name: customerData.lastName,
+        customer_phone: customerData.phone,
+        customer_email: customerData.email || null,
+        customer_street_address: customerData.streetAddress,
+        customer_city: customerData.city,
+        customer_state: customerData.state,
+        customer_postcode: customerData.postcode,
       };
 
       const { order, error: orderError } = await createOrder(orderData);
@@ -79,14 +103,43 @@ const Checkout = () => {
       }
 
       if (order) {
-        // إفراغ السلة بعد نجاح الطلب
+        // Send WhatsApp notification BEFORE clearing cart
+        try {
+          console.log("🔍 DEBUG: Order data:", order);
+          console.log("🔍 DEBUG: Cart items:", cartItems);
+
+          const orderDetails = convertOrderToOrderDetails(order, cartItems);
+          console.log("🔍 DEBUG: Order details:", orderDetails);
+
+          // Check if we have items to send
+          if (orderDetails.items && orderDetails.items.length > 0) {
+            console.log("🔍 DEBUG: Sending WhatsApp notification...");
+            sendWhatsAppNotification(orderDetails, locale);
+          } else {
+            console.log("🔍 DEBUG: No items found, skipping WhatsApp");
+            toast.error(
+              "تم إنشاء الطلب بنجاح، لكن لم يتم العثور على تفاصيل المنتجات لإرسال واتساب"
+            );
+          }
+        } catch (whatsappError) {
+          console.error(
+            "❌ Error sending WhatsApp notification:",
+            whatsappError
+          );
+          // Don't fail the order if WhatsApp notification fails
+          toast.error(
+            "تم إنشاء الطلب بنجاح، لكن حدث خطأ في إرسال إشعار واتساب"
+          );
+        }
+
+        // Clear cart after successful order and WhatsApp notification
         dispatch(removeAllItemsFromCart());
 
-        // إظهار رسالة نجاح
+        // Show success message
         toast.success(t("orderPlaced"));
 
-        // إعادة توجيه إلى صفحة الملف الشخصي
-        router.push(`/profile?tab=orders&orderId=${order.id}`);
+        // Redirect to success page
+        router.push(`/order-success?orderId=${order.id}`);
       }
     } catch (err) {
       console.error("Error placing order:", err);
@@ -132,7 +185,7 @@ const Checkout = () => {
                       </div>
                     </div>
 
-                    {/* عرض عناصر السلة */}
+                    {/* Cart items */}
                     {cartItems.length === 0 ? (
                       <div className="flex items-center justify-center py-10">
                         <p className="text-dark-5">{t("emptyCart")}</p>
@@ -163,21 +216,9 @@ const Checkout = () => {
                       ))
                     )}
 
-                    {/* رسوم الشحن */}
-                    {cartItems.length > 0 && (
-                      <div className="flex items-center justify-between py-5 border-b border-gray-3">
-                        <div>
-                          <p className="text-dark">{t("shippingFee")}</p>
-                        </div>
-                        <div>
-                          <p className="text-dark text-start">
-                            ${shippingFee.toFixed(2)}
-                          </p>
-                        </div>
-                      </div>
-                    )}
+                    {/* Shipping fee - Hidden since it's free */}
 
-                    {/* المجموع الكلي */}
+                    {/* Total */}
                     {cartItems.length > 0 && (
                       <div className="flex items-center justify-between pt-5">
                         <div>
@@ -187,7 +228,7 @@ const Checkout = () => {
                         </div>
                         <div>
                           <p className="font-medium text-lg text-dark text-start">
-                            ${finalTotal.toFixed(2)}
+                            ${totalPrice.toFixed(2)}
                           </p>
                         </div>
                       </div>
@@ -201,7 +242,7 @@ const Checkout = () => {
                   onPaymentChange={setPaymentMethod}
                 />
 
-                {/* رسالة الخطأ */}
+                {/* Error message */}
                 {error && (
                   <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
                     <p className="text-red-600 text-sm">{error}</p>
@@ -211,7 +252,7 @@ const Checkout = () => {
                 {/* <!-- checkout button --> */}
                 <button
                   type="submit"
-                  disabled={isLoading || cartItems.length === 0 || !user}
+                  disabled={isLoading || cartItems.length === 0}
                   className="w-full flex justify-center font-medium text-white bg-blue py-3 px-6 rounded-md ease-out duration-200 hover:bg-blue-dark mt-7.5 disabled:bg-gray-4 disabled:cursor-not-allowed"
                 >
                   {isLoading ? t("placingOrder") : t("processToCheckout")}
@@ -220,7 +261,16 @@ const Checkout = () => {
 
               {/* <!-- checkout left --> */}
               <div className="lg:max-w-[670px] w-full">
-                {/* <!-- others note box --> */}
+                {/* Customer Information Form */}
+                <div className="mb-7.5">
+                  <GuestCheckoutForm
+                    customerData={customerData}
+                    onCustomerDataChange={setCustomerData}
+                    errors={validationErrors}
+                  />
+                </div>
+
+                {/* <!-- order notes box --> */}
                 <div className="bg-white shadow-1 rounded-[10px] p-4 sm:p-8.5">
                   <div>
                     <label htmlFor="notes" className="block mb-2.5">

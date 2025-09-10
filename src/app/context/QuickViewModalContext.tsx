@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { createContext, useContext, useState } from "react";
 
 interface ModalContextType {
@@ -17,7 +17,7 @@ export const useModalContext = () => {
   return context;
 };
 
-export const ModalProvider = ({ children }) => {
+export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => {
@@ -33,4 +33,4 @@ export const ModalProvider = ({ children }) => {
       {children}
     </ModalContext.Provider>
   );
-}; 
+};

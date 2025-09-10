@@ -18,7 +18,7 @@ export type Product = {
     thumbnails: string[];
     previews: string[];
   };
-  stock: number;
+  stock_quantity: number;
   description_ar: string;
   description_en: string;
   description?: string;

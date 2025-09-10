@@ -23,7 +23,7 @@ const CartSidebarModal = () => {
 
   useEffect(() => {
     // closing modal while clicking outside
-    function handleClickOutside(event) {
+    function handleClickOutside(event: any) {
       if (!event.target.closest(".modal-content")) {
         closeCartModal();
       }
@@ -111,6 +111,13 @@ const CartSidebarModal = () => {
               </Link>
 
               <Link
+                onClick={() => {
+                  console.log(
+                    "Checkout clicked, navigating to:",
+                    `/${locale}/checkout`
+                  );
+                  closeCartModal();
+                }}
                 href={`/${locale}/checkout`}
                 className="w-full flex justify-center font-medium text-white bg-dark py-[13px] px-6 rounded-md ease-out duration-200 hover:bg-opacity-95"
               >

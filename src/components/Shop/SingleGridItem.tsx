@@ -43,7 +43,7 @@ const SingleGridItem = ({ item }: { item: Product }) => {
           (Array.isArray(item.image_url) ? item.image_url : [item.image_url]),
       },
       description: locale === "ar" ? item.description_ar : item.description_en,
-      stock: item.stock,
+      stock_quantity: item.stock_quantity,
       attributes: item.attributes || [],
     };
     dispatch(updateproductDetails(productDetails));

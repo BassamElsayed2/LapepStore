@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 
-const GenderItem = ({ category }) => {
+const GenderItem = ({ category }: { category: any }) => {
   const [selected, setSelected] = useState(false);
   return (
     <button
@@ -48,7 +48,7 @@ const GenderItem = ({ category }) => {
   );
 };
 
-const GenderDropdown = ({ genders }) => {
+const GenderDropdown = ({ genders }: { genders?: any[] }) => {
   const [toggleDropdown, setToggleDropdown] = useState(true);
 
   return (
@@ -91,7 +91,7 @@ const GenderDropdown = ({ genders }) => {
           toggleDropdown ? "flex" : "hidden"
         }`}
       >
-        {genders.map((gender, key) => (
+        {genders?.map((gender, key) => (
           <GenderItem key={key} category={gender} />
         ))}
       </div>

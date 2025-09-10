@@ -2,7 +2,13 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
-const Dropdown = ({ menuItem, stickyMenu }) => {
+const Dropdown = ({
+  menuItem,
+  stickyMenu,
+}: {
+  menuItem: any;
+  stickyMenu: boolean;
+}) => {
   const [dropdownToggler, setDropdownToggler] = useState(false);
   const pathUrl = usePathname();
 
@@ -45,7 +51,7 @@ const Dropdown = ({ menuItem, stickyMenu }) => {
             : "xl:group-hover:translate-y-0"
         }`}
       >
-        {menuItem.submenu.map((item, i) => (
+        {menuItem.submenu.map((item: any, i: number) => (
           <li key={i}>
             <Link
               href={item.path}

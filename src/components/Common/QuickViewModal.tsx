@@ -34,12 +34,18 @@ const QuickViewModal = () => {
 
   // add to cart
   const handleAddToCart = () => {
+    // Check if product is in stock and quantity doesn't exceed stock
+    if (product.stock_quantity <= 0 || quantity > product.stock_quantity) {
+      return;
+    }
+
     const cartItem = {
       id: product.id,
       title: locale === "ar" ? product.name_ar : product.name_en,
       price: product.price,
       discountedPrice: product.offer_price || product.price,
       quantity,
+      stock: product.stock_quantity,
       imgs: {
         thumbnails:
           product.imgs?.thumbnails ||
@@ -60,7 +66,7 @@ const QuickViewModal = () => {
 
   useEffect(() => {
     // closing modal while clicking outside
-    function handleClickOutside(event) {
+    function handleClickOutside(event: any) {
       if (!event.target.closest(".modal-content")) {
         closeModal();
       }
@@ -233,11 +239,15 @@ const QuickViewModal = () => {
                     <g clipPath="url(#clip0_375_9221)">
                       <path
                         d="M10 0.5625C4.78125 0.5625 0.5625 4.78125 0.5625 10C0.5625 15.2188 4.78125 19.4688 10 19.4688C15.2188 19.4688 19.4688 15.2188 19.4688 10C19.4688 4.78125 15.2188 0.5625 10 0.5625ZM10 18.0625C5.5625 18.0625 1.96875 14.4375 1.96875 10C1.96875 5.5625 5.5625 1.96875 10 1.96875C14.4375 1.96875 18.0625 5.59375 18.0625 10.0312C18.0625 14.4375 14.4375 18.0625 10 18.0625Z"
-                        fill="#22AD5C"
+                        fill={
+                          product.stock_quantity > 0 ? "#22AD5C" : "#FF4444"
+                        }
                       />
                       <path
                         d="M12.6875 7.09374L8.9688 10.7187L7.2813 9.06249C7.00005 8.78124 6.56255 8.81249 6.2813 9.06249C6.00005 9.34374 6.0313 9.78124 6.2813 10.0625L8.2813 12C8.4688 12.1875 8.7188 12.2812 8.9688 12.2812C9.2188 12.2812 9.4688 12.1875 9.6563 12L13.6875 8.12499C13.9688 7.84374 13.9688 7.40624 13.6875 7.12499C13.4063 6.84374 12.9688 6.84374 12.6875 7.09374Z"
-                        fill="#22AD5C"
+                        fill={
+                          product.stock_quantity > 0 ? "#22AD5C" : "#FF4444"
+                        }
                       />
                     </g>
                     <defs>
@@ -247,11 +257,15 @@ const QuickViewModal = () => {
                     </defs>
                   </svg>
 
-                  <span className="font-medium text-dark">
-                    {product.stock > 0
+                  <span
+                    className={`font-medium ${
+                      product.stock_quantity > 0 ? "text-green" : "text-red"
+                    }`}
+                  >
+                    {product.stock_quantity > 0
                       ? locale === "ar"
-                        ? "متوفر"
-                        : "In Stock"
+                        ? `متوفر (${product.stock_quantity})`
+                        : `In Stock (${product.stock_quantity})`
                       : locale === "ar"
                       ? "غير متوفر"
                       : "Out of Stock"}
@@ -324,8 +338,13 @@ const QuickViewModal = () => {
 
                     <button
                       onClick={() => setQuantity(quantity + 1)}
+                      disabled={quantity >= product.stock_quantity}
                       aria-label="button for add product"
-                      className="flex items-center justify-center w-10 h-10 rounded-[5px] bg-gray-2 text-dark ease-out duration-200 hover:text-blue"
+                      className={`flex items-center justify-center w-10 h-10 rounded-[5px] bg-gray-2 text-dark ease-out duration-200 ${
+                        quantity >= product.stock_quantity
+                          ? "text-gray-400 cursor-not-allowed"
+                          : "hover:text-blue"
+                      }`}
                     >
                       <svg
                         className="fill-current"
@@ -355,13 +374,31 @@ const QuickViewModal = () => {
 
               <div className="flex flex-wrap items-center gap-4">
                 <button
-                  disabled={quantity === 0}
+                  disabled={
+                    product.stock_quantity <= 0 ||
+                    quantity > product.stock_quantity ||
+                    quantity === 0
+                  }
                   onClick={() => handleAddToCart()}
-                  className={`inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark ${
-                    quantity === 0 ? "opacity-50 cursor-not-allowed" : ""
+                  className={`inline-flex font-medium py-3 px-7 rounded-md ease-out duration-200 ${
+                    product.stock_quantity <= 0 ||
+                    quantity > product.stock_quantity ||
+                    quantity === 0
+                      ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                      : "text-white bg-blue hover:bg-blue-dark"
                   }`}
                 >
-                  {locale === "ar" ? "إضافة إلى السلة" : "Add to Cart"}
+                  {product.stock_quantity <= 0
+                    ? locale === "ar"
+                      ? "غير متوفر"
+                      : "Out of Stock"
+                    : quantity > product.stock_quantity
+                    ? locale === "ar"
+                      ? "الكمية غير متوفرة"
+                      : "Quantity not available"
+                    : locale === "ar"
+                    ? "إضافة إلى السلة"
+                    : "Add to Cart"}
                 </button>
 
                 <Link

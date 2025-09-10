@@ -82,7 +82,7 @@ const ShopWithSidebar = () => {
     window.addEventListener("scroll", handleStickyMenu);
 
     // closing sidebar while clicking outside
-    function handleClickOutside(event) {
+    function handleClickOutside(event: any) {
       if (!event.target.closest(".sidebar-content")) {
         setProductSidebar(false);
       }
