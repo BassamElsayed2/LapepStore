@@ -38,13 +38,16 @@ const Testimonials = dynamic(() => import("./Testimonials"), {
   ssr: false,
 });
 
+const News = dynamic(() => import("./News"), {
+  loading: () => <div className="h-64 bg-gray-100 animate-pulse" />,
+  ssr: false,
+});
+
 export default function OptimizedHome() {
   const { isMobile, isSlowConnection } = useMobilePerformance();
 
   // Adjust root margin based on device and connection
-  const rootMargin = isMobile 
-    ? (isSlowConnection ? "50px" : "100px")
-    : "200px";
+  const rootMargin = isMobile ? (isSlowConnection ? "50px" : "100px") : "200px";
 
   return (
     <>
@@ -81,6 +84,11 @@ export default function OptimizedHome() {
       {/* Testimonials load last */}
       <LazySection rootMargin="300px" className="py-8">
         <Testimonials />
+      </LazySection>
+
+      {/* News load last */}
+      <LazySection rootMargin="300px" className="py-8">
+        <News />
       </LazySection>
     </>
   );

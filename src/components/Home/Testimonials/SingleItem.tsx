@@ -1,8 +1,19 @@
 import React from "react";
-import { Testimonial } from "@/types/testimonial";
+import { TestimonialData } from "@/types/testimonial";
 import Image from "next/image";
+import { useLocale } from "next-intl";
+import { Link } from "@/app/i18n/navigation";
 
-const SingleItem = ({ testimonial }: { testimonial: Testimonial }) => {
+const SingleItem = ({ testimonial }: { testimonial: TestimonialData }) => {
+  const locale = useLocale();
+  const displayReview =
+    locale === "ar"
+      ? testimonial.message_ar || testimonial.message_en
+      : testimonial.message_en || testimonial.message_ar;
+  const displayName =
+    locale === "ar"
+      ? testimonial.name_ar || testimonial.name_en
+      : testimonial.name_en || testimonial.name_ar;
   return (
     <div className="shadow-testimonial bg-white rounded-[10px] py-7.5 px-4 sm:px-8.5 m-1">
       <div className="flex items-center gap-1 mb-5">
@@ -38,12 +49,12 @@ const SingleItem = ({ testimonial }: { testimonial: Testimonial }) => {
         />
       </div>
 
-      <p className="text-dark mb-6">{testimonial.review}</p>
+      <p className="text-dark mb-6">{displayReview}</p>
 
-      <a href="#" className="flex items-center gap-4">
+      <div className="flex items-center gap-4">
         <div className="w-12.5 h-12.5 rounded-full overflow-hidden">
           <Image
-            src={testimonial.authorImg}
+            src={testimonial.image || "/images/users/user-01.jpg"}
             alt="author"
             className="w-12.5 h-12.5 rounded-full overflow-hidden"
             width={50}
@@ -52,10 +63,9 @@ const SingleItem = ({ testimonial }: { testimonial: Testimonial }) => {
         </div>
 
         <div>
-          <h3 className="font-medium text-dark">{testimonial.authorName}</h3>
-          <p className="text-custom-sm">{testimonial.authorRole}</p>
+          <h3 className="font-medium text-dark">{displayName}</h3>
         </div>
-      </a>
+      </div>
     </div>
   );
 };

@@ -1,37 +1,38 @@
 "use client";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useCallback, useRef, useEffect, useState } from "react";
+
+import type { BlogData } from "@/types/blogItem";
 import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
-import { getTestimonials } from "@/services/apiTestimonials";
-import { TestimonialData } from "@/types/testimonial";
+import { getBlogs } from "@/services/apiBlogs";
 
 // Import Swiper styles
 import "swiper/css/navigation";
 import "swiper/css";
 import SingleItem from "./SingleItem";
 
-const Testimonials = () => {
+const News = () => {
   const sliderRef = useRef<any>(null);
-  const t = useTranslations("testimonials");
+  const t = useTranslations("news");
   const locale = useLocale();
   const isRTL = locale === "ar";
-  const [testimonials, setTestimonials] = useState<TestimonialData[]>([]);
+  const [blogs, setBlogs] = useState<BlogData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTestimonials = async () => {
+    const fetchBlogs = async () => {
       try {
-        const data = await getTestimonials();
-        setTestimonials(data);
+        const data = await getBlogs();
+        setBlogs(data);
       } catch (error) {
-        console.error("Error fetching testimonials:", error);
+        console.error("Error fetching blogs:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTestimonials();
+    fetchBlogs();
   }, []);
 
   const handlePrev = useCallback(() => {
@@ -44,12 +45,12 @@ const Testimonials = () => {
     sliderRef.current.swiper.slideNext();
   }, []);
 
-  // Don't render the section if there are no testimonials
+  // Don't render the section if there are no blogs
   if (loading) {
     return null;
   }
 
-  if (testimonials.length === 0) {
+  if (blogs.length === 0) {
     return null;
   }
 
@@ -57,21 +58,21 @@ const Testimonials = () => {
     <section className="overflow-hidden pb-16.5">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
         <div className="">
-          <div className="swiper testimonial-carousel common-carousel p-5">
+          <div className="swiper news-carousel common-carousel p-5">
             {/* <!-- section title --> */}
             <div className="mb-10 flex items-center justify-between">
               <div>
                 <span className="flex items-center gap-2.5 font-medium text-dark mb-1.5">
                   <Image
-                    src="/images/icons/icon-08.svg"
+                    src="/images/icons/icon-07.svg"
                     alt="icon"
                     width={17}
                     height={17}
                   />
-                  {t("title")}
+                  {t("latestNews")}
                 </span>
                 <h2 className="font-semibold text-xl xl:text-heading-5 text-dark">
-                  {t("userFeedbacks")}
+                  {t("subtitle")}
                 </h2>
               </div>
 
@@ -131,19 +132,18 @@ const Testimonials = () => {
                 0: {
                   slidesPerView: 1,
                 },
-                1000: {
+                768: {
                   slidesPerView: 2,
-                  // spaceBetween: 4,
                 },
                 // when window width is >= 768px
-                1200: {
+                1024: {
                   slidesPerView: 3,
                 },
               }}
             >
-              {testimonials.map((item, key) => (
+              {blogs.map((item: BlogData) => (
                 <SwiperSlide key={item.id}>
-                  <SingleItem testimonial={item} />
+                  <SingleItem newsItem={item} />
                 </SwiperSlide>
               ))}
             </Swiper>
@@ -154,4 +154,4 @@ const Testimonials = () => {
   );
 };
 
-export default Testimonials;
+export default News;

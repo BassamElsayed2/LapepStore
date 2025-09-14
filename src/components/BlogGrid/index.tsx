@@ -1,20 +1,70 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
-import blogData from "./blogData";
 import BlogItem from "../Blog/BlogItem";
+import { getBlogs } from "@/services/apiBlogs";
+import { BlogData } from "@/types/blogItem";
 
 const BlogGrid = () => {
+  const [blogs, setBlogs] = useState<BlogData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const data = await getBlogs();
+        setBlogs(data);
+      } catch (error) {
+        console.error("Error fetching blogs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogs();
+  }, []);
+
+  if (loading) {
+    return (
+      <>
+        <Breadcrumb title={"Blog Grid"} pages={["blog grid"]} />
+        <section className="overflow-hidden py-20 bg-gray-2">
+          <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-10 gap-x-7.5">
+              {[...Array(6)].map((_, key) => (
+                <div key={key} className="animate-pulse">
+                  <div className="bg-gray-200 h-48 rounded-lg mb-4"></div>
+                  <div className="bg-gray-200 h-4 rounded mb-2"></div>
+                  <div className="bg-gray-200 h-4 rounded w-3/4"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </>
+    );
+  }
+
   return (
     <>
-      <Breadcrumb title={"Blog Grid"} pages={["blog grid"]} />{" "}
+      <Breadcrumb title={"Blog Grid"} pages={["blog grid"]} />
       <section className="overflow-hidden py-20 bg-gray-2">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-10 gap-x-7.5">
-            {/* <!-- blog item --> */}
-            {blogData.map((blog, key) => (
-              <BlogItem blog={blog} key={key} />
-            ))}
-          </div>
+          {blogs.length === 0 ? (
+            <div className="text-center py-20">
+              <h2 className="text-2xl font-semibold text-dark mb-4">
+                No blogs found
+              </h2>
+              <p className="text-dark-5">
+                There are no blog posts available at the moment.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-10 gap-x-7.5">
+              {blogs.map((blog) => (
+                <BlogItem blog={blog} key={blog.id} />
+              ))}
+            </div>
+          )}
 
           {/* <!-- Blog Pagination Start --> */}
           <div className="flex justify-center mt-15">
@@ -134,7 +184,7 @@ const BlogGrid = () => {
           </div>
           {/* <!-- Blog Pagination End --> */}
         </div>
-      </section> 
+      </section>
     </>
   );
 };

@@ -199,6 +199,18 @@
     "messagePlaceholder": "اكتب رسالتك",
     "required": "*"
   },
+  "testimonials": {
+    "title": "الشهادات",
+    "subtitle": "آراء العملاء",
+    "userFeedbacks": "تقييمات المستخدمين"
+  },
+  "news": {
+    "title": "أحدث الأخبار",
+    "subtitle": "ابق على اطلاع",
+    "latestNews": "أحدث الأخبار",
+    "readMore": "اقرأ المزيد",
+    "views": "مشاهدة"
+  },
   "footer": {
     "helpSupport": "المساعدة والدعم",
     "address": "685 شارع السوق، لاس فيغاس، لوس أنجلوس 95820، الولايات المتحدة الأمريكية.",

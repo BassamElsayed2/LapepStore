@@ -199,6 +199,18 @@
     "messagePlaceholder": "Type your message",
     "required": "*"
   },
+  "testimonials": {
+    "title": "Testimonials",
+    "subtitle": "User Feedbacks",
+    "userFeedbacks": "User Feedbacks"
+  },
+  "news": {
+    "title": "Latest News",
+    "subtitle": "Stay Updated",
+    "latestNews": "Latest News",
+    "readMore": "Read More",
+    "views": "views"
+  },
   "footer": {
     "helpSupport": "Help & Support",
     "address": "685 Market Street,Las Vegas, LA 95820,United States.",
