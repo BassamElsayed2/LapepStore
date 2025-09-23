@@ -24,6 +24,13 @@ export const menuData: Menu[] = [
   },
   {
     id: 4,
+    title_ar: "تتبع الطلب",
+    title_en: "Track Order",
+    newTab: false,
+    path: "/track-order",
+  },
+  {
+    id: 5,
     title_ar: "اتصل بنا",
     title_en: "Contact",
     newTab: false,

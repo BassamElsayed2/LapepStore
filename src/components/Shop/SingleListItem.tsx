@@ -12,6 +12,7 @@ import { AppDispatch } from "@/redux/store";
 import { Link } from "@/app/i18n/navigation";
 import Image from "next/image";
 import { useLocale } from "next-intl";
+import toast from "react-hot-toast";
 
 const SingleListItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
@@ -72,10 +73,16 @@ const SingleListItem = ({ item }: { item: Product }) => {
       },
     };
 
-    console.log("Adding to cart:", cartItem);
     dispatch(addItemToCart(cartItem));
 
     // Show success message
+    toast.success(
+      locale === "ar" ? "تمت إضافة المنتج إلى السلة" : "Product added to cart",
+      {
+        duration: 2000,
+        position: "top-right",
+      }
+    );
     setShowCartSuccess(true);
     setTimeout(() => setShowCartSuccess(false), 2000);
   };

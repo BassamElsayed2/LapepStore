@@ -229,6 +229,52 @@ export async function getOrderById(
   }
 }
 
+// جلب تفاصيل طلب محدد للتتبع العام (بدون الحاجة لمعرف المستخدم)
+export async function getOrderByIdForTracking(
+  orderId: string
+): Promise<{ order: Order | null; error: string | null }> {
+  try {
+    // التحقق من صحة معرف الطلب
+    if (!orderId || orderId.trim().length === 0) {
+      return { order: null, error: "رقم الطلب مطلوب" };
+    }
+
+    const { data: order, error } = await supabase
+      .from("orders")
+      .select(
+        `
+        *,
+        order_items (
+          *,
+          products (
+            id,
+            title,
+            price,
+            images
+          )
+        ),
+        payments (*)
+      `
+      )
+      .eq("id", orderId)
+      .single();
+
+    if (error) {
+      if (error.code === "PGRST116") {
+        // No rows returned
+        return { order: null, error: "لم يتم العثور على الطلب" };
+      }
+      console.error("Error fetching order for tracking:", error);
+      return { order: null, error: "حدث خطأ في جلب بيانات الطلب" };
+    }
+
+    return { order, error: null };
+  } catch (error) {
+    console.error("Unexpected error fetching order for tracking:", error);
+    return { order: null, error: "حدث خطأ غير متوقع" };
+  }
+}
+
 // تحديث حالة الطلب
 export async function updateOrderStatus(
   orderId: string,

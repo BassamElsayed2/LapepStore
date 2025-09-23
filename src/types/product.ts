@@ -25,4 +25,5 @@ export type Product = {
   is_best_seller?: boolean;
   limited_time_offer?: boolean;
   attributes?: ProductAttribute[];
+  category_id?: number;
 };

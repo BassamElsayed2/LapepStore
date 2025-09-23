@@ -14,7 +14,8 @@
     "wishlist": "المفضلة",
     "contact": "اتصل بنا",
     "about": "من نحن",
-    "blog": "المدونة"
+    "blog": "المدونة",
+    "trackOrder": "تتبع الطلب"
   },
   "navigation": {
     "menu": "القائمة",
@@ -80,7 +81,7 @@
     "enterYourDetail": "أدخل تفاصيلك أدناه",
     "forgetPassword": "نسيت كلمة المرور؟",
     "signInWithGoogle": "تسجيل الدخول باستخدام جوجل",
-    "signUpWithGithub": "إنشاء حساب باستخدام جيثب",
+    "signInWithGithub": "تسجيل الدخول باستخدام جيثب",
     "dontHaveAccount": "ليس لديك حساب؟",
     "signUpNow": "إنشاء حساب الآن!",
     "signingIn": "جاري تسجيل الدخول...",
@@ -125,13 +126,14 @@
   },
   "cart": {
     "cartView": "عرض السلة",
-    "subtotal": "المجموع الفرعي:",
+    "subtotal": " الاجمالي:",
     "viewCart": "عرض السلة",
     "checkout": "إتمام الشراء",
     "emptyCart": "سلة التسوق فارغة",
     "emptyCartMessage": "أضف بعض المنتجات إلى سلة التسوق للبدء",
     "continueShopping": "مواصلة التسوق",
-    "price": "السعر:"
+    "price": "السعر:",
+    "itemTotal": "المجموع"
   },
   "checkout": {
     "checkout": "إتمام الشراء",
@@ -211,6 +213,12 @@
     "readMore": "اقرأ المزيد",
     "views": "مشاهدة"
   },
+  "loading": {
+    "loading": "جاري التحميل...",
+    "loadingMessage": "يرجى الانتظار بينما نقوم بتحميل المحتوى",
+    "almostThere": "نحن نقترب...",
+    "preparingStore": "نحن نحضر تجربة التسوق الخاصة بك"
+  },
   "footer": {
     "helpSupport": "المساعدة والدعم",
     "address": "685 شارع السوق، لاس فيغاس، لوس أنجلوس 95820، الولايات المتحدة الأمريكية.",
@@ -236,5 +244,44 @@
     "googlePlay": "جوجل بلاي",
     "allRightsReserved": "جميع الحقوق محفوظة لشركة ENS.",
     "weAccept": "نحن نقبل:"
+  },
+  "orderTracking": {
+    "title": "تتبع الطلب",
+    "enterOrderNumber": "أدخل رقم الطلب",
+    "orderNumber": "رقم الطلب",
+    "trackOrder": "تتبع الطلب",
+    "orderNotFound": "لم يتم العثور على الطلب",
+    "orderNotFoundDesc": "تأكد من إدخال رقم الطلب الصحيح",
+    "orderDetails": "تفاصيل الطلب",
+    "orderStatus": "حالة الطلب",
+    "orderDate": "تاريخ الطلب",
+    "totalAmount": "المبلغ الإجمالي",
+    "customerInfo": "معلومات العميل",
+    "name": "الاسم",
+    "phone": "رقم الهاتف",
+    "email": "البريد الإلكتروني",
+    "deliveryAddress": "عنوان التسليم",
+    "orderItems": "المنتجات المطلوبة",
+    "quantity": "الكمية",
+    "statusPending": "في الانتظار",
+    "statusPaid": "تم الدفع",
+    "statusShipped": "تم الشحن",
+    "statusDelivered": "تم التوصيل",
+    "statusCancelled": "ملغي",
+    "statusPendingDesc": "طلبك قيد المراجعة وسنتواصل معك قريباً",
+    "statusPaidDesc": "تم تأكيد طلبك وهو قيد التحضير للشحن",
+    "statusShippedDesc": "تم شحن طلبك وهو في الطريق إليك",
+    "statusDeliveredDesc": "تم توصيل طلبك بنجاح",
+    "statusCancelledDesc": "تم إلغاء طلبك",
+    "trackingSteps": {
+      "orderPlaced": "تم تسجيل الطلب",
+      "orderConfirmed": "تم تأكيد الطلب",
+      "inTransit": "في الطريق",
+      "delivered": "تم التوصيل"
+    },
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ",
+    "tryAgain": "حاول مرة أخرى",
+    "backToHome": "العودة للرئيسية"
   }
 }

@@ -37,7 +37,12 @@ const SingleItem = ({
             <Link href={`/shop-details?id=${item.id}`}> {item.title} </Link>
           </h3>
           <p className="text-custom-sm">
-            {t("price")} ${item.discountedPrice}
+            {t("price")} ${item.discountedPrice}{" "}
+            <span className="text-gray-5">× {item.quantity}</span>
+          </p>
+          <p className="text-custom-sm font-medium text-blue">
+            {t("itemTotal")}: $
+            {(item.discountedPrice * item.quantity).toFixed(2)}
           </p>
         </div>
       </div>

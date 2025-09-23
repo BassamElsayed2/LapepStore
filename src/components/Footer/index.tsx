@@ -1,10 +1,13 @@
 import React from "react";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 
 const Footer = () => {
   const year = new Date().getFullYear();
+  const locale = useLocale();
   const t = useTranslations("footer");
+  const commonT = useTranslations("common");
 
   return (
     <footer className="overflow-hidden">
@@ -228,6 +231,14 @@ const Footer = () => {
                 <a className="ease-out duration-200 hover:text-blue" href="#">
                   {t("shop")}
                 </a>
+              </li>
+              <li>
+                <Link
+                  href={`/${locale}/track-order`}
+                  className="ease-out duration-200 hover:text-blue"
+                >
+                  {commonT("trackOrder")}
+                </Link>
               </li>
             </ul>
           </div>

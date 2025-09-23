@@ -11,6 +11,7 @@ import { AppDispatch } from "@/redux/store";
 import { Link } from "@/app/i18n/navigation";
 import Image from "next/image";
 import { useLocale } from "next-intl";
+import toast from "react-hot-toast";
 
 const SingleGridItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
@@ -51,12 +52,25 @@ const SingleGridItem = ({ item }: { item: Product }) => {
 
   // add to cart
   const handleAddToCart = () => {
+    // Check if product is in stock
+    if (item.stock_quantity <= 0) {
+      toast.error(
+        locale === "ar" ? "المنتج غير متوفر" : "Product out of stock",
+        {
+          duration: 2000,
+          position: "top-right",
+        }
+      );
+      return;
+    }
+
     const cartItem = {
       id: item.id,
       title: locale === "ar" ? item.name_ar : item.name_en,
       price: item.price,
       discountedPrice: item.offer_price || item.price,
       quantity: 1,
+      stock: item.stock_quantity,
       imgs: {
         thumbnails:
           item.imgs?.thumbnails ||
@@ -70,6 +84,13 @@ const SingleGridItem = ({ item }: { item: Product }) => {
     dispatch(addItemToCart(cartItem));
 
     // Show success message
+    toast.success(
+      locale === "ar" ? "تمت إضافة المنتج إلى السلة" : "Product added to cart",
+      {
+        duration: 2000,
+        position: "top-right",
+      }
+    );
     setShowCartSuccess(true);
     setTimeout(() => setShowCartSuccess(false), 2000);
   };
@@ -132,9 +153,20 @@ const SingleGridItem = ({ item }: { item: Product }) => {
 
           <button
             onClick={() => handleAddToCart()}
-            className="inline-flex font-medium text-custom-sm py-[7px] px-5 rounded-[5px] bg-blue text-white ease-out duration-200 hover:bg-blue-dark"
+            disabled={item.stock_quantity <= 0}
+            className={`inline-flex font-medium text-custom-sm py-[7px] px-5 rounded-[5px] ease-out duration-200 ${
+              item.stock_quantity <= 0
+                ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                : "bg-blue text-white hover:bg-blue-dark"
+            }`}
           >
-            {locale === "ar" ? "إضافة إلى السلة" : "Add to cart"}
+            {item.stock_quantity <= 0
+              ? locale === "ar"
+                ? "غير متوفر"
+                : "Out of Stock"
+              : locale === "ar"
+              ? "إضافة إلى السلة"
+              : "Add to cart"}
           </button>
         </div>
       </div>

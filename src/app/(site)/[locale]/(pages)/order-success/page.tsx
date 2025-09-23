@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import Link from "next/link";
+import Image from "next/image";
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import { getOrderById, type Order } from "@/services/apiOrders";
 import {
@@ -133,6 +134,129 @@ const OrderSuccessPage = () => {
               </p>
             </div>
 
+            {/* Important Alert */}
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-6 mb-8">
+              <div className="flex items-start">
+                <div className="text-yellow-400 text-2xl ml-3">⚠️</div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-yellow-800 mb-2">
+                    {locale === "ar" ? "تنبيه مهم" : "Important Notice"}
+                  </h3>
+                  <div className="text-yellow-700 space-y-2">
+                    <p className="font-medium">
+                      {locale === "ar"
+                        ? `يرجى الاحتفاظ برقم الطلب: ${order.id}`
+                        : `Please keep your order number: ${order.id}`}
+                    </p>
+                    <p>
+                      {locale === "ar"
+                        ? "للحصول على رد سريع وتسريع عملية التوصيل، يرجى إرسال رسالة واتساب برقم الطلب"
+                        : "For quick response and faster delivery, please send a WhatsApp message with your order number"}
+                    </p>
+                    <button
+                      onClick={handleSendWhatsApp}
+                      className="mt-3 inline-flex items-center bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors text-sm font-medium"
+                    >
+                      <Image
+                        src="/images/icons8-whatsapp.svg"
+                        alt="WhatsApp"
+                        width={40}
+                        height={40}
+                        className="ml-2"
+                      />
+                      {locale === "ar"
+                        ? "إرسال رسالة واتساب الآن"
+                        : "Send WhatsApp Message Now"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Order Status Tracker */}
+            <div className="bg-white  rounded-xl p-8 mb-8 shadow-sm">
+              {/* Current Order Status */}
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 text-center">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  {locale === "ar"
+                    ? "حالة الطلب الحالية"
+                    : "Current Order Status"}
+                </h3>
+
+                <div className="inline-flex items-center justify-center">
+                  <div
+                    className={`w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg ${
+                      order.status === "pending"
+                        ? "bg-yellow-500"
+                        : order.status === "paid"
+                        ? "bg-blue-500"
+                        : order.status === "shipped"
+                        ? "bg-purple-500"
+                        : order.status === "delivered"
+                        ? "bg-green-500"
+                        : order.status === "cancelled"
+                        ? "bg-red-500"
+                        : "bg-gray-500"
+                    }`}
+                  >
+                    {order.status === "pending" && "⏳"}
+                    {order.status === "paid" && "💳"}
+                    {order.status === "shipped" && "🚛"}
+                    {order.status === "delivered" && "✅"}
+                    {order.status === "cancelled" && "❌"}
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <h4 className="text-xl font-bold text-gray-800 mb-2">
+                    {order.status === "pending"
+                      ? locale === "ar"
+                        ? "في الانتظار"
+                        : "Pending"
+                      : order.status === "paid"
+                      ? locale === "ar"
+                        ? "تم الدفع"
+                        : "Paid"
+                      : order.status === "shipped"
+                      ? locale === "ar"
+                        ? "تم الشحن"
+                        : "Shipped"
+                      : order.status === "delivered"
+                      ? locale === "ar"
+                        ? "تم التوصيل"
+                        : "Delivered"
+                      : order.status === "cancelled"
+                      ? locale === "ar"
+                        ? "ملغي"
+                        : "Cancelled"
+                      : order.status}
+                  </h4>
+                  <p className="text-gray-600">
+                    {order.status === "pending" &&
+                      (locale === "ar"
+                        ? "طلبك قيد المراجعة وسنتواصل معك قريباً"
+                        : "Your order is being reviewed and we'll contact you soon")}
+                    {order.status === "paid" &&
+                      (locale === "ar"
+                        ? "تم تأكيد طلبك وهو قيد التحضير للشحن"
+                        : "Your order is confirmed and being prepared for shipping")}
+                    {order.status === "shipped" &&
+                      (locale === "ar"
+                        ? "تم شحن طلبك وهو في الطريق إليك"
+                        : "Your order has been shipped and is on its way")}
+                    {order.status === "delivered" &&
+                      (locale === "ar"
+                        ? "تم توصيل طلبك بنجاح"
+                        : "Your order has been delivered successfully")}
+                    {order.status === "cancelled" &&
+                      (locale === "ar"
+                        ? "تم إلغاء طلبك"
+                        : "Your order has been cancelled")}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Order Details */}
             <div className="border-t border-gray-3 pt-8">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -146,7 +270,7 @@ const OrderSuccessPage = () => {
                       <span className="text-dark-5">
                         {locale === "ar" ? "رقم الطلب:" : "Order ID:"}
                       </span>
-                      <span className="font-medium text-dark">#{order.id}</span>
+                      <span className="font-medium text-dark">{order.id}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-dark-5">

@@ -10,7 +10,7 @@ const shopData: Product[] = [
     discountedPrice: 29.0,
     id: 1,
     image_url: "/images/products/product-1-sm-1.png",
-    stock: 10,
+    stock_quantity: 10,
     description_en: "High-quality USB gamepad for gaming enthusiasts",
     description_ar: "جيمباد USB عالي الجودة لعشاق الألعاب",
     imgs: {
@@ -34,7 +34,7 @@ const shopData: Product[] = [
     discountedPrice: 99.0,
     id: 2,
     image_url: "/images/products/product-2-sm-1.png",
-    stock: 5,
+    stock_quantity: 5,
     description_en: "Latest iPhone with advanced features and performance",
     description_ar: "أحدث آيفون مع ميزات متقدمة وأداء عالي",
     imgs: {
@@ -58,7 +58,7 @@ const shopData: Product[] = [
     discountedPrice: 29.0,
     id: 3,
     image_url: "/images/products/product-3-sm-1.png",
-    stock: 8,
+    stock_quantity: 8,
     description_en: "Powerful all-in-one desktop with M1 chip",
     description_ar: "كمبيوتر مكتبي شامل قوي مع شريحة M1",
     imgs: {
@@ -82,7 +82,7 @@ const shopData: Product[] = [
     discountedPrice: 29.0,
     id: 4,
     image_url: "/images/products/product-4-sm-1.png",
-    stock: 12,
+    stock_quantity: 12,
     description_en: "Ultra-portable laptop with exceptional performance",
     description_ar: "لابتوب فائق المحمولية مع أداء استثنائي",
     imgs: {
@@ -106,7 +106,7 @@ const shopData: Product[] = [
     discountedPrice: 29.0,
     id: 5,
     image_url: "/images/products/product-5-sm-1.png",
-    stock: 15,
+    stock_quantity: 15,
     description_en: "Premium smartwatch for outdoor adventures",
     description_ar: "ساعة ذكية فاخرة للمغامرات الخارجية",
     imgs: {
@@ -130,7 +130,7 @@ const shopData: Product[] = [
     discountedPrice: 29.0,
     id: 6,
     image_url: "/images/products/product-6-sm-1.png",
-    stock: 20,
+    stock_quantity: 20,
     description_en: "Advanced wireless mouse for productivity",
     description_ar: "فأرة لاسلكية متقدمة للإنتاجية",
     imgs: {
@@ -154,7 +154,7 @@ const shopData: Product[] = [
     discountedPrice: 29.0,
     id: 7,
     image_url: "/images/products/product-7-sm-1.png",
-    stock: 7,
+    stock_quantity: 7,
     description_en: "Versatile tablet for work and entertainment",
     description_ar: "تابلت متعدد الاستخدامات للعمل والترفيه",
     imgs: {
@@ -178,7 +178,7 @@ const shopData: Product[] = [
     discountedPrice: 29.0,
     id: 8,
     image_url: "/images/products/product-8-sm-1.png",
-    stock: 25,
+    stock_quantity: 25,
     description_en: "High-speed dual-band wireless router",
     description_ar: "راوتر لاسلكي ثنائي النطاق عالي السرعة",
     imgs: {

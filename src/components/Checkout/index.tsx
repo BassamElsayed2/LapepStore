@@ -105,18 +105,12 @@ const Checkout = () => {
       if (order) {
         // Send WhatsApp notification BEFORE clearing cart
         try {
-          console.log("🔍 DEBUG: Order data:", order);
-          console.log("🔍 DEBUG: Cart items:", cartItems);
-
           const orderDetails = convertOrderToOrderDetails(order, cartItems);
-          console.log("🔍 DEBUG: Order details:", orderDetails);
 
           // Check if we have items to send
           if (orderDetails.items && orderDetails.items.length > 0) {
-            console.log("🔍 DEBUG: Sending WhatsApp notification...");
             sendWhatsAppNotification(orderDetails, locale);
           } else {
-            console.log("🔍 DEBUG: No items found, skipping WhatsApp");
             toast.error(
               "تم إنشاء الطلب بنجاح، لكن لم يتم العثور على تفاصيل المنتجات لإرسال واتساب"
             );

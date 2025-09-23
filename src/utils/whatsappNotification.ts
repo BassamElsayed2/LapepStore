@@ -186,20 +186,12 @@ export function sendWhatsAppNotification(
   orderDetails: OrderDetails,
   locale: string = "ar"
 ): void {
-  console.log("🔍 DEBUG: sendWhatsAppNotification called with:", orderDetails);
-
   if (!isWhatsAppNotificationEnabled()) {
-    console.log("🔍 DEBUG: WhatsApp notifications are disabled");
     return;
   }
 
-  console.log("🔍 DEBUG: WhatsApp notifications are enabled");
-
   const message = formatWhatsAppMessage(orderDetails);
   const whatsappUrl = generateWhatsAppUrl(message);
-
-  console.log("🔍 DEBUG: Generated message:", message);
-  console.log("🔍 DEBUG: Generated URL:", whatsappUrl);
 
   // Show confirmation dialog before opening WhatsApp
   const confirmationText =
@@ -207,15 +199,11 @@ export function sendWhatsAppNotification(
       ? "سيتم فتح واتساب لإرسال تفاصيل الطلب. هل تريد المتابعة؟"
       : "WhatsApp will open to send order details. Do you want to continue?";
 
-  console.log("🔍 DEBUG: Showing confirmation dialog...");
   const shouldOpen = window.confirm(confirmationText);
 
   if (shouldOpen) {
-    console.log("🔍 DEBUG: User confirmed, opening WhatsApp...");
     // Open WhatsApp Web in a new tab
     window.open(whatsappUrl, "_blank");
-  } else {
-    console.log("🔍 DEBUG: User cancelled WhatsApp notification");
   }
 }
 
@@ -243,10 +231,6 @@ export function convertOrderToOrderDetails(
   order: any,
   cartItems: any[]
 ): OrderDetails {
-  console.log("🔍 DEBUG: convertOrderToOrderDetails called");
-  console.log("🔍 DEBUG: order.order_items:", order.order_items);
-  console.log("🔍 DEBUG: cartItems length:", cartItems.length);
-
   // Use order_items from database if available, otherwise fall back to cartItems
   const items =
     order.order_items && order.order_items.length > 0
@@ -260,8 +244,6 @@ export function convertOrderToOrderDetails(
           quantity: item.quantity,
           price: item.discountedPrice || item.price,
         }));
-
-  console.log("🔍 DEBUG: Converted items:", items);
 
   const orderDetails = {
     orderId: order.id,

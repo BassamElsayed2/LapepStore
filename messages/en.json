@@ -14,7 +14,8 @@
     "wishlist": "Wishlist",
     "contact": "Contact",
     "about": "About",
-    "blog": "Blog"
+    "blog": "Blog",
+    "trackOrder": "Track Order"
   },
   "navigation": {
     "menu": "Menu",
@@ -80,7 +81,7 @@
     "enterYourDetail": "Enter your detail below",
     "forgetPassword": "Forget your password?",
     "signInWithGoogle": "Sign In with Google",
-    "signUpWithGithub": "Sign Up with Github",
+    "signInWithGithub": "Sign In with Github",
     "dontHaveAccount": "Don't have an account?",
     "signUpNow": "Sign Up Now!",
     "signingIn": "Signing In...",
@@ -131,7 +132,8 @@
     "emptyCart": "Your cart is empty",
     "emptyCartMessage": "Add some items to your cart to get started",
     "continueShopping": "Continue Shopping",
-    "price": "Price:"
+    "price": "Price:",
+    "itemTotal": "Total"
   },
   "checkout": {
     "checkout": "Checkout",
@@ -211,6 +213,12 @@
     "readMore": "Read More",
     "views": "views"
   },
+  "loading": {
+    "loading": "Loading...",
+    "loadingMessage": "Please wait while we load your content",
+    "almostThere": "Almost there...",
+    "preparingStore": "Preparing your shopping experience"
+  },
   "footer": {
     "helpSupport": "Help & Support",
     "address": "685 Market Street,Las Vegas, LA 95820,United States.",
@@ -236,5 +244,44 @@
     "googlePlay": "Google Play",
     "allRightsReserved": "All rights reserved by ENS.",
     "weAccept": "We Accept:"
+  },
+  "orderTracking": {
+    "title": "Order Tracking",
+    "enterOrderNumber": "Enter Order Number",
+    "orderNumber": "Order Number",
+    "trackOrder": "Track Order",
+    "orderNotFound": "Order Not Found",
+    "orderNotFoundDesc": "Please make sure you entered the correct order number",
+    "orderDetails": "Order Details",
+    "orderStatus": "Order Status",
+    "orderDate": "Order Date",
+    "totalAmount": "Total Amount",
+    "customerInfo": "Customer Information",
+    "name": "Name",
+    "phone": "Phone",
+    "email": "Email",
+    "deliveryAddress": "Delivery Address",
+    "orderItems": "Order Items",
+    "quantity": "Quantity",
+    "statusPending": "Pending",
+    "statusPaid": "Paid",
+    "statusShipped": "Shipped",
+    "statusDelivered": "Delivered",
+    "statusCancelled": "Cancelled",
+    "statusPendingDesc": "Your order is being reviewed and we'll contact you soon",
+    "statusPaidDesc": "Your order is confirmed and being prepared for shipping",
+    "statusShippedDesc": "Your order has been shipped and is on its way",
+    "statusDeliveredDesc": "Your order has been delivered successfully",
+    "statusCancelledDesc": "Your order has been cancelled",
+    "trackingSteps": {
+      "orderPlaced": "Order Placed",
+      "orderConfirmed": "Order Confirmed",
+      "inTransit": "In Transit",
+      "delivered": "Delivered"
+    },
+    "loading": "Loading...",
+    "error": "Error occurred",
+    "tryAgain": "Try Again",
+    "backToHome": "Back to Home"
   }
 }
