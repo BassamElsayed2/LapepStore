@@ -45,7 +45,12 @@ const ProductItem = memo(({ item, priority = false }: ProductItemProps) => {
       id: item.id,
       title: productTitle,
       price: item.price,
-      discountedPrice: item.offer_price || item.price,
+      discountedPrice:
+        item.offer_price !== null &&
+        item.offer_price !== undefined &&
+        item.offer_price > 0
+          ? item.offer_price
+          : item.price,
       quantity: 1,
       stock: item.stock_quantity,
       imgs: {
@@ -186,7 +191,9 @@ const ProductItem = memo(({ item, priority = false }: ProductItemProps) => {
       </Link>
 
       <div className="flex items-center gap-2">
-        {item.offer_price ? (
+        {item.offer_price !== null &&
+        item.offer_price !== undefined &&
+        item.offer_price > 0 ? (
           <>
             <span className="text-lg font-bold text-primary">
               ${item.offer_price.toFixed(2)}

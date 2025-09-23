@@ -64,7 +64,7 @@ const HeroCarousal = () => {
     >
       {productsToShow.map((product, index) => (
         <SwiperSlide key={product.id}>
-          <div className="flex items-center pt-6 sm:pt-0 flex-col-reverse sm:flex-row ">
+          <div className="flex items-center justify-between pt-6 sm:pt-0 flex-col-reverse sm:flex-row ">
             <div
               className={`max-w-[394px] py-10 sm:py-15 lg:py-24.5 ${
                 locale === "en"
@@ -74,7 +74,10 @@ const HeroCarousal = () => {
             >
               <div className="flex items-center gap-4 mb-7.5 sm:mb-10">
                 <span className="block font-semibold text-heading-3 sm:text-heading-1 text-red">
-                  {product.offer_price && product.price > product.offer_price
+                  {product.offer_price !== null &&
+                  product.offer_price !== undefined &&
+                  product.offer_price > 0 &&
+                  product.price > product.offer_price
                     ? Math.round(
                         ((product.price - product.offer_price) /
                           product.price) *
@@ -104,13 +107,21 @@ const HeroCarousal = () => {
 
               <div className="flex items-center gap-3 mb-4">
                 <span className="font-medium text-heading-5 text-red">
-                  ${product.offer_price || product.price}
+                  $
+                  {product.offer_price !== null &&
+                  product.offer_price !== undefined &&
+                  product.offer_price > 0
+                    ? product.offer_price
+                    : product.price}
                 </span>
-                {product.offer_price && product.price > product.offer_price && (
-                  <span className="font-medium text-2xl text-dark-4 line-through">
-                    ${product.price}
-                  </span>
-                )}
+                {product.offer_price !== null &&
+                  product.offer_price !== undefined &&
+                  product.offer_price > 0 &&
+                  product.price > product.offer_price && (
+                    <span className="font-medium text-2xl text-dark-4 line-through">
+                      ${product.price}
+                    </span>
+                  )}
               </div>
 
               <Link

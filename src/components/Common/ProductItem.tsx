@@ -36,7 +36,12 @@ const ProductItem = ({ item }: { item: Product }) => {
       id: item.id,
       title: locale === "ar" ? item.name_ar : item.name_en,
       price: item.price,
-      discountedPrice: item.offer_price || item.price,
+      discountedPrice:
+        item.offer_price !== null &&
+        item.offer_price !== undefined &&
+        item.offer_price > 0
+          ? item.offer_price
+          : item.price,
       quantity: 1,
       stock: item.stock_quantity,
       imgs: {

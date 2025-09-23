@@ -401,13 +401,14 @@ const ShopDetails = ({ productId }: ShopDetailsProps) => {
                   </div>
 
                   <h3 className="font-medium text-custom-1 mb-4.5">
-                    {product.offer_price &&
+                    {product.offer_price !== null &&
+                    product.offer_price !== undefined &&
+                    product.offer_price > 0 &&
                     product.offer_price < product.price ? (
                       <>
                         <span className="text-lg sm:text-base text-dark">
                           {locale === "ar" ? "السعر:" : "Price:"}{" "}
-                          {product.offer_price || 0}{" "}
-                          {locale === "ar" ? "ج.م" : "$"}
+                          {product.offer_price} {locale === "ar" ? "ج.م" : "$"}
                         </span>
                         <span className="line-through text-dark-4 ml-2 mr-2 text-sm">
                           {locale === "ar" ? "السعر:" : "Price:"}{" "}

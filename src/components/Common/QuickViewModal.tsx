@@ -291,9 +291,15 @@ const QuickViewModal = () => {
                   <span className="flex items-center gap-2">
                     <span className="font-semibold text-dark text-xl xl:text-heading-4">
                       {locale === "ar" ? "ج.م" : "EGP"}
-                      {product.offer_price || product.price}
+                      {product.offer_price !== null &&
+                      product.offer_price !== undefined &&
+                      product.offer_price > 0
+                        ? product.offer_price
+                        : product.price}
                     </span>
-                    {product.offer_price &&
+                    {product.offer_price !== null &&
+                      product.offer_price !== undefined &&
+                      product.offer_price > 0 &&
                       product.offer_price < product.price && (
                         <span className="font-medium text-dark-4 text-lg xl:text-2xl line-through">
                           {locale === "ar" ? "ج.م" : "EGP"}
