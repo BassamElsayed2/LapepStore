@@ -19,14 +19,14 @@
   },
   "navigation": {
     "menu": "القائمة",
-    "categories": "الفئات",
+    "categories": "الاقسام",
     "brands": "العلامات التجارية",
     "deals": "العروض",
     "newArrivals": "وصل حديثاً",
     "bestSellers": "الأكثر مبيعاً"
   },
   "header": {
-    "allCategories": "جميع الفئات",
+    "allCategories": "جميع الاقسام",
     "desktop": "كمبيوتر مكتبي",
     "laptop": "لابتوب",
     "monitor": "شاشة",
@@ -34,7 +34,7 @@
     "watch": "ساعة",
     "mouse": "فأرة",
     "tablet": "تابلت",
-    "searchPlaceholder": "أنا أتسوق من أجل...",
+    "searchPlaceholder": "إبحث في لبيب ستور...",
     "signIn": "تسجيل الدخول",
     "recentlyViewed": "شوهد مؤخراً",
     "support": "الدعم",

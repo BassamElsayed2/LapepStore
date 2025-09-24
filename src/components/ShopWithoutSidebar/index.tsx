@@ -317,11 +317,11 @@ const ShopWithoutSidebar = () => {
             <div className="w-full">
               {/* Category Filter Message */}
               {selectedCategoryName && (
-                <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <svg
-                        className="w-5 h-5 text-blue-600"
+                        className="w-5 h-5 text-green-600"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -333,7 +333,7 @@ const ShopWithoutSidebar = () => {
                           d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
                         />
                       </svg>
-                      <span className="text-blue-800 font-medium">
+                      <span className="text-green-800 font-medium">
                         {locale === "ar"
                           ? `عرض المنتجات في فئة: ${selectedCategoryName}`
                           : `Showing products in category: ${selectedCategoryName}`}
@@ -344,7 +344,7 @@ const ShopWithoutSidebar = () => {
                         setSelectedCategories([]);
                         window.history.pushState({}, "", `/${locale}/shop`);
                       }}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      className="text-green-600 hover:text-green-800 text-sm font-medium"
                     >
                       {locale === "ar" ? "إزالة التصفية" : "Clear Filter"}
                     </button>
@@ -480,7 +480,7 @@ const ShopWithoutSidebar = () => {
                     {/* Categories */}
                     <div>
                       <h4 className="font-medium text-dark mb-3">
-                        {locale === "ar" ? "الفئات" : "Categories"}
+                        {locale === "ar" ? "الاقسام" : "Categories"}
                       </h4>
                       <div className="space-y-2 max-h-40 overflow-y-auto">
                         {categoriesLoading ? (
@@ -510,7 +510,9 @@ const ShopWithoutSidebar = () => {
                           ))
                         ) : (
                           <div className="text-sm text-gray-500">
-                            {locale === "ar" ? "لا توجد فئات" : "No categories"}
+                            {locale === "ar"
+                              ? "لا توجد اقسام"
+                              : "No categories"}
                           </div>
                         )}
                       </div>

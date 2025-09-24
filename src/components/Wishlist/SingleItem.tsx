@@ -18,12 +18,17 @@ const SingleItem = ({ item }: { item: any }) => {
   };
 
   const handleAddToCart = () => {
-    dispatch(
-      addItemToCart({
-        ...item,
-        quantity: 1,
-      })
-    );
+    const cartItem = {
+      id: item.id,
+      title: item.title,
+      price: item.price,
+      discountedPrice: item.discountedPrice,
+      quantity: 1,
+      stock: item.stock || 10, // Use stock from item or default to 10
+      imgs: item.imgs,
+    };
+
+    dispatch(addItemToCart(cartItem));
   };
 
   return (

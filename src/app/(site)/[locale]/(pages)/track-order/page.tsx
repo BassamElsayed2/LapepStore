@@ -66,7 +66,7 @@ const TrackOrderPage = () => {
               </form>
 
               {/* Quick Info */}
-              <div className="mt-8 p-4 bg-blue-50 rounded-lg">
+              <div className="mt-8 p-4 bg-green-50 rounded-lg">
                 <div className="flex items-start">
                   <div className="text-blue text-2xl ml-3">💡</div>
                   <div className="flex-1">

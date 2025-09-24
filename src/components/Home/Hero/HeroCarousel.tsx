@@ -64,34 +64,34 @@ const HeroCarousal = () => {
     >
       {productsToShow.map((product, index) => (
         <SwiperSlide key={product.id}>
-          <div className="flex items-center justify-between pt-6 sm:pt-0 flex-col-reverse sm:flex-row ">
+          <div className="flex items-center justify-between pt-6 sm:pt-0 flex-col-reverse sm:flex-row bg-gradient-to-r from-[#fff] to-[#f4f1f1] ">
             <div
-              className={`max-w-[394px] py-10 sm:py-15 lg:py-24.5 ${
+              className={`max-w-[394px]  ${
                 locale === "en"
                   ? "pl-4 sm:pl-7.5 lg:pl-12.5"
                   : "pr-4 sm:pr-7.5 lg:pr-12.5"
               }`}
             >
-              <div className="flex items-center gap-4 mb-7.5 sm:mb-10">
-                <span className="block font-semibold text-heading-3 sm:text-heading-1 text-red">
-                  {product.offer_price !== null &&
-                  product.offer_price !== undefined &&
-                  product.offer_price > 0 &&
-                  product.price > product.offer_price
-                    ? Math.round(
+              {product.offer_price !== null &&
+                product.offer_price !== undefined &&
+                product.offer_price > 0 &&
+                product.price > product.offer_price && (
+                  <div className="flex items-center gap-4 mb-7.5 sm:mb-10">
+                    <span className="block font-semibold text-heading-3 sm:text-heading-1 text-red">
+                      {Math.round(
                         ((product.price - product.offer_price) /
                           product.price) *
                           100
-                      )
-                    : 30}
-                  %
-                </span>
-                <span className="block text-dark text-sm sm:text-custom-1 sm:leading-[24px]">
-                  {locale === "en" ? "Sale" : "تخفيض"}
-                  <br />
-                  {locale === "en" ? "Off" : "محدود"}
-                </span>
-              </div>
+                      )}
+                      %
+                    </span>
+                    <span className="block text-dark text-sm sm:text-custom-1 sm:leading-[24px]">
+                      {locale === "en" ? "Sale" : "تخفيض"}
+                      <br />
+                      {locale === "en" ? "Off" : "محدود"}
+                    </span>
+                  </div>
+                )}
 
               <h1 className="font-semibold text-dark text-xl sm:text-3xl mb-3">
                 <Link href={`/shop-details?id=${product.id}`}>
@@ -107,26 +107,26 @@ const HeroCarousal = () => {
 
               <div className="flex items-center gap-3 mb-4">
                 <span className="font-medium text-heading-5 text-red">
-                  $
                   {product.offer_price !== null &&
                   product.offer_price !== undefined &&
                   product.offer_price > 0
                     ? product.offer_price
-                    : product.price}
+                    : product.price}{" "}
+                  {locale === "ar" ? "جنية" : "Pound"}
                 </span>
                 {product.offer_price !== null &&
                   product.offer_price !== undefined &&
                   product.offer_price > 0 &&
                   product.price > product.offer_price && (
                     <span className="font-medium text-2xl text-dark-4 line-through">
-                      ${product.price}
+                      {product.price} {locale === "ar" ? "جنية" : "Pound"}
                     </span>
                   )}
               </div>
 
               <Link
                 href={`/shop-details?id=${product.id}`}
-                className="inline-flex font-medium text-white text-custom-sm rounded-md bg-dark py-3 px-9 ease-out duration-200 hover:bg-blue mt-10"
+                className="inline-flex font-medium text-white text-custom-sm rounded-md bg-green-dark py-3 px-9 ease-out duration-200 hover:bg-green mt-10"
               >
                 {locale === "en" ? "Shop Now" : "تسوق الآن"}
               </Link>
@@ -142,7 +142,7 @@ const HeroCarousal = () => {
                 alt={locale === "en" ? product.name_en : product.name_ar}
                 width={351}
                 height={358}
-                className="object-cover"
+                className="object-cover rounded-[30px]"
               />
             </div>
           </div>

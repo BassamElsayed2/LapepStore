@@ -157,7 +157,7 @@ export const getPasswordStrengthColor = (
     case PasswordStrength.FAIR:
       return "text-yellow-500";
     case PasswordStrength.GOOD:
-      return "text-blue-500";
+      return "text-green-500";
     case PasswordStrength.STRONG:
       return "text-green-500";
     default:
@@ -181,7 +181,7 @@ export const getPasswordStrengthBgColor = (
     case PasswordStrength.FAIR:
       return "bg-yellow-500";
     case PasswordStrength.GOOD:
-      return "bg-blue-500";
+      return "bg-green-500";
     case PasswordStrength.STRONG:
       return "bg-green-500";
     default:

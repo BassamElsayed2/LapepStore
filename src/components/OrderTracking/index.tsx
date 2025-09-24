@@ -91,7 +91,7 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({ orderId }) => {
       case "pending":
         return "bg-yellow-500";
       case "paid":
-        return "bg-blue-500";
+        return "bg-green-500";
       case "shipped":
         return "bg-purple-500";
       case "delivered":
@@ -224,7 +224,7 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({ orderId }) => {
         </h3>
 
         {/* Progress Component */}
-        <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-6 border border-gray-200">
+        <div className="bg-gradient-to-r from-gray-50 to-green-50 rounded-lg p-6 border border-gray-200">
           {order.status === "cancelled" ? (
             /* Cancelled Order Info */
             <div className="text-center">

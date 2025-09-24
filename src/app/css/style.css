@@ -15,8 +15,13 @@
   body.rtl {
     direction: rtl;
     text-align: right;
+    font-family: Cairo;
   }
-
+  .videoz {
+    max-width: 1180px;
+    margin: auto;
+    border-radius: 60px;
+  }
   body.ltr {
     direction: ltr;
     text-align: left;
@@ -143,7 +148,7 @@ input[type="search"]::-webkit-search-results-decoration {
 }
 
 .select-selected {
-  @apply bg-gray-1 rounded-l-[5px] border border-gray-3 !border-r-0 cursor-pointer text-dark text-custom-sm py-[11px] pl-3.5 pr-8 relative;
+  @apply bg-gray-1 rounded-l-[5px] border border-gray-3 !border-r-0 cursor-pointer text-dark text-custom-sm py-[11px] pl-3.5 pr-8 relative text-[12px];
 }
 
 /* Style the arrow inside the select element: */
@@ -275,4 +280,9 @@ input[type="search"]::-webkit-search-results-decoration {
 
 .range-slider__range {
   @apply !bg-blue;
+}
+
+.force-font,
+* {
+  font-family: Cairo;
 }

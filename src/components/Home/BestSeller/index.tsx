@@ -26,7 +26,7 @@ const BestSeller = () => {
         {/* <!-- section title --> */}
         <div className="mb-10 flex items-center justify-between">
           <div>
-            <span className="flex items-center gap-2.5 font-medium text-dark mb-1.5">
+            <span className="flex items-center gap-2.5 font-medium text-green-dark mb-1.5">
               <Image
                 src="/images/icons/icon-07.svg"
                 alt="icon"
@@ -69,7 +69,7 @@ const BestSeller = () => {
         <div className="text-center mt-12.5">
           <Link
             href={`/${locale}/shop`}
-            className="inline-flex font-medium text-custom-sm py-3 px-7 sm:px-12.5 rounded-md border-gray-3 border bg-gray-1 text-dark ease-out duration-200 hover:bg-dark hover:text-white hover:border-transparent"
+            className="inline-flex font-medium text-custom-sm py-3 px-7 sm:px-12.5 rounded-md border-gray-3 border bg-gray-1 text-green-dark ease-out duration-200 hover:bg-green hover:text-white hover:border-transparent"
           >
             {locale === "ar" ? "عرض الكل" : "View All"}
           </Link>

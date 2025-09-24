@@ -52,7 +52,9 @@ const PromoBanner = () => {
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
         {/* <!-- promo banner big --> */}
         <div className="flex flex-col md:flex-row items-center gap-8 rounded-lg bg-[#F5F5F7] px-2 mb-7.5">
-          <div className={`flex-1 pt-5 ${isRTL ? "text-right" : "text-left"}`}>
+          <div
+            className={`flex-1 pr-3 pt-5 ${isRTL ? "text-right" : "text-left"}`}
+          >
             {banners.length > 0 ? (
               <>
                 <div
@@ -61,6 +63,7 @@ const PromoBanner = () => {
                       ? banners[0].desc_ar || ""
                       : banners[0].desc_en || "",
                   }}
+                  className="force-font"
                 />
                 <Link
                   href={`/${currentLocale}/shop`}
@@ -96,15 +99,14 @@ const PromoBanner = () => {
           </div>
 
           <div className="flex-shrink-0">
-            <Image
+            <img
               src={
                 banners.length > 0 && banners[0].image
                   ? banners[0].image
                   : "/images/promo/promo-01.png"
               }
               alt="promo img"
-              width={274}
-              height={350}
+              className="h-[300px] w-[450px]"
             />
           </div>
         </div>

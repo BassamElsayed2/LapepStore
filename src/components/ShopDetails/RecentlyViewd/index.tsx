@@ -40,10 +40,10 @@ const RecentlyViewdItems = () => {
                   height={17}
                   alt="icon"
                 />
-                {locale === "ar" ? "الفئات" : "Categories"}
+                {locale === "ar" ? "الاقسام" : "Categories"}
               </span>
               <h2 className="font-semibold text-xl xl:text-heading-5 text-dark">
-                {locale === "ar" ? "تصفح بالفئة" : "Browse by Category"}
+                {locale === "ar" ? "تصفح بالاقسام" : "Browse by Category"}
               </h2>
             </div>
 

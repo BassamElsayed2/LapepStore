@@ -30,6 +30,7 @@ const SingleItem = ({ item }: { item: Product }) => {
       price: item.price,
       discountedPrice: item.offer_price || item.price,
       quantity: 1,
+      stock: item.stock_quantity || 10, // Use stock_quantity from product or default to 10
       imgs: {
         thumbnails:
           item.imgs?.thumbnails ||
@@ -56,34 +57,34 @@ const SingleItem = ({ item }: { item: Product }) => {
         </div>
       )}
 
-      <div className="relative overflow-hidden rounded-lg bg-[#F6F7FB] h-[420px] flex flex-col">
-        <div className="text-center px-4 py-6 flex-shrink-0">
+      <div className="relative overflow-hidden rounded-lg  h-[420px] flex flex-col">
+        <div className="text-center px-4 py-6 flex-shrink-0 bg-[#F6F7FB]">
           <h3 className="font-medium text-dark ease-out duration-200 hover:text-blue mb-2 line-clamp-2 min-h-[2.5rem]">
             <Link href={`/shop-details?id=${item.id}`}>
               {locale === "ar" ? item.name_ar : item.name_en}
             </Link>
           </h3>
 
-          <span className="flex items-center justify-center gap-2 font-medium text-lg">
+          <span className="flex items-center justify-center gap-2 font-medium text-lg ">
             {item.offer_price && item.offer_price > 0 ? (
               <>
-                <span className="text-dark">
-                  {`${locale === "ar" ? "ج.م" : "$"} ${item.offer_price}`}
+                <span className="text-red-dark font-semibold">
+                  {`${locale === "ar" ? "جنيه" : "Pound"} ${item.offer_price}`}
                 </span>
                 <span className="text-dark-4 line-through">
-                  {`${locale === "ar" ? "ج.م" : "$"} ${item.price}`}
+                  {`${locale === "ar" ? "جنيه" : "Pound"} ${item.price}`}
                 </span>
               </>
             ) : (
-              <span className="text-dark">
-                {`${locale === "ar" ? "ج.م" : "$"} ${item.price}`}
+              <span className="text-red-dark font-semibold">
+                {`${locale === "ar" ? "جنيه" : "Pound"} ${item.price}`}
               </span>
             )}
           </span>
         </div>
 
-        <div className="flex justify-center items-center flex-1 px-4">
-          <div className="relative w-full h-full max-w-[280px] max-h-[280px]">
+        <div className="flex justify-center items-center flex-1 ">
+          <div className="relative w-full h-full  ">
             <Image
               src={
                 item.imgs?.thumbnails?.[0] ||
@@ -94,8 +95,7 @@ const SingleItem = ({ item }: { item: Product }) => {
               }
               alt={locale === "ar" ? item.name_ar : item.name_en}
               fill
-              className="object-contain"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className=" w-full"
               onError={(e) => {
                 // Fallback to a default image if the original fails to load
                 e.currentTarget.src = "/images/products/product-1-bg-1.png";

@@ -189,7 +189,7 @@ const OrderSuccessPage = () => {
                       order.status === "pending"
                         ? "bg-yellow-500"
                         : order.status === "paid"
-                        ? "bg-blue-500"
+                        ? "bg-green-500"
                         : order.status === "shipped"
                         ? "bg-purple-500"
                         : order.status === "delivered"

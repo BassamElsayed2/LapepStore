@@ -3,9 +3,9 @@ import React, { useState } from "react";
 
 const ColorsDropdwon = () => {
   const [toggleDropdown, setToggleDropdown] = useState(true);
-  const [activeColor, setActiveColor] = useState("blue");
+  const [activeColor, setActiveColor] = useState("green");
 
-  const colors = ["red", "blue", "orange", "pink", "purple"];
+  const colors = ["red", "green", "orange", "pink", "purple"];
 
   return (
     <div className="bg-white shadow-1 rounded-lg">

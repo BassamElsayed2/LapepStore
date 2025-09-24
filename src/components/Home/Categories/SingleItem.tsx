@@ -13,7 +13,11 @@ const SingleItem = ({ item }: { item: Category }) => {
       className="group flex flex-col items-center"
     >
       <div className="max-w-[130px] w-full bg-[#F2F3F8] h-32.5 rounded-full flex items-center justify-center mb-4">
-        <Image src={item.image_url} alt="Category" width={82} height={62} />
+        <img
+          src={item.image_url}
+          alt="Category"
+          className="w-full h-full object-cover rounded-full"
+        />
       </div>
 
       <div className="flex justify-center">

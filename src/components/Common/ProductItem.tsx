@@ -94,7 +94,7 @@ const ProductItem = ({ item }: { item: Product }) => {
         </div>
       )}
 
-      <div className="relative overflow-hidden rounded-lg bg-[#F6F7FB] h-[320px] flex items-center justify-center mb-4">
+      <div className="relative overflow-hidden rounded-lg  h-[320px] flex items-end justify-center ">
         <div className="relative w-full h-full max-w-[280px] max-h-[280px] px-4 py-4">
           <Image
             src={
@@ -168,32 +168,34 @@ const ProductItem = ({ item }: { item: Product }) => {
         </div>
       </div>
 
-      <h3
-        className="font-medium text-dark ease-out duration-200 hover:text-blue mb-1.5"
-        onClick={() => handleProductDetails()}
-      >
-        <Link href={`/shop-details?id=${item.id}`}>
-          {" "}
-          {locale === "ar" ? item.name_ar : item.name_en}{" "}
-        </Link>
-      </h3>
+      <div className="bg-[#F6F7FB] p-2 rounded-lg">
+        <h3
+          className="font-bold text-dark ease-out duration-200 hover:text-green mb-1.5 text-center "
+          onClick={() => handleProductDetails()}
+        >
+          <Link href={`/shop-details?id=${item.id}`}>
+            {" "}
+            {locale === "ar" ? item.name_ar : item.name_en}{" "}
+          </Link>
+        </h3>
 
-      <span className="flex items-center  gap-2 font-medium text-lg">
-        {item.offer_price && item.offer_price > 0 ? (
-          <>
-            <span className="text-dark">
-              {`${locale === "ar" ? "ج.م" : "$"} ${item.offer_price}`}
+        <span className="flex items-center  gap-2 font-semibold text-lg ">
+          {item.offer_price && item.offer_price > 0 ? (
+            <>
+              <span className="text-green-dark font-semibold">
+                {`${locale === "ar" ? "جنيه" : "pound"} ${item.offer_price}`}
+              </span>
+              <span className="text-dark-4 line-through font-semibold">
+                {`${locale === "ar" ? "جنيه" : "pound"} ${item.price}`}
+              </span>
+            </>
+          ) : (
+            <span className="text-red font-semibold">
+              {`${locale === "ar" ? "جنيه" : "pound"} ${item.price}`}
             </span>
-            <span className="text-dark-4 line-through">
-              {`${locale === "ar" ? "ج.م" : "$"} ${item.price}`}
-            </span>
-          </>
-        ) : (
-          <span className="text-dark">
-            {`${locale === "ar" ? "ج.م" : "$"} ${item.price}`}
-          </span>
-        )}
-      </span>
+          )}
+        </span>
+      </div>
     </div>
   );
 };

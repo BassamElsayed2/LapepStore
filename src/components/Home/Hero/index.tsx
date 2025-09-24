@@ -45,19 +45,12 @@ const Hero = () => {
       : fallbackProducts;
 
   return (
-    <section className="overflow-hidden pb-10 lg:pb-12.5 xl:pb-15 pt-57.5 sm:pt-45 lg:pt-30 xl:pt-51.5 bg-[#E5EAF4]">
+    <section className="overflow-hidden ">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
         <div className="flex flex-wrap gap-5">
           <div className="xl:max-w-[757px] w-full">
             <div className="relative z-1 rounded-[10px] bg-white overflow-hidden">
               {/* <!-- bg shapes --> */}
-              <Image
-                src="/images/hero/hero-bg.png"
-                alt="hero bg shapes"
-                className="absolute right-0 bottom-0 -z-1"
-                width={534}
-                height={520}
-              />
 
               <HeroCarousel />
             </div>
@@ -68,11 +61,11 @@ const Hero = () => {
               {productsToShow.map((product, index) => (
                 <div
                   key={product.id}
-                  className="w-full relative rounded-[10px] bg-white p-4 sm:p-7.5"
+                  className="w-full relative rounded-[10px] bg-gradient-to-r from-[#fff] to-[#f4f1f1]  "
                 >
                   <div className="flex items-center justify-between gap-14">
-                    <div>
-                      <h2 className="max-w-[153px] font-semibold text-dark text-xl mb-20">
+                    <div className="p-2">
+                      <h2 className="max-w-[153px] font-semibold text-dark text-xl mb-10">
                         <Link href={`/shop-details?id=${product.id}`}>
                           {locale === "en" ? product.name_en : product.name_ar}
                         </Link>
@@ -84,19 +77,20 @@ const Hero = () => {
                         </p>
                         <span className="flex items-center gap-3">
                           <span className="font-medium text-heading-5 text-red">
-                            $
                             {product.offer_price !== null &&
                             product.offer_price !== undefined &&
                             product.offer_price > 0
                               ? product.offer_price
-                              : product.price}
+                              : product.price}{" "}
+                            {locale === "ar" ? "جنية" : "Pound"}
                           </span>
                           {product.offer_price !== null &&
                             product.offer_price !== undefined &&
                             product.offer_price > 0 &&
                             product.price > product.offer_price && (
                               <span className="font-medium text-2xl text-dark-4 line-through">
-                                ${product.price}
+                                {product.price}{" "}
+                                {locale === "ar" ? "جنية" : "Pound"}
                               </span>
                             )}
                         </span>
@@ -113,8 +107,8 @@ const Hero = () => {
                         alt={
                           locale === "en" ? product.name_en : product.name_ar
                         }
-                        width={123}
-                        height={161}
+                        width={153}
+                        height={170}
                         className="object-cover rounded"
                       />
                     </div>
@@ -127,7 +121,7 @@ const Hero = () => {
       </div>
 
       {/* <!-- Hero features --> */}
-      <HeroFeature />
+      {/* <HeroFeature /> */}
     </section>
   );
 };
