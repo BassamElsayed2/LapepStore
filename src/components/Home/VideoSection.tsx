@@ -3,7 +3,7 @@ import React from "react";
 
 const VideoSection = () => {
   return (
-    <section className="w-full">
+    <section className="w-full pt-20 sm:pt-24 lg:pt-28">
       <div className="relative w-full h-auto ">
         <video
           src="/lapip.mp4"
@@ -11,7 +11,7 @@ const VideoSection = () => {
           loop
           muted
           playsInline
-          className="w-full h-auto object-cover max-w-[1180px] mx-auto my-10 rounded-[30px]"
+          className="w-full h-auto object-cover max-w-[1180px] mx-auto mb-10 mt-10 lg:mt-0 md:rounded-[30px] "
         >
           Your browser does not support the video tag.
         </video>

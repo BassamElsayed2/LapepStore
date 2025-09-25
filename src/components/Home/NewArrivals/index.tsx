@@ -67,7 +67,7 @@ const NewArrival = () => {
 
           <Link
             href={`/${locale}/shop`}
-            className="inline-flex font-medium text-custom-sm py-2.5 px-7 rounded-md border-gray-3 border bg-gray-1 text-green-dark ease-out duration-200 hover:bg-green hover:text-white hover:border-transparent"
+            className="inline-flex font-medium text-custom-sm py-2.5 px-7 rounded-md border-gray-3 border text-gray-1 bg-green-dark ease-out duration-200 hover:bg-green hover:text-white hover:border-transparent"
           >
             {locale === "ar" ? "عرض الكل" : "View All"}
           </Link>

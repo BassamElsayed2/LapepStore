@@ -56,7 +56,7 @@ const CustomSelect = ({
 
   return (
     <div
-      className="dropdown-content custom-select relative"
+      className="dropdown-content custom-select relative hidden lg:block"
       style={{ width: "200px" }}
     >
       <div

@@ -23,50 +23,27 @@ const HeroCarousal = () => {
     queryFn: getLimitedTimeOfferProducts,
   });
 
-  // Fallback data if no products available
-  const fallbackProducts = [
-    {
-      id: 1,
-      name_en: "True Wireless Noise Cancelling Headphone",
-      name_ar: "سماعات لاسلكية مع إلغاء الضوضاء",
-      offer_price: 299,
-      price: 399,
-      image_url: "/images/hero/hero-01.png",
-    },
-    {
-      id: 2,
-      name_en: "iPhone 14 Plus & 14 Pro Max",
-      name_ar: "آيفون 14 بلس و 14 برو ماكس",
-      offer_price: 699,
-      price: 999,
-      image_url: "/images/hero/hero-02.png",
-    },
-  ];
-
-  const productsToShow =
-    limitedTimeProducts && limitedTimeProducts.length > 0
-      ? limitedTimeProducts.slice(0, 2)
-      : fallbackProducts;
+  const productsToShow = limitedTimeProducts?.slice(0, 2) || [];
 
   return (
     <Swiper
       spaceBetween={30}
       centeredSlides={true}
-      autoplay={{
-        delay: 2500,
-        disableOnInteraction: false,
-      }}
+      // autoplay={{
+      //   delay: 2500,
+      //   disableOnInteraction: false,
+      // }}
       pagination={{
         clickable: true,
       }}
-      modules={[Autoplay, Pagination]}
+      modules={[Pagination]}
       className="hero-carousel"
     >
       {productsToShow.map((product, index) => (
         <SwiperSlide key={product.id}>
           <div className="flex items-center justify-between pt-6 sm:pt-0 flex-col-reverse sm:flex-row bg-gradient-to-r from-[#fff] to-[#f4f1f1] ">
             <div
-              className={`max-w-[394px]  ${
+              className={`max-w-[394px] flex flex-col items-center justify-center md:block  ${
                 locale === "en"
                   ? "pl-4 sm:pl-7.5 lg:pl-12.5"
                   : "pr-4 sm:pr-7.5 lg:pr-12.5"
@@ -93,7 +70,7 @@ const HeroCarousal = () => {
                   </div>
                 )}
 
-              <h1 className="font-semibold text-dark text-xl sm:text-3xl mb-3">
+              <h1 className="font-semibold text-dark text-xl sm:text-3xl mb-3 sm:text-center mt-2">
                 <Link href={`/shop-details?id=${product.id}`}>
                   {locale === "en" ? product.name_en : product.name_ar}
                 </Link>
@@ -126,7 +103,7 @@ const HeroCarousal = () => {
 
               <Link
                 href={`/shop-details?id=${product.id}`}
-                className="inline-flex font-medium text-white text-custom-sm rounded-md bg-green-dark py-3 px-9 ease-out duration-200 hover:bg-green mt-10"
+                className="inline-flex font-medium text-white text-custom-sm rounded-md bg-green-dark py-3 px-9 ease-out duration-200 hover:bg-green mt-10 mb-10"
               >
                 {locale === "en" ? "Shop Now" : "تسوق الآن"}
               </Link>

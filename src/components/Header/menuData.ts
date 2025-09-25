@@ -31,6 +31,13 @@ export const menuData: Menu[] = [
   },
   {
     id: 5,
+    title_ar: "فروعنا",
+    title_en: "Branches",
+    newTab: false,
+    path: "/branches",
+  },
+  {
+    id: 6,
     title_ar: "اتصل بنا",
     title_en: "Contact",
     newTab: false,

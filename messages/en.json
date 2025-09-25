@@ -38,7 +38,8 @@
     "signIn": "Sign In",
     "recentlyViewed": "Recently Viewed",
     "support": "Support",
-    "contactUs": "Contact Us"
+    "contactUs": "Contact Us",
+    "complaintsSuggestions": "Complaints & Suggestions"
   },
   "menu": {
     "popular": "Popular",
@@ -283,5 +284,15 @@
     "error": "Error occurred",
     "tryAgain": "Try Again",
     "backToHome": "Back to Home"
+  },
+  "branches": {
+    "title": "Our Branches",
+    "description": "Find our store locations across the kingdom. Visit us for the best shopping experience.",
+    "noBranches": "No branches available at the moment.",
+    "viewOnMap": "View on Map",
+    "workingHours": "Working Hours",
+    "phone": "Phone",
+    "address": "Address",
+    "area": "Area"
   }
 }

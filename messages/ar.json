@@ -38,7 +38,8 @@
     "signIn": "تسجيل الدخول",
     "recentlyViewed": "شوهد مؤخراً",
     "support": "الدعم",
-    "contactUs": "اتصل بنا"
+    "contactUs": "اتصل بنا",
+    "complaintsSuggestions": "للشكوى والاقتراحات"
   },
   "menu": {
     "popular": "شائع",
@@ -283,5 +284,15 @@
     "error": "حدث خطأ",
     "tryAgain": "حاول مرة أخرى",
     "backToHome": "العودة للرئيسية"
+  },
+  "branches": {
+    "title": "فروعنا",
+    "description": "اكتشف مواقع متاجرنا في جميع أنحاء المملكة. زرنا للحصول على أفضل تجربة تسوق.",
+    "noBranches": "لا توجد فروع متاحة في الوقت الحالي.",
+    "viewOnMap": "عرض على الخريطة",
+    "workingHours": "ساعات العمل",
+    "phone": "الهاتف",
+    "address": "العنوان",
+    "area": "المنطقة"
   }
 }
