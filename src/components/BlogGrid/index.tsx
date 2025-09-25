@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 import BlogItem from "../Blog/BlogItem";

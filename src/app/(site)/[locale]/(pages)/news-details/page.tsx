@@ -3,10 +3,11 @@ import { Suspense } from "react";
 import NewsDetails from "@/components/NewsDetails";
 
 export async function generateMetadata({
-  params: { locale },
+  params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
+  const { locale } = await params;
   return {
     title:
       locale === "ar"
