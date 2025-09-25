@@ -94,8 +94,8 @@ const ProductItem = ({ item }: { item: Product }) => {
         </div>
       )}
 
-      <div className="relative overflow-hidden rounded-lg  h-[320px] flex items-end justify-center ">
-        <div className="relative w-full h-full max-w-[280px] max-h-[280px] px-4 py-4">
+      <div className="relative overflow-hidden rounded-t-md h-[320px] flex items-end justify-center ">
+        <div className="relative w-full h-full px-4 py-4">
           <Image
             src={
               item.imgs?.thumbnails?.[0] ||
@@ -106,8 +106,8 @@ const ProductItem = ({ item }: { item: Product }) => {
             }
             alt={locale === "ar" ? item.name_ar : item.name_en}
             fill
-            className="object-contain"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover"
+            // sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             onError={(e) => {
               // Fallback to a default image if the original fails to load
               e.currentTarget.src = "/images/products/product-1-bg-1.png";
@@ -168,7 +168,7 @@ const ProductItem = ({ item }: { item: Product }) => {
         </div>
       </div>
 
-      <div className="bg-[#F6F7FB] p-2 rounded-lg">
+      <div className="bg-[#F6F7FB] p-2 rounded-b-lg">
         <h3
           className="font-bold text-dark ease-out duration-200 hover:text-green mb-1.5 text-center "
           onClick={() => handleProductDetails()}
