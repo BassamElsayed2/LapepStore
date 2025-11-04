@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "NextCommerce | Nextjs E-commerce template",
-  description: "This is Home for NextCommerce Template",
+  title: "Lapip Store | لبيب ستور",
+  description: "Your trusted electronics store in Egypt",
 };
 
 export default function RootLayout({
@@ -10,9 +10,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
+  // Root layout should not have html/body when using locale layout
+  return children;
 }

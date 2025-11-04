@@ -5,8 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import shopData from "@/components/Shop/shopData";
 import { useLocale } from "next-intl";
-import { getBestSellerProducts } from "@/services/apiProducts";
-import { useQuery } from "@tanstack/react-query";
+import { useBestSellers } from "@/hooks/useProducts";
 
 const BestSeller = () => {
   const locale = useLocale();
@@ -15,10 +14,7 @@ const BestSeller = () => {
     data: products,
     isLoading,
     error,
-  } = useQuery({
-    queryKey: ["bestSellerProducts"],
-    queryFn: getBestSellerProducts,
-  });
+  } = useBestSellers();
 
   return (
     <section className="overflow-hidden">

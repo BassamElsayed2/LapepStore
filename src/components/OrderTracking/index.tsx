@@ -379,7 +379,7 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({ orderId }) => {
                 >
                   <div>
                     <h4 className="font-medium text-dark">
-                      {item.products?.title || `Product ${item.product_id}`}
+                      {item.product?.title || `Product ${item.product_id}`}
                     </h4>
                     <p className="text-sm text-dark-5">
                       {locale === "ar" ? "الكمية:" : "Quantity:"}{" "}

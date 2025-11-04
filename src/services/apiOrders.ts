@@ -1,4 +1,4 @@
-import supabase from "./supabase";
+import apiClient, { ApiResponse } from './apiClient';
 
 export interface OrderItem {
   product_id: string;
@@ -7,30 +7,28 @@ export interface OrderItem {
 }
 
 export interface CreateOrderData {
-  user_id: string | null; // Allow null for guest orders
+  user_id?: string | null;
   total_price: number;
   items: OrderItem[];
-  payment_method: "cod" | "paypal" | "stripe";
+  payment_method: 'easykash' | 'cod';
   notes?: string;
-  // Guest checkout fields
-  customer_first_name?: string;
-  customer_last_name?: string;
-  customer_phone?: string;
+  customer_first_name: string;
+  customer_last_name: string;
+  customer_phone: string;
   customer_email?: string | null;
-  customer_street_address?: string;
-  customer_city?: string;
+  customer_street_address: string;
+  customer_city: string;
   customer_state?: string;
   customer_postcode?: string;
 }
 
 export interface Order {
   id: string;
-  user_id: string | null; // Allow null for guest orders
-  status: "pending" | "paid" | "shipped" | "delivered" | "cancelled";
+  user_id?: string | null;
+  status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
   total_price: number;
   created_at: string;
   updated_at: string;
-  // Guest checkout fields
   customer_first_name?: string;
   customer_last_name?: string;
   customer_phone?: string;
@@ -45,7 +43,7 @@ export interface Order {
     product_id: string;
     quantity: number;
     price: number;
-    products?: {
+    product?: {
       id: string;
       title: string;
       price: number;
@@ -55,277 +53,157 @@ export interface Order {
   payments?: {
     id: string;
     payment_method: string;
+    payment_provider?: string;
     amount: number;
     payment_status: string;
     transaction_id?: string;
+    easykash_ref?: string;
+    voucher?: string;
     created_at: string;
   }[];
 }
 
-// إنشاء طلب جديد
+/**
+ * Create a new order
+ */
 export async function createOrder(
   orderData: CreateOrderData
 ): Promise<{ order: Order | null; error: string | null }> {
   try {
-    // إنشاء الطلب الأساسي
-    const orderInsertData: any = {
-      user_id: orderData.user_id,
-      total_price: orderData.total_price,
-      status: "pending",
+    const response = await apiClient.post<ApiResponse<Order>>('/orders', orderData);
+
+    if (response.data.success && response.data.data) {
+      return { order: response.data.data, error: null };
+    }
+
+    return {
+      order: null,
+      error: response.data.error || 'Failed to create order',
     };
-
-    // Add guest customer data if provided
-    if (orderData.customer_first_name) {
-      orderInsertData.customer_first_name = orderData.customer_first_name;
-    }
-    if (orderData.customer_last_name) {
-      orderInsertData.customer_last_name = orderData.customer_last_name;
-    }
-    if (orderData.customer_phone) {
-      orderInsertData.customer_phone = orderData.customer_phone;
-    }
-    if (orderData.customer_email) {
-      orderInsertData.customer_email = orderData.customer_email;
-    }
-    if (orderData.customer_street_address) {
-      orderInsertData.customer_street_address =
-        orderData.customer_street_address;
-    }
-    if (orderData.customer_city) {
-      orderInsertData.customer_city = orderData.customer_city;
-    }
-    if (orderData.customer_state) {
-      orderInsertData.customer_state = orderData.customer_state;
-    }
-    if (orderData.customer_postcode) {
-      orderInsertData.customer_postcode = orderData.customer_postcode;
-    }
-    if (orderData.notes) {
-      orderInsertData.order_notes = orderData.notes;
-    }
-
-    const { data: order, error: orderError } = await supabase
-      .from("orders")
-      .insert(orderInsertData)
-      .select()
-      .single();
-
-    if (orderError) {
-      console.error("Error creating order:", orderError);
-      return { order: null, error: orderError.message };
-    }
-
-    // إنشاء عناصر الطلب
-    const orderItems = orderData.items.map((item) => ({
-      order_id: order.id,
-      product_id: item.product_id,
-      quantity: item.quantity,
-      price: item.price,
-    }));
-
-    const { error: itemsError } = await supabase
-      .from("order_items")
-      .insert(orderItems);
-
-    if (itemsError) {
-      console.error("Error creating order items:", itemsError);
-      // حذف الطلب إذا فشل إنشاء العناصر
-      await supabase.from("orders").delete().eq("id", order.id);
-      return { order: null, error: itemsError.message };
-    }
-
-    // إنشاء سجل الدفع
-    const { error: paymentError } = await supabase.from("payments").insert({
-      order_id: order.id,
-      payment_method: orderData.payment_method,
-      amount: orderData.total_price,
-      payment_status:
-        orderData.payment_method === "cod" ? "pending" : "pending",
-    });
-
-    if (paymentError) {
-      console.error("Error creating payment record:", paymentError);
-      // يمكن المتابعة حتى لو فشل إنشاء سجل الدفع
-    }
-
-    return { order, error: null };
-  } catch (error) {
-    console.error("Unexpected error creating order:", error);
-    return { order: null, error: "حدث خطأ غير متوقع" };
+  } catch (error: any) {
+    console.error('Error creating order:', error);
+    return {
+      order: null,
+      error: error.message || 'حدث خطأ غير متوقع',
+    };
   }
 }
 
-// جلب طلبات المستخدم
+/**
+ * Get user orders (requires authentication)
+ */
 export async function getUserOrders(
-  userId: string
+  page?: number,
+  limit?: number
 ): Promise<{ orders: Order[] | null; error: string | null }> {
   try {
-    const { data: orders, error } = await supabase
-      .from("orders")
-      .select(
-        `
-        *,
-        order_items (
-          *,
-          products (
-            id,
-            title,
-            price,
-            images
-          )
-        ),
-        payments (*)
-      `
-      )
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
+    const response = await apiClient.get<ApiResponse<Order[]>>('/orders/my-orders', {
+      params: { page, limit },
+    });
 
-    if (error) {
-      console.error("Error fetching user orders:", error);
-      return { orders: null, error: error.message };
+    if (response.data.success) {
+      return { orders: response.data.data || [], error: null };
     }
 
-    return { orders: orders || [], error: null };
-  } catch (error) {
-    console.error("Unexpected error fetching orders:", error);
-    return { orders: null, error: "حدث خطأ غير متوقع" };
+    return {
+      orders: null,
+      error: response.data.error || 'Failed to fetch orders',
+    };
+  } catch (error: any) {
+    console.error('Error fetching user orders:', error);
+    return {
+      orders: null,
+      error: error.message || 'حدث خطأ غير متوقع',
+    };
   }
 }
 
-// جلب تفاصيل طلب محدد
+/**
+ * Get order by ID
+ */
 export async function getOrderById(
   orderId: string
 ): Promise<{ order: Order | null; error: string | null }> {
   try {
-    const { data: order, error } = await supabase
-      .from("orders")
-      .select(
-        `
-        *,
-        order_items (
-          *,
-          products (
-            id,
-            title,
-            price,
-            images
-          )
-        ),
-        payments (*)
-      `
-      )
-      .eq("id", orderId)
-      .single();
+    const response = await apiClient.get<ApiResponse<Order>>(`/orders/${orderId}`);
 
-    if (error) {
-      console.error("Error fetching order:", error);
-      return { order: null, error: error.message };
+    if (response.data.success && response.data.data) {
+      return { order: response.data.data, error: null };
     }
 
-    return { order, error: null };
-  } catch (error) {
-    console.error("Unexpected error fetching order:", error);
-    return { order: null, error: "حدث خطأ غير متوقع" };
+    return {
+      order: null,
+      error: response.data.error || 'Order not found',
+    };
+  } catch (error: any) {
+    console.error('Error fetching order:', error);
+    return {
+      order: null,
+      error: error.message || 'حدث خطأ غير متوقع',
+    };
   }
 }
 
-// جلب تفاصيل طلب محدد للتتبع العام (بدون الحاجة لمعرف المستخدم)
+/**
+ * Track order (public - no authentication required)
+ */
 export async function getOrderByIdForTracking(
   orderId: string
 ): Promise<{ order: Order | null; error: string | null }> {
   try {
-    // التحقق من صحة معرف الطلب
     if (!orderId || orderId.trim().length === 0) {
-      return { order: null, error: "رقم الطلب مطلوب" };
+      return { order: null, error: 'رقم الطلب مطلوب' };
     }
 
-    const { data: order, error } = await supabase
-      .from("orders")
-      .select(
-        `
-        *,
-        order_items (
-          *,
-          products (
-            id,
-            title,
-            price,
-            images
-          )
-        ),
-        payments (*)
-      `
-      )
-      .eq("id", orderId)
-      .single();
+    const response = await apiClient.get<ApiResponse<Order>>(`/orders/tracking/${orderId}`);
 
-    if (error) {
-      if (error.code === "PGRST116") {
-        // No rows returned
-        return { order: null, error: "لم يتم العثور على الطلب" };
-      }
-      console.error("Error fetching order for tracking:", error);
-      return { order: null, error: "حدث خطأ في جلب بيانات الطلب" };
+    if (response.data.success && response.data.data) {
+      return { order: response.data.data, error: null };
     }
 
-    return { order, error: null };
-  } catch (error) {
-    console.error("Unexpected error fetching order for tracking:", error);
-    return { order: null, error: "حدث خطأ غير متوقع" };
+    return {
+      order: null,
+      error: response.data.error || 'لم يتم العثور على الطلب',
+    };
+  } catch (error: any) {
+    console.error('Error fetching order for tracking:', error);
+    
+    if (error.message.includes('404')) {
+      return { order: null, error: 'لم يتم العثور على الطلب' };
+    }
+    
+    return {
+      order: null,
+      error: 'حدث خطأ في جلب بيانات الطلب',
+    };
   }
 }
 
-// تحديث حالة الطلب
+/**
+ * Update order status (Admin only)
+ */
 export async function updateOrderStatus(
   orderId: string,
-  status: "pending" | "paid" | "shipped" | "delivered" | "cancelled"
+  status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled'
 ): Promise<{ success: boolean; error: string | null }> {
   try {
-    const { error } = await supabase
-      .from("orders")
-      .update({
-        status,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", orderId);
+    const response = await apiClient.put<ApiResponse>(`/orders/${orderId}/status`, {
+      status,
+    });
 
-    if (error) {
-      console.error("Error updating order status:", error);
-      return { success: false, error: error.message };
+    if (response.data.success) {
+      return { success: true, error: null };
     }
 
-    return { success: true, error: null };
-  } catch (error) {
-    console.error("Unexpected error updating order status:", error);
-    return { success: false, error: "حدث خطأ غير متوقع" };
-  }
-}
-
-// تحديث حالة الدفع
-export async function updatePaymentStatus(
-  orderId: string,
-  paymentStatus: "pending" | "completed" | "failed",
-  transactionId?: string
-): Promise<{ success: boolean; error: string | null }> {
-  try {
-    const updateData: any = { payment_status: paymentStatus };
-    if (transactionId) {
-      updateData.transaction_id = transactionId;
-    }
-
-    const { error } = await supabase
-      .from("payments")
-      .update(updateData)
-      .eq("order_id", orderId);
-
-    if (error) {
-      console.error("Error updating payment status:", error);
-      return { success: false, error: error.message };
-    }
-
-    return { success: true, error: null };
-  } catch (error) {
-    console.error("Unexpected error updating payment status:", error);
-    return { success: false, error: "حدث خطأ غير متوقع" };
+    return {
+      success: false,
+      error: response.data.error || 'Failed to update order status',
+    };
+  } catch (error: any) {
+    console.error('Error updating order status:', error);
+    return {
+      success: false,
+      error: error.message || 'حدث خطأ غير متوقع',
+    };
   }
 }

@@ -9,20 +9,6 @@ export default function Loading() {
       aria-label="Loading content"
     >
       <div className="text-center">
-        {/* Logo */}
-        <div className="mb-8 flex justify-center">
-          <div className="relative">
-            <Image
-              src="/images/logo/logo.svg"
-              alt="NextCommerce Logo"
-              width={171}
-              height={36}
-              priority
-              className="h-auto w-auto max-w-[200px]"
-            />
-          </div>
-        </div>
-
         {/* Loading Spinner */}
         <div className="mb-6 flex justify-center">
           <div

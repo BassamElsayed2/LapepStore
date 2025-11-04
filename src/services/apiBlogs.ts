@@ -1,55 +1,38 @@
-import supabase from "./supabase";
+import apiClient, { ApiResponse } from './apiClient';
+import { BlogData } from '@/types/blogItem';
 
-export interface BlogData {
-  id: string;
-  title_ar: string;
-  title_en: string;
-  content_ar: string | null;
-  content_en: string;
-  user_id: string | null;
-  images: string[] | null;
-  created_at: string | null;
-  yt_code: string | null;
-  author: string | null;
-}
-
+/**
+ * Get all blogs
+ */
 export async function getBlogs(): Promise<BlogData[]> {
   try {
-    const { data, error } = await supabase
-      .from("blog")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const response = await apiClient.get<ApiResponse<BlogData[]>>('/content/blogs');
 
-    if (error) {
-      console.error("Error fetching blogs:", error);
-      throw error;
+    if (response.data.success) {
+      return response.data.data || [];
     }
 
-    return data || [];
-  } catch (error) {
-    console.error("Unexpected error fetching blogs:", error);
-    return [];
+    throw new Error(response.data.error || 'Failed to fetch blogs');
+  } catch (error: any) {
+    console.error('Error fetching blogs:', error);
+    throw error;
   }
 }
 
-export async function getBlogById(id: string): Promise<BlogData | null> {
+/**
+ * Get blog by ID
+ */
+export async function getBlogById(id: string): Promise<BlogData> {
   try {
-    const { data, error } = await supabase
-      .from("blog")
-      .select("*")
-      .eq("id", id)
-      .single();
+    const response = await apiClient.get<ApiResponse<BlogData>>(`/content/blogs/${id}`);
 
-    if (error) {
-      console.error("Error fetching blog:", error);
-      return null;
+    if (response.data.success && response.data.data) {
+      return response.data.data;
     }
 
-    return data;
-  } catch (error) {
-    console.error("Unexpected error fetching blog:", error);
-    return null;
+    throw new Error(response.data.error || 'Blog not found');
+  } catch (error: any) {
+    console.error('Error fetching blog:', error);
+    throw error;
   }
 }
-
-

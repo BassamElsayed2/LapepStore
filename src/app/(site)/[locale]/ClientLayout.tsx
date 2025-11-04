@@ -6,7 +6,7 @@ import CartSidebarModal from "@/components/Common/CartSidebarModal";
 import PreviewSliderModal from "@/components/Common/PreviewSlider";
 import ScrollToTop from "@/components/Common/ScrollToTop";
 import PreLoader from "@/components/Common/PreLoader";
-import Header from "@/components/Header";
+import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { CartModalProvider } from "@/app/context/CartSidebarModalContext";
 import { ModalProvider } from "@/app/context/QuickViewModalContext";
@@ -36,7 +36,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
           <CartModalProvider>
             <ModalProvider>
               <PreviewSliderProvider>
-                <Header />
+                <Navbar />
                 {children}
                 <QuickViewModal />
                 <CartSidebarModal />

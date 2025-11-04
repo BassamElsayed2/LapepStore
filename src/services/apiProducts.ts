@@ -1,57 +1,135 @@
-import supabase from "./supabase";
+import apiClient, { ApiResponse, PaginatedResponse } from "./apiClient";
+import { Product, ProductAttribute } from "@/types/product";
 
-export async function getProducts() {
-  const { data, error } = await supabase.from("products").select("*");
-
-  if (error) throw error;
-  return data;
+export interface GetProductsParams {
+  page?: number;
+  limit?: number;
+  categoryId?: string;
+  search?: string;
+  isBestSeller?: boolean;
+  limitedTimeOffer?: boolean;
 }
 
-export async function getProductById(id: string) {
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("id", id)
-    .single();
+/**
+ * Get all products with optional filters
+ */
+export async function getProducts(
+  params?: GetProductsParams
+): Promise<Product[]> {
+  try {
+    const response = await apiClient.get<
+      PaginatedResponse<Product> | ApiResponse<Product[]>
+    >("/products", { params });
 
-  if (error) {
+    if (response.data.success) {
+      // Handle both paginated and non-paginated responses
+      let products =
+        "pagination" in response.data
+          ? response.data.data
+          : response.data.data || [];
+
+      // Map images to image_url for backward compatibility
+      products = products.map((product: any) => ({
+        ...product,
+        image_url: product.images || product.image_url, // Ensure compatibility
+      }));
+
+      return products;
+    }
+
+    throw new Error(response.data.error || "Failed to fetch products");
+  } catch (error: any) {
+    console.error("Error fetching products:", error);
+    throw error;
+  }
+}
+
+/**
+ * Get product by ID
+ */
+export async function getProductById(id: string): Promise<Product> {
+  try {
+    const response = await apiClient.get<ApiResponse<Product>>(
+      `/products/${id}`
+    );
+
+    if (response.data.success && response.data.data) {
+      const product: any = response.data.data;
+      // Map images to image_url for backward compatibility
+      return {
+        ...product,
+        image_url: product.images || product.image_url,
+      };
+    }
+
+    throw new Error(response.data.error || "Product not found");
+  } catch (error: any) {
     console.error("Error fetching product:", error);
     throw error;
   }
+}
 
-  if (!data) {
-    throw new Error("Product not found");
+/**
+ * Get best seller products
+ */
+export async function getBestSellerProducts(): Promise<Product[]> {
+  try {
+    const response = await apiClient.get<ApiResponse<Product[]>>(
+      "/products/best-sellers"
+    );
+
+    if (response.data.success) {
+      const products = response.data.data || [];
+      // Map images to image_url for backward compatibility
+      return products.map((product: any) => ({
+        ...product,
+        image_url: product.images || product.image_url,
+      }));
+    }
+
+    throw new Error(response.data.error || "Failed to fetch best sellers");
+  } catch (error: any) {
+    console.error("Error fetching best sellers:", error);
+    throw error;
   }
-
-  return data;
 }
 
-export async function getBestSellerProducts() {
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("is_best_seller", true);
+/**
+ * Get limited time offer products
+ */
+export async function getLimitedTimeOfferProducts(): Promise<Product[]> {
+  try {
+    const response = await apiClient.get<ApiResponse<Product[]>>(
+      "/products/limited-offers"
+    );
 
-  if (error) throw error;
-  return data;
+    if (response.data.success) {
+      const products = response.data.data || [];
+      // Map images to image_url for backward compatibility
+      return products.map((product: any) => ({
+        ...product,
+        image_url: product.images || product.image_url,
+      }));
+    }
+
+    throw new Error(response.data.error || "Failed to fetch limited offers");
+  } catch (error: any) {
+    console.error("Error fetching limited offers:", error);
+    throw error;
+  }
 }
 
-export async function getLimitedTimeOfferProducts() {
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("limited_time_offer", true);
-
-  if (error) throw error;
-  return data;
-}
-
-export async function getProductAttributes(productId: string) {
-  const { data, error } = await supabase
-    .from("product_attributes")
-    .select("attribute_name, attribute_value")
-    .eq("product_id", productId);
-
-  if (error) throw error;
-  return data;
+/**
+ * Get product attributes
+ */
+export async function getProductAttributes(
+  productId: string
+): Promise<ProductAttribute[]> {
+  try {
+    const product = await getProductById(productId);
+    return product.attributes || [];
+  } catch (error: any) {
+    console.error("Error fetching product attributes:", error);
+    throw error;
+  }
 }

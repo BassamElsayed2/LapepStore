@@ -14,7 +14,7 @@ const SingleItem = ({ item }: { item: Category }) => {
     >
       <div className="max-w-[130px] w-full bg-[#F2F3F8] h-32.5 rounded-full flex items-center justify-center mb-4">
         <img
-          src={item.image_url}
+          src={item.image_url || "/images/category/default-category.png"}
           alt="Category"
           className="w-full h-full object-cover rounded-full"
         />

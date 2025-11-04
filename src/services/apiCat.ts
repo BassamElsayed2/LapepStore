@@ -1,8 +1,20 @@
-import supabase from "./supabase";
+import apiClient, { ApiResponse } from './apiClient';
+import { Category } from '@/types/category';
 
-export async function getCategories() {
-  const { data, error } = await supabase.from("categories").select("*");
+/**
+ * Get all categories
+ */
+export async function getCategories(): Promise<Category[]> {
+  try {
+    const response = await apiClient.get<ApiResponse<Category[]>>('/categories');
 
-  if (error) throw error;
-  return data;
+    if (response.data.success) {
+      return response.data.data || [];
+    }
+
+    throw new Error(response.data.error || 'Failed to fetch categories');
+  } catch (error: any) {
+    console.error('Error fetching categories:', error);
+    throw error;
+  }
 }

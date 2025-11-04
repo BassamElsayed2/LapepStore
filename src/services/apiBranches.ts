@@ -1,41 +1,20 @@
-import supabase from "./supabase";
-import { Branch } from "@/types/branch";
+import apiClient, { ApiResponse } from './apiClient';
+import { Branch } from '@/types/branch';
 
-export const getBranches = async (): Promise<Branch[]> => {
+/**
+ * Get all branches
+ */
+export async function getBranches(): Promise<Branch[]> {
   try {
-    const { data, error } = await supabase
-      .from("branches")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const response = await apiClient.get<ApiResponse<Branch[]>>('/content/branches');
 
-    if (error) {
-      console.error("Error fetching branches:", error);
-      throw error;
+    if (response.data.success) {
+      return response.data.data || [];
     }
 
-    return data || [];
-  } catch (error) {
-    console.error("Error in getBranches:", error);
+    throw new Error(response.data.error || 'Failed to fetch branches');
+  } catch (error: any) {
+    console.error('Error fetching branches:', error);
     throw error;
   }
-};
-
-export const getBranchById = async (id: number): Promise<Branch | null> => {
-  try {
-    const { data, error } = await supabase
-      .from("branches")
-      .select("*")
-      .eq("id", id)
-      .single();
-
-    if (error) {
-      console.error("Error fetching branch:", error);
-      throw error;
-    }
-
-    return data;
-  } catch (error) {
-    console.error("Error in getBranchById:", error);
-    throw error;
-  }
-};
+}

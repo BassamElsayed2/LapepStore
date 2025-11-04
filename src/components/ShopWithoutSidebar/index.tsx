@@ -8,11 +8,8 @@ import CustomSelect from "../ShopWithSidebar/CustomSelect";
 
 import shopData from "../Shop/shopData";
 import { useLocale } from "next-intl";
+import { useProducts, useLimitedOffers } from "@/hooks/useProducts";
 import { useQuery } from "@tanstack/react-query";
-import {
-  getProducts,
-  getLimitedTimeOfferProducts,
-} from "@/services/apiProducts";
 import { getCategories } from "@/services/apiCat";
 import { useSearchParams } from "next/navigation";
 
@@ -37,19 +34,13 @@ const ShopWithoutSidebar = () => {
     data: products,
     isLoading: productsLoading,
     error: productsError,
-  } = useQuery({
-    queryKey: ["products"],
-    queryFn: getProducts,
-  });
+  } = useProducts();
 
   const {
     data: limitedTimeProducts,
     isLoading: limitedTimeLoading,
     error: limitedTimeError,
-  } = useQuery({
-    queryKey: ["limitedTimeOfferProducts"],
-    queryFn: getLimitedTimeOfferProducts,
-  });
+  } = useLimitedOffers();
 
   const {
     data: categories,

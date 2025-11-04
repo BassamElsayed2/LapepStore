@@ -59,7 +59,7 @@ const nextConfig = {
   // Optimize builds
   productionBrowserSourceMaps: false,
   generateEtags: true,
-  // Headers for caching
+  // Headers for caching - تحسين الـ cache
   async headers() {
     return [
       {
@@ -81,6 +81,10 @@ const nextConfig = {
             key: "X-Content-Type-Options",
             value: "nosniff",
           },
+          {
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
+          },
         ],
       },
       {
@@ -97,7 +101,7 @@ const nextConfig = {
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
+            value: "public, max-age=86400, must-revalidate",
           },
         ],
       },

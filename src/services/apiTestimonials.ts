@@ -1,30 +1,29 @@
-import supabase from "./supabase";
+import apiClient, { ApiResponse } from './apiClient';
 
 export interface TestimonialData {
   id: number;
-  created_at: string;
   name_ar: string | null;
   name_en: string | null;
-  image: string | null;
   message_ar: string | null;
   message_en: string | null;
+  image: string | null;
+  created_at: string;
 }
 
+/**
+ * Get all testimonials
+ */
 export async function getTestimonials(): Promise<TestimonialData[]> {
   try {
-    const { data, error } = await supabase
-      .from("testemonial")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const response = await apiClient.get<ApiResponse<TestimonialData[]>>('/content/testimonials');
 
-    if (error) {
-      console.error("Error fetching testimonials:", error);
-      throw error;
+    if (response.data.success) {
+      return response.data.data || [];
     }
 
-    return data || [];
-  } catch (error) {
-    console.error("Unexpected error fetching testimonials:", error);
-    return [];
+    throw new Error(response.data.error || 'Failed to fetch testimonials');
+  } catch (error: any) {
+    console.error('Error fetching testimonials:', error);
+    throw error;
   }
 }

@@ -1,169 +1,110 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "@/app/i18n/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
-import supabase from "@/services/supabase";
-import { User, Session } from "@supabase/supabase-js";
 import toast from "react-hot-toast";
-import { generateUserGuid } from "@/utils/auth";
+import {
+  login as loginApi,
+  register as registerApi,
+  logout as logoutApi,
+  getCurrentUser,
+  updateProfile as updateProfileApi,
+  changePassword as changePasswordApi,
+  getStoredUser,
+  type User,
+  type RegisterData,
+  type LoginData,
+} from "@/services/apiAuth";
 
 interface AuthState {
   user: User | null;
-  session: Session | null;
   loading: boolean;
 }
 
 export const useAuth = () => {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
-    session: null,
     loading: true,
   });
   const router = useRouter();
   const locale = useLocale();
 
   useEffect(() => {
-    // Get initial session
-    const getInitialSession = async () => {
+    // Get initial user from localStorage
+    const initializeAuth = async () => {
       try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
+        const storedUser = getStoredUser();
+        
+        if (storedUser) {
+          // Set user immediately from localStorage (optimistic)
+          setAuthState({
+            user: storedUser,
+            loading: false,
+          });
+
+          // Verify user is still valid with backend (in background)
+          try {
+            const result = await Promise.race([
+              getCurrentUser(),
+              new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout')), 5000)
+              )
+            ]);
+            
+            if (result && (result as any).success && (result as any).data) {
+              setAuthState({
+                user: (result as any).data,
+                loading: false,
+              });
+            } else {
+              // Token expired or invalid, keep storedUser for now
+              console.warn('Failed to verify user, using cached user');
+            }
+          } catch (error) {
+            console.warn('Backend verification failed, using cached user:', error);
+            // Keep using storedUser, don't clear it
+          }
+        } else {
+          setAuthState({
+            user: null,
+            loading: false,
+          });
+        }
+      } catch (error) {
+        console.error("Error initializing auth:", error);
         setAuthState({
-          user: session?.user ?? null,
-          session,
+          user: null,
           loading: false,
         });
-      } catch (error) {
-        console.error("Error getting initial session:", error);
-        setAuthState((prev) => ({
-          ...prev,
-          loading: false,
-        }));
       }
     };
 
-    getInitialSession();
-
-    // Set a timeout to ensure loading doesn't stay true forever
-    const timeoutId = setTimeout(() => {
-      setAuthState((prev) => {
-        if (prev.loading) {
-          console.log("Loading timeout reached, setting loading to false");
-          return { ...prev, loading: false };
-        }
-        return prev;
-      });
-    }, 5000); // 5 seconds timeout
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event, session?.user?.email);
-      setAuthState({
-        user: session?.user ?? null,
-        session,
-        loading: false,
-      });
-
-      if (event === "SIGNED_IN" && session?.user) {
-        // Create profile record in profiles table
-        await createProfile(session.user);
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-      clearTimeout(timeoutId);
-    };
+    initializeAuth();
   }, []);
 
-  const createProfile = async (user: User) => {
+  const signUp = async (data: RegisterData) => {
     try {
-      // Generate unique GUID
-      const userGuid = generateUserGuid();
+      const result = await registerApi(data);
 
-      // Prepare profile data
-      const profileData: any = {
-        id: user.id,
-        full_name: user.user_metadata?.full_name || "",
-      };
+      if (result.success && result.data) {
+        setAuthState({
+          user: result.data.user,
+          loading: false,
+        });
 
-      // Try to add user_guid, but handle gracefully if column doesn't exist
-      try {
-        const { error } = await supabase
-          .from("profiles")
-          .insert([
-            {
-              ...profileData,
-              user_guid: userGuid,
-            },
-          ])
-          .select();
+        toast.success(
+          locale === "ar"
+            ? "تم إنشاء الحساب بنجاح!"
+            : "Account created successfully!"
+        );
 
-        if (error) {
-          if (error.code === "23505") {
-            // Duplicate key error - profile already exists
-            return;
-          } else if (
-            error.message.includes("user_guid") ||
-            error.code === "42703"
-          ) {
-            // Column doesn't exist, try without it
-            const { error: fallbackError } = await supabase
-              .from("profiles")
-              .insert([profileData])
-              .select();
-
-            if (fallbackError && fallbackError.code !== "23505") {
-              console.error("Error creating profile:", fallbackError);
-            }
-          } else {
-            console.error("Error creating profile:", error);
-          }
-        }
-      } catch (insertError) {
-        console.error("Error in profile creation:", insertError);
+        return { success: true, data: result.data };
+      } else {
+        toast.error(result.error || "Registration failed");
+        return { success: false, error: result.error };
       }
-    } catch (error) {
-      console.error("Error in createProfile function:", error);
-    }
-  };
-
-  const signUp = async (email: string, password: string, fullName: string) => {
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-          },
-        },
-      });
-
-      if (error) {
-        toast.error(error.message);
-        return { success: false, error };
-      }
-
-      if (data.user && !data.session) {
-        toast.success("Please check your email for verification link");
-        return { success: true, data };
-      }
-
-      if (data.session) {
-        toast.success("Account created successfully!");
-        // Try to create profile immediately for immediate session
-        await createProfile(data.session.user);
-        router.push(`/profile`);
-        return { success: true, data };
-      }
-
-      return { success: true, data };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Signup error:", error);
       toast.error("An error occurred during signup");
       return { success: false, error };
@@ -172,105 +113,127 @@ export const useAuth = () => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const result = await loginApi({ email, password });
 
-      if (error) {
-        toast.error(error.message);
-        return { success: false, error };
+      if (result.success && result.data) {
+        setAuthState({
+          user: result.data.user,
+          loading: false,
+        });
+
+        toast.success(
+          locale === "ar"
+            ? "تم تسجيل الدخول بنجاح!"
+            : "Signed in successfully!"
+        );
+
+        // Redirect to profile or home
+        router.push(`/${locale}/profile`);
+        return { success: true, data: result.data };
+      } else {
+        toast.error(
+          result.error ||
+            (locale === "ar"
+              ? "فشل تسجيل الدخول"
+              : "Login failed")
+        );
+        return { success: false, error: result.error };
       }
-
-      if (data.session) {
-        toast.success("Signed in successfully!");
-
-        // Check if user has a profile
-        try {
-          const { data: profileData, error: profileError } = await supabase
-            .from("profiles")
-            .select("id")
-            .eq("id", data.session.user.id)
-            .single();
-
-          if (profileError && profileError.code === "PGRST116") {
-            // No profile found
-            toast.error(
-              locale === "ar"
-                ? "يبدو أنك لم تقم بإنشاء حساب. الرجاء التسجيل أولاً."
-                : "It seems you haven't created an account. Please sign up first."
-            );
-
-            // Sign out the user
-            await supabase.auth.signOut();
-
-            // Note: signup page removed - redirect to home instead
-            router.push(`/`);
-            return { success: false, error: { message: "No profile found" } };
-          } else if (profileError) {
-            console.error("Error checking profile:", profileError);
-            // Continue to profile page even if there's an error
-          }
-        } catch (profileCheckError) {
-          console.error("Error in profile check:", profileCheckError);
-          // Continue to profile page even if there's an error
-        }
-
-        router.push(`/profile`);
-        return { success: true, data };
-      }
-
-      return { success: true, data };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Signin error:", error);
-      toast.error("An error occurred during signin");
+      toast.error(
+        locale === "ar"
+          ? "حدث خطأ أثناء تسجيل الدخول"
+          : "An error occurred during signin"
+      );
       return { success: false, error };
     }
   };
 
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        toast.error(error.message);
-        return { success: false, error };
-      }
+      await logoutApi();
 
-      toast.success("Signed out successfully");
-      // Redirect to home page
-      console.log("Signing out, redirecting to:", `/`);
-      router.push(`/`);
-      return { success: true };
+      setAuthState({
+        user: null,
+        loading: false,
+      });
+
+      toast.success(
+        locale === "ar"
+          ? "تم تسجيل الخروج بنجاح!"
+          : "Signed out successfully!"
+      );
+
+      router.push(`/${locale}`);
     } catch (error) {
       console.error("Signout error:", error);
-      toast.error("An error occurred during signout");
+      toast.error(
+        locale === "ar"
+          ? "حدث خطأ أثناء تسجيل الخروج"
+          : "An error occurred during signout"
+      );
+    }
+  };
+
+  const updateUserProfile = async (data: Partial<User>) => {
+    try {
+      const result = await updateProfileApi(data);
+
+      if (result.success && result.data) {
+        setAuthState({
+          user: result.data,
+          loading: false,
+        });
+
+        toast.success(
+          locale === "ar"
+            ? "تم تحديث الملف الشخصي بنجاح!"
+            : "Profile updated successfully!"
+        );
+
+        return { success: true, data: result.data };
+      } else {
+        toast.error(result.error || "Failed to update profile");
+        return { success: false, error: result.error };
+      }
+    } catch (error: any) {
+      console.error("Update profile error:", error);
+      toast.error("An error occurred while updating profile");
       return { success: false, error };
     }
   };
 
-  const redirectIfAuthenticated = useCallback(
-    (redirectTo: string = `/profile`) => {
-      if (authState.user && !authState.loading) {
-        console.log("Redirecting authenticated user to:", redirectTo);
-        router.push(redirectTo);
-        return true;
-      }
-      return false;
-    },
-    [authState.user, authState.loading, router]
-  );
+  const updatePassword = async (currentPassword: string, newPassword: string) => {
+    try {
+      const result = await changePasswordApi(currentPassword, newPassword);
 
-  // Removed requireAuth function since the app now supports guest checkout
-  // and no authentication is required for purchases
+      if (result.success) {
+        toast.success(
+          locale === "ar"
+            ? "تم تغيير كلمة المرور بنجاح!"
+            : "Password changed successfully!"
+        );
+
+        return { success: true };
+      } else {
+        toast.error(result.error || "Failed to change password");
+        return { success: false, error: result.error };
+      }
+    } catch (error: any) {
+      console.error("Change password error:", error);
+      toast.error("An error occurred while changing password");
+      return { success: false, error };
+    }
+  };
 
   return {
     user: authState.user,
-    session: authState.session,
     loading: authState.loading,
     signUp,
     signIn,
     signOut,
-    redirectIfAuthenticated,
-    // requireAuth removed - no longer needed for guest checkout
+    updateUserProfile,
+    updatePassword,
   };
 };

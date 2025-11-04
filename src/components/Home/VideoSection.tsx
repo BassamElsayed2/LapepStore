@@ -3,7 +3,7 @@ import React from "react";
 
 const VideoSection = () => {
   return (
-    <section className="w-full pt-20 sm:pt-24 lg:pt-28">
+    <section className="w-full pt-2">
       <div className="relative w-full h-auto ">
         <video
           src="/lapip.mp4"

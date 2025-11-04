@@ -1,0 +1,1098 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useLocale } from "next-intl";
+import Image from "next/image";
+import toast from "react-hot-toast";
+import { useAuth } from "@/hooks/useAuth";
+import Breadcrumb from "../Common/Breadcrumb";
+import {
+  getAddresses,
+  createAddress,
+  updateAddress,
+  deleteAddress,
+  setDefaultAddress,
+  type Address,
+  type CreateAddressData,
+} from "@/services/apiAddresses";
+
+const Profile = () => {
+  const locale = useLocale();
+  const { user, updateUserProfile, updatePassword, loading } = useAuth();
+  
+  const [activeTab, setActiveTab] = useState("profile");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Profile form data
+  const [profileData, setProfileData] = useState({
+    full_name: "",
+    email: "",
+    phone: "",
+  });
+  
+  // Password form data
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  // Addresses state
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [loadingAddresses, setLoadingAddresses] = useState(false);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const [addressFormData, setAddressFormData] = useState<CreateAddressData>({
+    street: "",
+    building: "",
+    floor: "",
+    apartment: "",
+    area: "",
+    city: "",
+    notes: "",
+    is_default: false,
+  });
+
+  // Initialize form with user data
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        full_name: user.full_name || user.name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+      });
+    }
+  }, [user]);
+
+  // Load addresses when tab changes to addresses
+  useEffect(() => {
+    if (activeTab === "addresses" && user) {
+      loadAddresses();
+    }
+  }, [activeTab, user]);
+
+  // Load addresses function
+  const loadAddresses = async () => {
+    setLoadingAddresses(true);
+    try {
+      const response = await getAddresses();
+      if (response.success && response.data) {
+        setAddresses(response.data);
+      } else {
+        toast.error(
+          locale === "ar"
+            ? "فشل في تحميل العناوين"
+            : "Failed to load addresses"
+        );
+      }
+    } catch (error) {
+      console.error("Error loading addresses:", error);
+    } finally {
+      setLoadingAddresses(false);
+    }
+  };
+
+  // Handle profile input change
+  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setProfileData({
+      ...profileData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // Handle password input change
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPasswordData({
+      ...passwordData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // Handle profile update
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!profileData.full_name || !profileData.email) {
+      toast.error(
+        locale === "ar"
+          ? "الرجاء ملء جميع الحقول المطلوبة"
+          : "Please fill all required fields"
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      const result = await updateUserProfile(profileData);
+      
+      if (result.success) {
+        toast.success(
+          locale === "ar"
+            ? "تم تحديث الملف الشخصي بنجاح"
+            : "Profile updated successfully"
+        );
+      }
+    } catch (error) {
+      console.error("Profile update error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle password change
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      toast.error(
+        locale === "ar"
+          ? "الرجاء ملء جميع حقول كلمة المرور"
+          : "Please fill all password fields"
+      );
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error(
+        locale === "ar"
+          ? "كلمة المرور الجديدة غير متطابقة"
+          : "New passwords do not match"
+      );
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      toast.error(
+        locale === "ar"
+          ? "يجب أن تكون كلمة المرور 6 أحرف على الأقل"
+          : "Password must be at least 6 characters"
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      const result = await updatePassword(
+        passwordData.currentPassword,
+        passwordData.newPassword
+      );
+      
+      if (result.success) {
+        toast.success(
+          locale === "ar"
+            ? "تم تغيير كلمة المرور بنجاح"
+            : "Password changed successfully"
+        );
+        // Clear password fields
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      }
+    } catch (error) {
+      console.error("Password change error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Address handlers
+  const handleAddressInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+    
+    setAddressFormData({
+      ...addressFormData,
+      [name]: type === "checkbox" ? checked : value,
+    });
+  };
+
+  const openAddressModal = (address?: Address) => {
+    if (address) {
+      setEditingAddress(address);
+      setAddressFormData({
+        street: address.street || "",
+        building: address.building || "",
+        floor: address.floor || "",
+        apartment: address.apartment || "",
+        area: address.area || "",
+        city: address.city || "",
+        notes: address.notes || "",
+        is_default: address.is_default || false,
+      });
+    } else {
+      setEditingAddress(null);
+      setAddressFormData({
+        street: "",
+        building: "",
+        floor: "",
+        apartment: "",
+        area: "",
+        city: "",
+        notes: "",
+        is_default: false,
+      });
+    }
+    setShowAddressModal(true);
+  };
+
+  const closeAddressModal = () => {
+    setShowAddressModal(false);
+    setEditingAddress(null);
+    setAddressFormData({
+      street: "",
+      building: "",
+      floor: "",
+      apartment: "",
+      area: "",
+      city: "",
+      notes: "",
+      is_default: false,
+    });
+  };
+
+  const handleAddressSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!addressFormData.street || !addressFormData.city) {
+      toast.error(
+        locale === "ar"
+          ? "الرجاء ملء الحقول المطلوبة (الشارع والمدينة)"
+          : "Please fill required fields (Street and City)"
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      let response;
+      if (editingAddress) {
+        response = await updateAddress(editingAddress.id, addressFormData);
+      } else {
+        response = await createAddress(addressFormData);
+      }
+
+      if (response.success) {
+        toast.success(
+          locale === "ar"
+            ? editingAddress
+              ? "تم تحديث العنوان بنجاح"
+              : "تم إضافة العنوان بنجاح"
+            : editingAddress
+            ? "Address updated successfully"
+            : "Address added successfully"
+        );
+        closeAddressModal();
+        loadAddresses();
+      } else {
+        toast.error(response.error || "Failed to save address");
+      }
+    } catch (error) {
+      console.error("Address save error:", error);
+      toast.error(
+        locale === "ar" ? "حدث خطأ أثناء حفظ العنوان" : "Error saving address"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteAddress = async (addressId: string) => {
+    if (
+      !confirm(
+        locale === "ar"
+          ? "هل أنت متأكد من حذف هذا العنوان؟"
+          : "Are you sure you want to delete this address?"
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const response = await deleteAddress(addressId);
+      if (response.success) {
+        toast.success(
+          locale === "ar"
+            ? "تم حذف العنوان بنجاح"
+            : "Address deleted successfully"
+        );
+        loadAddresses();
+      } else {
+        toast.error(response.error || "Failed to delete address");
+      }
+    } catch (error) {
+      console.error("Address delete error:", error);
+      toast.error(
+        locale === "ar" ? "حدث خطأ أثناء حذف العنوان" : "Error deleting address"
+      );
+    }
+  };
+
+  const handleSetDefaultAddress = async (addressId: string) => {
+    try {
+      const response = await setDefaultAddress(addressId);
+      if (response.success) {
+        toast.success(
+          locale === "ar"
+            ? "تم تعيين العنوان كافتراضي"
+            : "Address set as default"
+        );
+        loadAddresses();
+      } else {
+        toast.error(response.error || "Failed to set default address");
+      }
+    } catch (error) {
+      console.error("Set default error:", error);
+      toast.error(
+        locale === "ar"
+          ? "حدث خطأ أثناء تعيين العنوان الافتراضي"
+          : "Error setting default address"
+      );
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-xl text-dark mb-4">
+            {locale === "ar"
+              ? "الرجاء تسجيل الدخول لعرض ملفك الشخصي"
+              : "Please login to view your profile"}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Breadcrumb
+        title={locale === "ar" ? "الملف الشخصي" : "Profile"}
+        pages={[locale === "ar" ? "الملف الشخصي" : "profile"]}
+      />
+
+      <section className="overflow-hidden py-20 bg-gray-2">
+        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+          <div className="flex flex-col xl:flex-row gap-7.5">
+            {/* Sidebar */}
+            <div className="xl:max-w-[370px] w-full bg-white rounded-xl shadow-1">
+              <div className="flex xl:flex-col">
+                {/* User Info */}
+                <div className="hidden lg:flex flex-wrap items-center gap-5 py-6 px-4 sm:px-7.5 xl:px-9 border-r xl:border-r-0 xl:border-b border-gray-3">
+                  <div className="max-w-[64px] w-full h-16 rounded-full overflow-hidden bg-gray-3 flex items-center justify-center">
+                    {(user.full_name || user.name) ? (
+                      <span className="text-2xl font-bold text-blue">
+                        {(user.full_name || user.name || "U").charAt(0).toUpperCase()}
+                      </span>
+                    ) : (
+                      <svg
+                        className="fill-blue"
+                        width="32"
+                        height="32"
+                        viewBox="0 0 32 32"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M16 4C12.6863 4 10 6.68629 10 10C10 13.3137 12.6863 16 16 16C19.3137 16 22 13.3137 22 10C22 6.68629 19.3137 4 16 4ZM12 10C12 7.79086 13.7909 6 16 6C18.2091 6 20 7.79086 20 10C20 12.2091 18.2091 14 16 14C13.7909 14 12 12.2091 12 10Z"
+                        />
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M16 18C11.5817 18 7.99999 20.6863 7.99999 24C7.99999 25.1046 8.89542 26 9.99999 26H22C23.1046 26 24 25.1046 24 24C24 20.6863 20.4183 18 16 18ZM9.99999 24C9.99999 21.7909 12.6863 20 16 20C19.3137 20 22 21.7909 22 24H9.99999Z"
+                        />
+                      </svg>
+                    )}
+                  </div>
+
+                  <div>
+                    <p className="font-medium text-dark mb-0.5">
+                      {user.full_name || user.name || "User"}
+                    </p>
+                    <p className="text-custom-xs text-dark-5">
+                      {user.email}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Menu */}
+                <div className="p-4 sm:p-7.5 xl:p-9 w-full">
+                  <div className="flex flex-wrap xl:flex-nowrap xl:flex-col gap-4">
+                    <button
+                      onClick={() => setActiveTab("profile")}
+                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                        activeTab === "profile"
+                          ? "text-white bg-blue"
+                          : "text-dark-2 bg-gray-1"
+                      }`}
+                    >
+                      <svg
+                        className="fill-current"
+                        width="22"
+                        height="22"
+                        viewBox="0 0 22 22"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M10.9995 1.14581C8.59473 1.14581 6.64531 3.09524 6.64531 5.49998C6.64531 7.90472 8.59473 9.85415 10.9995 9.85415C13.4042 9.85415 15.3536 7.90472 15.3536 5.49998C15.3536 3.09524 13.4042 1.14581 10.9995 1.14581ZM8.02031 5.49998C8.02031 3.85463 9.35412 2.52081 10.9995 2.52081C12.6448 2.52081 13.9786 3.85463 13.9786 5.49998C13.9786 7.14533 12.6448 8.47915 10.9995 8.47915C9.35412 8.47915 8.02031 7.14533 8.02031 5.49998Z"
+                        />
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M10.9995 11.2291C8.87872 11.2291 6.92482 11.7112 5.47697 12.5256C4.05066 13.3279 2.97864 14.5439 2.97864 16.0416L2.97858 16.1351C2.97754 17.2001 2.97624 18.5368 4.14868 19.4916C4.7257 19.9614 5.53291 20.2956 6.6235 20.5163C7.71713 20.7377 9.14251 20.8541 10.9995 20.8541C12.8564 20.8541 14.2818 20.7377 15.3754 20.5163C16.466 20.2956 17.2732 19.9614 17.8503 19.4916C19.0227 18.5368 19.0214 17.2001 19.0204 16.1351L19.0203 16.0416C19.0203 14.5439 17.9483 13.3279 16.522 12.5256C15.0741 11.7112 13.1202 11.2291 10.9995 11.2291ZM4.35364 16.0416C4.35364 15.2612 4.92324 14.4147 6.15108 13.724C7.35737 13.0455 9.07014 12.6041 10.9995 12.6041C12.9288 12.6041 14.6416 13.0455 15.8479 13.724C17.0757 14.4147 17.6453 15.2612 17.6453 16.0416C17.6453 17.2405 17.6084 17.9153 16.982 18.4254C16.6424 18.702 16.0746 18.9719 15.1027 19.1686C14.1338 19.3648 12.8092 19.4791 10.9995 19.4791C9.18977 19.4791 7.86515 19.3648 6.89628 19.1686C5.92437 18.9719 5.35658 18.702 5.01693 18.4254C4.39059 17.9153 4.35364 17.2405 4.35364 16.0416Z"
+                        />
+                      </svg>
+                      {locale === "ar" ? "معلومات الملف الشخصي" : "Profile Information"}
+                    </button>
+
+                    <button
+                      onClick={() => setActiveTab("password")}
+                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                        activeTab === "password"
+                          ? "text-white bg-blue"
+                          : "text-dark-2 bg-gray-1"
+                      }`}
+                    >
+                      <svg
+                        className="fill-current"
+                        width="22"
+                        height="22"
+                        viewBox="0 0 22 22"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M5.95833 6.41667C5.95833 3.77183 8.10516 1.625 10.75 1.625C13.3948 1.625 15.5417 3.77183 15.5417 6.41667V8.25H16.5C17.9728 8.25 19.1667 9.44391 19.1667 10.9167V17.4167C19.1667 18.8894 17.9728 20.0833 16.5 20.0833H5C3.52724 20.0833 2.33333 18.8894 2.33333 17.4167V10.9167C2.33333 9.44391 3.52724 8.25 5 8.25H5.95833V6.41667ZM7.33333 8.25H14.1667V6.41667C14.1667 4.53198 12.6346 3 10.75 3C8.86535 3 7.33333 4.53198 7.33333 6.41667V8.25ZM5 9.625C4.28756 9.625 3.70833 10.2042 3.70833 10.9167V17.4167C3.70833 18.1291 4.28756 18.7083 5 18.7083H16.5C17.2124 18.7083 17.7917 18.1291 17.7917 17.4167V10.9167C17.7917 10.2042 17.2124 9.625 16.5 9.625H5Z"
+                        />
+                      </svg>
+                      {locale === "ar" ? "تغيير كلمة المرور" : "Change Password"}
+                    </button>
+
+                    <button
+                      onClick={() => setActiveTab("addresses")}
+                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                        activeTab === "addresses"
+                          ? "text-white bg-blue"
+                          : "text-dark-2 bg-gray-1"
+                      }`}
+                    >
+                      <svg
+                        className="fill-current"
+                        width="22"
+                        height="22"
+                        viewBox="0 0 22 22"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M11.0007 1.14581C10.3515 1.14581 9.7618 1.33173 9.12199 1.64287C8.50351 1.94363 7.78904 2.38706 6.8966 2.94094L5.00225 4.11664C4.15781 4.6407 3.48164 5.06035 2.96048 5.45947C2.42079 5.87278 2.00627 6.29371 1.70685 6.84072C1.40806 7.38659 1.2735 7.96741 1.20899 8.65396C1.14647 9.31931 1.14648 10.1329 1.14648 11.1533V12.6315C1.14647 14.3767 1.14646 15.7543 1.28646 16.8315C1.43008 17.9364 1.73183 18.8284 2.41365 19.5336C3.0986 20.2421 3.97024 20.5587 5.04929 20.7087C6.0951 20.8542 7.43075 20.8542 9.11401 20.8541H12.8872C14.5705 20.8542 15.9062 20.8542 16.952 20.7087C18.0311 20.5587 18.9027 20.2421 19.5877 19.5336C20.2695 18.8284 20.5712 17.9364 20.7148 16.8315C20.8548 15.7543 20.8548 14.3768 20.8548 12.6315V11.1533C20.8548 10.1329 20.8548 9.31929 20.7923 8.65396C20.7278 7.96741 20.5932 7.38659 20.2944 6.84072C19.995 6.29371 19.5805 5.87278 19.0408 5.45947C18.5197 5.06035 17.8435 4.64071 16.9991 4.11665L15.1047 2.94093C14.2123 2.38706 13.4978 1.94363 12.8793 1.64287C12.2395 1.33173 11.6498 1.14581 11.0007 1.14581Z"
+                        />
+                      </svg>
+                      {locale === "ar" ? "العناوين" : "Addresses"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="xl:max-w-[770px] w-full">
+              {/* Profile Tab */}
+              <div
+                className={`bg-white rounded-xl shadow-1 p-4 sm:p-8.5 ${
+                  activeTab === "profile" ? "block" : "hidden"
+                }`}
+              >
+                <h3 className="font-medium text-xl sm:text-2xl text-dark mb-7">
+                  {locale === "ar"
+                    ? "تحديث معلومات الملف الشخصي"
+                    : "Update Profile Information"}
+                </h3>
+
+                <form onSubmit={handleProfileSubmit}>
+                  <div className="mb-5">
+                    <label htmlFor="full_name" className="block mb-2.5 text-dark">
+                      {locale === "ar" ? "الاسم الكامل" : "Full Name"}{" "}
+                      <span className="text-red">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="full_name"
+                      id="full_name"
+                      value={profileData.full_name}
+                      onChange={handleProfileChange}
+                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      placeholder={
+                        locale === "ar" ? "أدخل اسمك الكامل" : "Enter your full name"
+                      }
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-5">
+                    <label htmlFor="email" className="block mb-2.5 text-dark">
+                      {locale === "ar" ? "البريد الإلكتروني" : "Email"}{" "}
+                      <span className="text-red">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      id="email"
+                      value={profileData.email}
+                      onChange={handleProfileChange}
+                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      placeholder={
+                        locale === "ar"
+                          ? "أدخل بريدك الإلكتروني"
+                          : "Enter your email"
+                      }
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-7">
+                    <label htmlFor="phone" className="block mb-2.5 text-dark">
+                      {locale === "ar" ? "رقم الهاتف" : "Phone Number"}
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      id="phone"
+                      value={profileData.phone}
+                      onChange={handleProfileChange}
+                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      placeholder={
+                        locale === "ar"
+                          ? "أدخل رقم هاتفك"
+                          : "Enter your phone number"
+                      }
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting
+                      ? locale === "ar"
+                        ? "جاري الحفظ..."
+                        : "Saving..."
+                      : locale === "ar"
+                      ? "حفظ التغييرات"
+                      : "Save Changes"}
+                  </button>
+                </form>
+              </div>
+
+              {/* Password Tab */}
+              <div
+                className={`bg-white rounded-xl shadow-1 p-4 sm:p-8.5 ${
+                  activeTab === "password" ? "block" : "hidden"
+                }`}
+              >
+                <h3 className="font-medium text-xl sm:text-2xl text-dark mb-7">
+                  {locale === "ar" ? "تغيير كلمة المرور" : "Change Password"}
+                </h3>
+
+                <form onSubmit={handlePasswordSubmit}>
+                  <div className="mb-5">
+                    <label
+                      htmlFor="currentPassword"
+                      className="block mb-2.5 text-dark"
+                    >
+                      {locale === "ar"
+                        ? "كلمة المرور الحالية"
+                        : "Current Password"}{" "}
+                      <span className="text-red">*</span>
+                    </label>
+                    <input
+                      type="password"
+                      name="currentPassword"
+                      id="currentPassword"
+                      value={passwordData.currentPassword}
+                      onChange={handlePasswordChange}
+                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      placeholder={
+                        locale === "ar"
+                          ? "أدخل كلمة المرور الحالية"
+                          : "Enter current password"
+                      }
+                      autoComplete="current-password"
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-5">
+                    <label htmlFor="newPassword" className="block mb-2.5 text-dark">
+                      {locale === "ar"
+                        ? "كلمة المرور الجديدة"
+                        : "New Password"}{" "}
+                      <span className="text-red">*</span>
+                    </label>
+                    <input
+                      type="password"
+                      name="newPassword"
+                      id="newPassword"
+                      value={passwordData.newPassword}
+                      onChange={handlePasswordChange}
+                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      placeholder={
+                        locale === "ar"
+                          ? "أدخل كلمة المرور الجديدة"
+                          : "Enter new password"
+                      }
+                      autoComplete="new-password"
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-5">
+                    <label
+                      htmlFor="confirmPassword"
+                      className="block mb-2.5 text-dark"
+                    >
+                      {locale === "ar"
+                        ? "تأكيد كلمة المرور الجديدة"
+                        : "Confirm New Password"}{" "}
+                      <span className="text-red">*</span>
+                    </label>
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      id="confirmPassword"
+                      value={passwordData.confirmPassword}
+                      onChange={handlePasswordChange}
+                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      placeholder={
+                        locale === "ar"
+                          ? "أعد إدخال كلمة المرور الجديدة"
+                          : "Re-enter new password"
+                      }
+                      autoComplete="new-password"
+                      required
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting
+                      ? locale === "ar"
+                        ? "جاري التغيير..."
+                        : "Changing..."
+                      : locale === "ar"
+                      ? "تغيير كلمة المرور"
+                      : "Change Password"}
+                  </button>
+                </form>
+              </div>
+
+              {/* Addresses Tab */}
+              <div
+                className={`bg-white rounded-xl shadow-1 p-4 sm:p-8.5 ${
+                  activeTab === "addresses" ? "block" : "hidden"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-7">
+                  <h3 className="font-medium text-xl sm:text-2xl text-dark">
+                    {locale === "ar" ? "عناويني" : "My Addresses"}
+                  </h3>
+                  <button
+                    onClick={() => openAddressModal()}
+                    className="inline-flex items-center gap-2 font-medium text-white bg-blue py-2.5 px-5 rounded-md ease-out duration-200 hover:bg-blue-dark"
+                  >
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="fill-current"
+                    >
+                      <path
+                        d="M10 4V16M4 10H16"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    {locale === "ar" ? "إضافة عنوان" : "Add Address"}
+                  </button>
+                </div>
+
+                {loadingAddresses ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue"></div>
+                  </div>
+                ) : addresses.length === 0 ? (
+                  <div className="text-center py-12 text-dark-5">
+                    <svg
+                      className="mx-auto mb-4 text-gray-3"
+                      width="80"
+                      height="80"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <circle
+                        cx="12"
+                        cy="9"
+                        r="2.5"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      />
+                    </svg>
+                    <p className="text-lg">
+                      {locale === "ar"
+                        ? "لا توجد عناوين محفوظة"
+                        : "No saved addresses"}
+                    </p>
+                    <p className="text-sm mt-2">
+                      {locale === "ar"
+                        ? "اضغط 'إضافة عنوان' لحفظ عنوان جديد"
+                        : "Click 'Add Address' to save a new address"}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {addresses.map((address) => (
+                      <div
+                        key={address.id}
+                        className={`relative border rounded-lg p-4 ${
+                          address.is_default
+                            ? "border-blue bg-blue/5"
+                            : "border-gray-3"
+                        }`}
+                      >
+                        {address.is_default && (
+                          <span className="absolute top-2 right-2 bg-blue text-white text-xs px-2 py-1 rounded">
+                            {locale === "ar" ? "افتراضي" : "Default"}
+                          </span>
+                        )}
+
+                        <div className="mb-4 mt-6">
+                          <p className="font-medium text-dark mb-2">
+                            {address.street}
+                          </p>
+                          <div className="text-sm text-dark-5 space-y-1">
+                            {address.building && (
+                              <p>
+                                {locale === "ar" ? "المبنى: " : "Building: "}
+                                {address.building}
+                              </p>
+                            )}
+                            {address.floor && (
+                              <p>
+                                {locale === "ar" ? "الدور: " : "Floor: "}
+                                {address.floor}
+                              </p>
+                            )}
+                            {address.apartment && (
+                              <p>
+                                {locale === "ar" ? "الشقة: " : "Apartment: "}
+                                {address.apartment}
+                              </p>
+                            )}
+                            {address.area && (
+                              <p>
+                                {locale === "ar" ? "المنطقة: " : "Area: "}
+                                {address.area}
+                              </p>
+                            )}
+                            <p className="font-medium">
+                              {address.city}
+                            </p>
+                            {address.notes && (
+                              <p className="text-xs mt-2 italic">
+                                {address.notes}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2 mt-4 pt-4 border-t border-gray-3">
+                          {!address.is_default && (
+                            <button
+                              onClick={() => handleSetDefaultAddress(address.id)}
+                              className="flex-1 text-xs sm:text-sm py-2 px-3 border border-blue text-blue rounded hover:bg-blue hover:text-white duration-200"
+                            >
+                              {locale === "ar" ? "اجعله افتراضي" : "Set Default"}
+                            </button>
+                          )}
+                          <button
+                            onClick={() => openAddressModal(address)}
+                            className="flex-1 text-xs sm:text-sm py-2 px-3 border border-gray-3 text-dark rounded hover:bg-gray-1 duration-200"
+                          >
+                            {locale === "ar" ? "تعديل" : "Edit"}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteAddress(address.id)}
+                            className="flex-1 text-xs sm:text-sm py-2 px-3 border border-red text-red rounded hover:bg-red hover:text-white duration-200"
+                          >
+                            {locale === "ar" ? "حذف" : "Delete"}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Address Modal */}
+      {showAddressModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-3 p-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-medium text-dark">
+                  {editingAddress
+                    ? locale === "ar"
+                      ? "تعديل العنوان"
+                      : "Edit Address"
+                    : locale === "ar"
+                    ? "إضافة عنوان جديد"
+                    : "Add New Address"}
+                </h3>
+                <button
+                  onClick={closeAddressModal}
+                  className="text-dark-5 hover:text-dark"
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M18 6L6 18M6 6L18 18"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <form onSubmit={handleAddressSubmit} className="p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {/* Street */}
+                <div className="sm:col-span-2">
+                  <label htmlFor="street" className="block mb-2.5 text-dark">
+                    {locale === "ar" ? "الشارع" : "Street"}{" "}
+                    <span className="text-red">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="street"
+                    id="street"
+                    value={addressFormData.street}
+                    onChange={handleAddressInputChange}
+                    className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    placeholder={
+                      locale === "ar" ? "مثال: شارع التحرير" : "e.g., Tahrir Street"
+                    }
+                    required
+                  />
+                </div>
+
+                {/* Building */}
+                <div>
+                  <label htmlFor="building" className="block mb-2.5 text-dark">
+                    {locale === "ar" ? "المبنى" : "Building"}
+                  </label>
+                  <input
+                    type="text"
+                    name="building"
+                    id="building"
+                    value={addressFormData.building}
+                    onChange={handleAddressInputChange}
+                    className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    placeholder={locale === "ar" ? "مثال: 123" : "e.g., 123"}
+                  />
+                </div>
+
+                {/* Floor */}
+                <div>
+                  <label htmlFor="floor" className="block mb-2.5 text-dark">
+                    {locale === "ar" ? "الدور/الطابق" : "Floor"}
+                  </label>
+                  <input
+                    type="text"
+                    name="floor"
+                    id="floor"
+                    value={addressFormData.floor}
+                    onChange={handleAddressInputChange}
+                    className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    placeholder={locale === "ar" ? "مثال: 3" : "e.g., 3"}
+                  />
+                </div>
+
+                {/* Apartment */}
+                <div>
+                  <label htmlFor="apartment" className="block mb-2.5 text-dark">
+                    {locale === "ar" ? "الشقة" : "Apartment"}
+                  </label>
+                  <input
+                    type="text"
+                    name="apartment"
+                    id="apartment"
+                    value={addressFormData.apartment}
+                    onChange={handleAddressInputChange}
+                    className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    placeholder={locale === "ar" ? "مثال: 5" : "e.g., 5"}
+                  />
+                </div>
+
+                {/* Area */}
+                <div>
+                  <label htmlFor="area" className="block mb-2.5 text-dark">
+                    {locale === "ar" ? "المنطقة" : "Area"}
+                  </label>
+                  <input
+                    type="text"
+                    name="area"
+                    id="area"
+                    value={addressFormData.area}
+                    onChange={handleAddressInputChange}
+                    className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    placeholder={
+                      locale === "ar" ? "مثال: المعادي" : "e.g., Maadi"
+                    }
+                  />
+                </div>
+
+                {/* City */}
+                <div className="sm:col-span-2">
+                  <label htmlFor="city" className="block mb-2.5 text-dark">
+                    {locale === "ar" ? "المدينة" : "City"}{" "}
+                    <span className="text-red">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="city"
+                    id="city"
+                    value={addressFormData.city}
+                    onChange={handleAddressInputChange}
+                    className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    placeholder={
+                      locale === "ar" ? "مثال: القاهرة" : "e.g., Cairo"
+                    }
+                    required
+                  />
+                </div>
+
+                {/* Notes */}
+                <div className="sm:col-span-2">
+                  <label htmlFor="notes" className="block mb-2.5 text-dark">
+                    {locale === "ar" ? "ملاحظات إضافية" : "Additional Notes"}
+                  </label>
+                  <textarea
+                    name="notes"
+                    id="notes"
+                    value={addressFormData.notes}
+                    onChange={handleAddressInputChange}
+                    rows={3}
+                    className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 resize-none"
+                    placeholder={
+                      locale === "ar"
+                        ? "أي ملاحظات إضافية للعنوان..."
+                        : "Any additional notes about the address..."
+                    }
+                  />
+                </div>
+
+                {/* Set as Default */}
+                <div className="sm:col-span-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      name="is_default"
+                      checked={addressFormData.is_default}
+                      onChange={handleAddressInputChange}
+                      className="w-5 h-5 rounded border-gray-3 text-blue focus:ring-2 focus:ring-blue/20"
+                    />
+                    <span className="text-dark">
+                      {locale === "ar"
+                        ? "اجعل هذا العنوان افتراضياً"
+                        : "Set as default address"}
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-7 pt-6 border-t border-gray-3">
+                <button
+                  type="button"
+                  onClick={closeAddressModal}
+                  className="flex-1 py-3 px-6 border border-gray-3 text-dark rounded-md hover:bg-gray-1 duration-200"
+                >
+                  {locale === "ar" ? "إلغاء" : "Cancel"}
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 py-3 px-6 bg-blue text-white rounded-md hover:bg-blue-dark duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting
+                    ? locale === "ar"
+                      ? "جاري الحفظ..."
+                      : "Saving..."
+                    : editingAddress
+                    ? locale === "ar"
+                      ? "تحديث العنوان"
+                      : "Update Address"
+                    : locale === "ar"
+                    ? "إضافة العنوان"
+                    : "Add Address"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default Profile;
+

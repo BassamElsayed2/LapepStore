@@ -3,7 +3,15 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useLocale } from "next-intl";
 import Link from "next/link";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination, Navigation, EffectFade } from "swiper/modules";
 import { getBanners, Banner } from "@/services/apiBanners";
+
+// Import Swiper styles
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
+import "swiper/css/effect-fade";
 
 const PromoBanner = () => {
   const locale = useLocale();
@@ -47,101 +55,131 @@ const PromoBanner = () => {
     );
   }
 
+  // Main banner (first banner)
+  const mainBanner = banners.length > 0 ? banners[0] : null;
+  const sideBanners = banners.length > 1 ? banners.slice(1, 3) : [];
+
   return (
     <section className="overflow-hidden py-20">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-        {/* <!-- promo banner big --> */}
-        <div className="flex flex-col md:flex-row items-center gap-8 rounded-lg bg-[#F5F5F7] px-2 mb-7.5">
-          <div
-            className={`flex-1 pr-3 pt-5 ${isRTL ? "text-right" : "text-left"}`}
+        {/* Main Promo Banner with Slider */}
+        <div className="mb-7.5 rounded-lg bg-gradient-to-r from-[#F5F5F7] to-[#E8E8EA] overflow-hidden">
+          <Swiper
+            modules={[Autoplay, Pagination, Navigation, EffectFade]}
+            spaceBetween={0}
+            slidesPerView={1}
+            effect="fade"
+            autoplay={{
+              delay: 5000,
+              disableOnInteraction: false,
+            }}
+            pagination={{
+              clickable: true,
+              dynamicBullets: true,
+            }}
+            navigation={true}
+            loop={true}
+            className="promo-swiper"
+            dir={isRTL ? "rtl" : "ltr"}
           >
-            {banners.length > 0 ? (
-              <>
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: isRTL
-                      ? banners[0].desc_ar || ""
-                      : banners[0].desc_en || "",
-                  }}
-                  className="force-font"
-                />
-                <Link
-                  href={`/${currentLocale}/shop`}
-                  className="inline-flex font-medium text-custom-sm text-white bg-blue py-[11px] px-9.5 rounded-md ease-out duration-200 hover:bg-blue-dark mt-7.5"
-                >
-                  {isRTL ? "شراء الآن" : "Buy Now"}
-                </Link>
-              </>
+            {mainBanner ? (
+              <SwiperSlide>
+                <div className="flex flex-col md:flex-row items-center gap-8 px-6 py-8 min-h-[350px]">
+                  <div
+                    className={`flex-1 ${isRTL ? "text-right" : "text-left"} animate-fade-in-up`}
+                  >
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: isRTL
+                          ? mainBanner.desc_ar || ""
+                          : mainBanner.desc_en || "",
+                      }}
+                      className="force-font mb-6"
+                    />
+                    <Link
+                      href={`/${currentLocale}/shop`}
+                      className="inline-flex font-medium text-custom-sm text-white bg-blue py-[11px] px-9.5 rounded-md ease-out duration-200 hover:bg-blue-dark hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
+                    >
+                      {isRTL ? "شراء الآن" : "Buy Now"}
+                    </Link>
+                  </div>
+
+                  <div className="flex-shrink-0 animate-fade-in-right">
+                    <img
+                      src={mainBanner.image || "/images/promo/promo-01.png"}
+                      alt="promo img"
+                      className="h-[300px] w-[450px] object-contain transform hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                </div>
+              </SwiperSlide>
             ) : (
-              <>
-                <span className="block font-medium text-xl text-dark mb-3">
-                  {isRTL ? "آيفون 14 بلس" : "Apple iPhone 14 Plus"}
-                </span>
-
-                <h2 className="font-bold text-xl lg:text-heading-4 xl:text-heading-3 text-dark mb-5">
-                  {isRTL ? "أعلى 30% تخفيض" : "UP TO 30% OFF"}
-                </h2>
-
-                <p>
-                  {isRTL
-                    ? "آيفون 14 لديه نفس المعالج السريع المتطور الذي يستخدم في آيفون 13 برو، A15 Bionic، مع GPU 5-core يقوم بتشغيل جميع الميزات الأحدث."
-                    : "iPhone 14 has the same superspeedy chip that's in iPhone 13 Pro, A15 Bionic, with a 5‑core GPU, powers all the latest features."}
-                </p>
-
-                <Link
-                  href={`/${currentLocale}/shop`}
-                  className="inline-flex font-medium text-custom-sm text-white bg-blue py-[11px] px-9.5 rounded-md ease-out duration-200 hover:bg-blue-dark mt-7.5"
-                >
-                  {isRTL ? "شراء الآن" : "Buy Now"}
-                </Link>
-              </>
+              <SwiperSlide>
+                <div className="flex flex-col md:flex-row items-center gap-8 px-6 py-8 min-h-[350px]">
+                  <div className={`flex-1 ${isRTL ? "text-right" : "text-left"}`}>
+                    <span className="block font-medium text-xl text-dark mb-3">
+                      {isRTL ? "آيفون 14 بلس" : "Apple iPhone 14 Plus"}
+                    </span>
+                    <h2 className="font-bold text-xl lg:text-heading-4 xl:text-heading-3 text-dark mb-5">
+                      {isRTL ? "أعلى 30% تخفيض" : "UP TO 30% OFF"}
+                    </h2>
+                    <p className="mb-6">
+                      {isRTL
+                        ? "آيفون 14 لديه نفس المعالج السريع المتطور الذي يستخدم في آيفون 13 برو، A15 Bionic، مع GPU 5-core يقوم بتشغيل جميع الميزات الأحدث."
+                        : "iPhone 14 has the same superspeedy chip that's in iPhone 13 Pro, A15 Bionic, with a 5‑core GPU, powers all the latest features."}
+                    </p>
+                    <Link
+                      href={`/${currentLocale}/shop`}
+                      className="inline-flex font-medium text-custom-sm text-white bg-blue py-[11px] px-9.5 rounded-md ease-out duration-200 hover:bg-blue-dark hover:shadow-lg"
+                    >
+                      {isRTL ? "شراء الآن" : "Buy Now"}
+                    </Link>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <img
+                      src="/images/promo/promo-01.png"
+                      alt="promo img"
+                      className="h-[300px] w-[450px]"
+                    />
+                  </div>
+                </div>
+              </SwiperSlide>
             )}
-          </div>
-
-          <div className="flex-shrink-0">
-            <img
-              src={
-                banners.length > 0 && banners[0].image
-                  ? banners[0].image
-                  : "/images/promo/promo-01.png"
-              }
-              alt="promo img"
-              className="h-[300px] w-[450px]"
-            />
-          </div>
+          </Swiper>
         </div>
 
+        {/* Side Banners Grid */}
         <div className="grid gap-7.5 grid-cols-1 lg:grid-cols-2">
-          {/* <!-- promo banner small --> */}
-          <div className="flex flex-col md:flex-row items-center gap-4 rounded-lg bg-[#DBF4F3] py-2 px-2">
-            <div className="flex-shrink-0">
+          {/* Promo Banner Small 1 */}
+          <div className="group flex flex-col md:flex-row items-center gap-4 rounded-lg bg-[#DBF4F3] py-4 px-4 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+            <div className="flex-shrink-0 overflow-hidden rounded-lg">
               <Image
                 src={
-                  banners.length > 1 && banners[1].image
-                    ? banners[1].image
-                    : "/images/promo/promo-02.png"
+                  sideBanners[0]?.image || "/images/promo/promo-02.png"
                 }
                 alt="promo img"
                 width={241}
                 height={241}
+                className="transform group-hover:scale-110 transition-transform duration-300"
               />
             </div>
 
             <div
-              className={`flex-1 pb-5 ${isRTL ? "text-right" : "text-left"}`}
+              className={`flex-1 ${isRTL ? "text-right" : "text-left"}`}
             >
-              {banners.length > 1 ? (
+              {sideBanners[0] ? (
                 <>
                   <div
                     dangerouslySetInnerHTML={{
                       __html: isRTL
-                        ? banners[1].desc_ar || ""
-                        : banners[1].desc_en || "",
+                        ? sideBanners[0].desc_ar || ""
+                        : sideBanners[0].desc_en || "",
                     }}
+                    className="mb-4"
                   />
                   <Link
                     href={`/${currentLocale}/shop`}
-                    className="inline-flex font-medium text-custom-sm text-white bg-teal py-2.5 px-8.5 rounded-md ease-out duration-200 hover:bg-teal-dark mt-9"
+                    className="inline-flex font-medium text-custom-sm text-white bg-teal py-2.5 px-8.5 rounded-md ease-out duration-200 hover:bg-teal-dark hover:shadow-md transform hover:-translate-x-1 transition-all"
                   >
                     {isRTL ? "الآن" : "Grab Now"}
                   </Link>
@@ -153,18 +191,15 @@ const PromoBanner = () => {
                       ? "مشاية متحركة قابلة للطي"
                       : "Foldable Motorised Treadmill"}
                   </span>
-
                   <h2 className="font-bold text-xl lg:text-heading-4 text-dark mb-2.5">
                     {isRTL ? "تمرين في المنزل" : "Workout At Home"}
                   </h2>
-
-                  <p className="font-semibold text-custom-1 text-teal">
+                  <p className="font-semibold text-custom-1 text-teal mb-4">
                     {isRTL ? "تخفيض 20%" : "Flat 20% off"}
                   </p>
-
                   <Link
                     href={`/${currentLocale}/shop`}
-                    className="inline-flex font-medium text-custom-sm text-white bg-teal py-2.5 px-8.5 rounded-md ease-out duration-200 hover:bg-teal-dark mt-9"
+                    className="inline-flex font-medium text-custom-sm text-white bg-teal py-2.5 px-8.5 rounded-md ease-out duration-200 hover:bg-teal-dark"
                   >
                     {isRTL ? "الآن" : "Grab Now"}
                   </Link>
@@ -173,36 +208,36 @@ const PromoBanner = () => {
             </div>
           </div>
 
-          {/* <!-- promo banner small --> */}
-          <div className="flex flex-col md:flex-row items-center gap-4 rounded-lg bg-[#FFECE1] py-2 px-2">
-            <div className="flex-shrink-0">
+          {/* Promo Banner Small 2 */}
+          <div className="group flex flex-col md:flex-row items-center gap-4 rounded-lg bg-[#FFECE1] py-4 px-4 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+            <div className="flex-shrink-0 overflow-hidden rounded-lg">
               <Image
                 src={
-                  banners.length > 2 && banners[2].image
-                    ? banners[2].image
-                    : "/images/promo/promo-03.png"
+                  sideBanners[1]?.image || "/images/promo/promo-03.png"
                 }
                 alt="promo img"
                 width={200}
                 height={200}
+                className="transform group-hover:scale-110 transition-transform duration-300"
               />
             </div>
 
             <div
-              className={`flex-1 pb-5 ${isRTL ? "text-right" : "text-left"}`}
+              className={`flex-1 ${isRTL ? "text-right" : "text-left"}`}
             >
-              {banners.length > 2 ? (
+              {sideBanners[1] ? (
                 <>
                   <div
                     dangerouslySetInnerHTML={{
                       __html: isRTL
-                        ? banners[2].desc_ar || ""
-                        : banners[2].desc_en || "",
+                        ? sideBanners[1].desc_ar || ""
+                        : sideBanners[1].desc_en || "",
                     }}
+                    className="mb-4"
                   />
                   <Link
                     href={`/${currentLocale}/shop`}
-                    className="inline-flex font-medium text-custom-sm text-white bg-orange py-2.5 px-8.5 rounded-md ease-out duration-200 hover:bg-orange-dark mt-7.5"
+                    className="inline-flex font-medium text-custom-sm text-white bg-orange py-2.5 px-8.5 rounded-md ease-out duration-200 hover:bg-orange-dark hover:shadow-md transform hover:-translate-x-1 transition-all"
                   >
                     {isRTL ? "شراء الآن" : "Buy Now"}
                   </Link>
@@ -212,20 +247,17 @@ const PromoBanner = () => {
                   <span className="block text-lg text-dark mb-1.5">
                     {isRTL ? "ساعة آبل أولترا" : "Apple Watch Ultra"}
                   </span>
-
                   <h2 className="font-bold text-xl lg:text-heading-4 text-dark mb-2.5">
                     {isRTL ? "خصم يصل إلى 40%" : "Up to 40% off"}
                   </h2>
-
-                  <p className="max-w-[285px] text-custom-sm">
+                  <p className="max-w-[285px] text-custom-sm mb-4">
                     {isRTL
                       ? "الحالة الفضائية من التيتانيوم تحقق التوازن المثالي لكل شيء."
                       : "The aerospace-grade titanium case strikes the perfect balance of everything."}
                   </p>
-
                   <Link
                     href={`/${currentLocale}/shop`}
-                    className="inline-flex font-medium text-custom-sm text-white bg-orange py-2.5 px-8.5 rounded-md ease-out duration-200 hover:bg-orange-dark mt-7.5"
+                    className="inline-flex font-medium text-custom-sm text-white bg-orange py-2.5 px-8.5 rounded-md ease-out duration-200 hover:bg-orange-dark"
                   >
                     {isRTL ? "شراء الآن" : "Buy Now"}
                   </Link>
@@ -235,6 +267,62 @@ const PromoBanner = () => {
           </div>
         </div>
       </div>
+
+      <style jsx global>{`
+        .promo-swiper .swiper-button-next,
+        .promo-swiper .swiper-button-prev {
+          color: #0063F7;
+          background: white;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .promo-swiper .swiper-button-next:after,
+        .promo-swiper .swiper-button-prev:after {
+          font-size: 16px;
+        }
+
+        .promo-swiper .swiper-pagination-bullet {
+          background: #0063F7;
+          opacity: 0.5;
+        }
+
+        .promo-swiper .swiper-pagination-bullet-active {
+          opacity: 1;
+        }
+
+        @keyframes fade-in-up {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes fade-in-right {
+          from {
+            opacity: 0;
+            transform: translateX(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        .animate-fade-in-up {
+          animation: fade-in-up 0.6s ease-out;
+        }
+
+        .animate-fade-in-right {
+          animation: fade-in-right 0.6s ease-out 0.2s both;
+        }
+      `}</style>
     </section>
   );
 };

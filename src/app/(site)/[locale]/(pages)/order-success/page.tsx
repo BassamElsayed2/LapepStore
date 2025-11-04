@@ -374,7 +374,7 @@ const OrderSuccessPage = () => {
                       >
                         <div>
                           <h4 className="font-medium text-dark">
-                            {item.products?.title ||
+                            {item.product?.title ||
                               `Product ${item.product_id}`}
                           </h4>
                           <p className="text-sm text-dark-5">

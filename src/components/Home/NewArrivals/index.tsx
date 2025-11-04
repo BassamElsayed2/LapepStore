@@ -5,11 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ProductItem from "@/components/Common/ProductItem";
 import shopData from "@/components/Shop/shopData";
-import {
-  getProducts,
-  getLimitedTimeOfferProducts,
-} from "@/services/apiProducts";
-import { useQuery } from "@tanstack/react-query";
+import { useProducts, useLimitedOffers } from "@/hooks/useProducts";
 import { useLocale } from "next-intl";
 
 const NewArrival = () => {
@@ -18,19 +14,13 @@ const NewArrival = () => {
     data: products,
     isLoading,
     error,
-  } = useQuery({
-    queryKey: ["products"],
-    queryFn: getProducts,
-  });
+  } = useProducts();
 
   const {
     data: limitedTimeProducts,
     isLoading: limitedTimeLoading,
     error: limitedTimeError,
-  } = useQuery({
-    queryKey: ["limitedTimeOfferProducts"],
-    queryFn: getLimitedTimeOfferProducts,
-  });
+  } = useLimitedOffers();
 
   return (
     <section className="overflow-hidden pt-15">
