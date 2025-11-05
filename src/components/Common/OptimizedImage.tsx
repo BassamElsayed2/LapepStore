@@ -79,9 +79,7 @@ export default function OptimizedImage({
     );
   }
 
-  const imageProps = fill
-    ? { fill: true }
-    : { width: width!, height: height! };
+  const imageProps = fill ? { fill: true } : { width: width!, height: height! };
 
   return (
     <div className={cn("relative", containerClassName)}>
