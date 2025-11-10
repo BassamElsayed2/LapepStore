@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useLocale } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,21 +16,33 @@ import {
   type Address,
   type CreateAddressData,
 } from "@/services/apiAddresses";
+import { getUserOrders, type Order } from "@/services/apiOrders";
 
 const Profile = () => {
   const locale = useLocale();
+  const searchParams = useSearchParams();
   const { user, updateUserProfile, updatePassword, loading } = useAuth();
-  
-  const [activeTab, setActiveTab] = useState("profile");
+
+  // Get tab from URL or default to "profile"
+  const tabFromUrl = searchParams.get("tab") || "profile";
+  const [activeTab, setActiveTab] = useState(tabFromUrl);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Profile form data
+  const [refreshingProfile, setRefreshingProfile] = useState(false);
+
+  // Update activeTab when URL changes
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab && ["profile", "password", "addresses", "orders"].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
+  // Profile form data (from profiles table)
   const [profileData, setProfileData] = useState({
     full_name: "",
-    email: "",
     phone: "",
   });
-  
+
   // Password form data
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -53,12 +66,49 @@ const Profile = () => {
     is_default: false,
   });
 
-  // Initialize form with user data
+  // Orders state
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+
+  // Refresh profile data from server when component mounts
+  useEffect(() => {
+    let isMounted = true;
+
+    const refreshProfileData = async () => {
+      setRefreshingProfile(true);
+      try {
+        const { getCurrentUser } = await import("@/services/apiAuth");
+        const result = await getCurrentUser();
+
+        if (result.success && result.data && isMounted) {
+          // Update profile form with fresh data
+          setProfileData({
+            full_name: result.data.full_name || result.data.name || "",
+            phone: result.data.phone || "",
+          });
+        }
+      } catch (error) {
+        console.error("Failed to refresh profile data:", error);
+      } finally {
+        if (isMounted) {
+          setRefreshingProfile(false);
+        }
+      }
+    };
+
+    refreshProfileData();
+
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
+
+  // Initialize form with user data from profiles table
   useEffect(() => {
     if (user) {
       setProfileData({
         full_name: user.full_name || user.name || "",
-        email: user.email || "",
         phone: user.phone || "",
       });
     }
@@ -69,6 +119,15 @@ const Profile = () => {
     if (activeTab === "addresses" && user) {
       loadAddresses();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, user]);
+
+  // Load orders when tab changes to orders
+  useEffect(() => {
+    if (activeTab === "orders" && user) {
+      loadOrders();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, user]);
 
   // Load addresses function
@@ -80,15 +139,32 @@ const Profile = () => {
         setAddresses(response.data);
       } else {
         toast.error(
-          locale === "ar"
-            ? "فشل في تحميل العناوين"
-            : "Failed to load addresses"
+          locale === "ar" ? "فشل في تحميل العناوين" : "Failed to load addresses"
         );
       }
     } catch (error) {
       console.error("Error loading addresses:", error);
     } finally {
       setLoadingAddresses(false);
+    }
+  };
+
+  // Load orders function
+  const loadOrders = async () => {
+    setLoadingOrders(true);
+    try {
+      const response = await getUserOrders();
+      if (response.orders) {
+        setOrders(response.orders);
+      } else {
+        toast.error(
+          locale === "ar" ? "فشل في تحميل الطلبات" : "Failed to load orders"
+        );
+      }
+    } catch (error) {
+      console.error("Error loading orders:", error);
+    } finally {
+      setLoadingOrders(false);
     }
   };
 
@@ -108,24 +184,24 @@ const Profile = () => {
     });
   };
 
-  // Handle profile update
+  // Handle profile update (updates profiles table)
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!profileData.full_name || !profileData.email) {
+
+    if (!profileData.full_name) {
       toast.error(
         locale === "ar"
-          ? "الرجاء ملء جميع الحقول المطلوبة"
-          : "Please fill all required fields"
+          ? "الرجاء إدخال الاسم الكامل"
+          : "Please enter your full name"
       );
       return;
     }
 
     setIsSubmitting(true);
-    
+
     try {
       const result = await updateUserProfile(profileData);
-      
+
       if (result.success) {
         toast.success(
           locale === "ar"
@@ -143,8 +219,12 @@ const Profile = () => {
   // Handle password change
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+
+    if (
+      !passwordData.currentPassword ||
+      !passwordData.newPassword ||
+      !passwordData.confirmPassword
+    ) {
       toast.error(
         locale === "ar"
           ? "الرجاء ملء جميع حقول كلمة المرور"
@@ -172,13 +252,13 @@ const Profile = () => {
     }
 
     setIsSubmitting(true);
-    
+
     try {
       const result = await updatePassword(
         passwordData.currentPassword,
         passwordData.newPassword
       );
-      
+
       if (result.success) {
         toast.success(
           locale === "ar"
@@ -205,7 +285,7 @@ const Profile = () => {
   ) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
-    
+
     setAddressFormData({
       ...addressFormData,
       [name]: type === "checkbox" ? checked : value,
@@ -395,9 +475,11 @@ const Profile = () => {
                 {/* User Info */}
                 <div className="hidden lg:flex flex-wrap items-center gap-5 py-6 px-4 sm:px-7.5 xl:px-9 border-r xl:border-r-0 xl:border-b border-gray-3">
                   <div className="max-w-[64px] w-full h-16 rounded-full overflow-hidden bg-gray-3 flex items-center justify-center">
-                    {(user.full_name || user.name) ? (
+                    {user.full_name || user.name ? (
                       <span className="text-2xl font-bold text-blue">
-                        {(user.full_name || user.name || "U").charAt(0).toUpperCase()}
+                        {(user.full_name || user.name || "U")
+                          .charAt(0)
+                          .toUpperCase()}
                       </span>
                     ) : (
                       <svg
@@ -426,9 +508,7 @@ const Profile = () => {
                     <p className="font-medium text-dark mb-0.5">
                       {user.full_name || user.name || "User"}
                     </p>
-                    <p className="text-custom-xs text-dark-5">
-                      {user.email}
-                    </p>
+                    <p className="text-custom-xs text-dark-5">{user.email}</p>
                   </div>
                 </div>
 
@@ -462,7 +542,9 @@ const Profile = () => {
                           d="M10.9995 11.2291C8.87872 11.2291 6.92482 11.7112 5.47697 12.5256C4.05066 13.3279 2.97864 14.5439 2.97864 16.0416L2.97858 16.1351C2.97754 17.2001 2.97624 18.5368 4.14868 19.4916C4.7257 19.9614 5.53291 20.2956 6.6235 20.5163C7.71713 20.7377 9.14251 20.8541 10.9995 20.8541C12.8564 20.8541 14.2818 20.7377 15.3754 20.5163C16.466 20.2956 17.2732 19.9614 17.8503 19.4916C19.0227 18.5368 19.0214 17.2001 19.0204 16.1351L19.0203 16.0416C19.0203 14.5439 17.9483 13.3279 16.522 12.5256C15.0741 11.7112 13.1202 11.2291 10.9995 11.2291ZM4.35364 16.0416C4.35364 15.2612 4.92324 14.4147 6.15108 13.724C7.35737 13.0455 9.07014 12.6041 10.9995 12.6041C12.9288 12.6041 14.6416 13.0455 15.8479 13.724C17.0757 14.4147 17.6453 15.2612 17.6453 16.0416C17.6453 17.2405 17.6084 17.9153 16.982 18.4254C16.6424 18.702 16.0746 18.9719 15.1027 19.1686C14.1338 19.3648 12.8092 19.4791 10.9995 19.4791C9.18977 19.4791 7.86515 19.3648 6.89628 19.1686C5.92437 18.9719 5.35658 18.702 5.01693 18.4254C4.39059 17.9153 4.35364 17.2405 4.35364 16.0416Z"
                         />
                       </svg>
-                      {locale === "ar" ? "معلومات الملف الشخصي" : "Profile Information"}
+                      {locale === "ar"
+                        ? "معلومات الملف الشخصي"
+                        : "Profile Information"}
                     </button>
 
                     <button
@@ -487,7 +569,9 @@ const Profile = () => {
                           d="M5.95833 6.41667C5.95833 3.77183 8.10516 1.625 10.75 1.625C13.3948 1.625 15.5417 3.77183 15.5417 6.41667V8.25H16.5C17.9728 8.25 19.1667 9.44391 19.1667 10.9167V17.4167C19.1667 18.8894 17.9728 20.0833 16.5 20.0833H5C3.52724 20.0833 2.33333 18.8894 2.33333 17.4167V10.9167C2.33333 9.44391 3.52724 8.25 5 8.25H5.95833V6.41667ZM7.33333 8.25H14.1667V6.41667C14.1667 4.53198 12.6346 3 10.75 3C8.86535 3 7.33333 4.53198 7.33333 6.41667V8.25ZM5 9.625C4.28756 9.625 3.70833 10.2042 3.70833 10.9167V17.4167C3.70833 18.1291 4.28756 18.7083 5 18.7083H16.5C17.2124 18.7083 17.7917 18.1291 17.7917 17.4167V10.9167C17.7917 10.2042 17.2124 9.625 16.5 9.625H5Z"
                         />
                       </svg>
-                      {locale === "ar" ? "تغيير كلمة المرور" : "Change Password"}
+                      {locale === "ar"
+                        ? "تغيير كلمة المرور"
+                        : "Change Password"}
                     </button>
 
                     <button
@@ -514,6 +598,46 @@ const Profile = () => {
                       </svg>
                       {locale === "ar" ? "العناوين" : "Addresses"}
                     </button>
+
+                    <button
+                      onClick={() => setActiveTab("orders")}
+                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                        activeTab === "orders"
+                          ? "text-white bg-blue"
+                          : "text-dark-2 bg-gray-1"
+                      }`}
+                    >
+                      <svg
+                        className="fill-current"
+                        width="22"
+                        height="22"
+                        viewBox="0 0 22 22"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M2.75 5.95833C2.75 5.07789 3.46205 4.36583 4.34249 4.36583H17.6575C18.538 4.36583 19.25 5.07789 19.25 5.95833V16.0417C19.25 16.9221 18.538 17.6342 17.6575 17.6342H4.34249C3.46205 17.6342 2.75 16.9221 2.75 16.0417V5.95833ZM4.34249 5.86583C4.29048 5.86583 4.25 5.90631 4.25 5.95833V16.0417C4.25 16.0937 4.29048 16.1342 4.34249 16.1342H17.6575C17.7095 16.1342 17.75 16.0937 17.75 16.0417V5.95833C17.75 5.90631 17.7095 5.86583 17.6575 5.86583H4.34249Z"
+                        />
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M7.33325 2.75C7.74747 2.75 8.08325 3.08579 8.08325 3.5V5.5C8.08325 5.91421 7.74747 6.25 7.33325 6.25C6.91904 6.25 6.58325 5.91421 6.58325 5.5V3.5C6.58325 3.08579 6.91904 2.75 7.33325 2.75Z"
+                        />
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M14.6667 2.75C15.0809 2.75 15.4167 3.08579 15.4167 3.5V5.5C15.4167 5.91421 15.0809 6.25 14.6667 6.25C14.2525 6.25 13.9167 5.91421 13.9167 5.5V3.5C13.9167 3.08579 14.2525 2.75 14.6667 2.75Z"
+                        />
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M2.75 8.70825C2.75 8.29404 3.08579 7.95825 3.5 7.95825H18.5C18.9142 7.95825 19.25 8.29404 19.25 8.70825C19.25 9.12247 18.9142 9.45825 18.5 9.45825H3.5C3.08579 9.45825 2.75 9.12247 2.75 8.70825Z"
+                        />
+                      </svg>
+                      {locale === "ar" ? "الطلبات" : "Orders"}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -527,15 +651,97 @@ const Profile = () => {
                   activeTab === "profile" ? "block" : "hidden"
                 }`}
               >
-                <h3 className="font-medium text-xl sm:text-2xl text-dark mb-7">
-                  {locale === "ar"
-                    ? "تحديث معلومات الملف الشخصي"
-                    : "Update Profile Information"}
-                </h3>
+                <div className="flex items-center justify-between mb-7">
+                  <h3 className="font-medium text-xl sm:text-2xl text-dark">
+                    {locale === "ar"
+                      ? "تحديث معلومات الملف الشخصي"
+                      : "Update Profile Information"}
+                  </h3>
+                  {refreshingProfile ? (
+                    <div className="flex items-center gap-2 text-sm text-blue">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue"></div>
+                      <span>
+                        {locale === "ar" ? "جاري التحميل..." : "Loading..."}
+                      </span>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setRefreshingProfile(true);
+                        try {
+                          const { getCurrentUser } = await import(
+                            "@/services/apiAuth"
+                          );
+                          const result = await getCurrentUser();
+
+                          if (result.success && result.data) {
+                            setProfileData({
+                              full_name:
+                                result.data.full_name || result.data.name || "",
+                              phone: result.data.phone || "",
+                            });
+                            toast.success(
+                              locale === "ar"
+                                ? "تم تحديث البيانات"
+                                : "Data refreshed"
+                            );
+                          }
+                        } catch (error) {
+                          console.error("Failed to refresh:", error);
+                        } finally {
+                          setRefreshingProfile(false);
+                        }
+                      }}
+                      className="text-sm text-blue hover:text-blue-dark flex items-center gap-1"
+                      title={
+                        locale === "ar"
+                          ? "إعادة تحميل البيانات"
+                          : "Refresh data"
+                      }
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
 
                 <form onSubmit={handleProfileSubmit}>
+                  {/* Email - Read Only (من جدول users) */}
                   <div className="mb-5">
-                    <label htmlFor="full_name" className="block mb-2.5 text-dark">
+                    <label htmlFor="email" className="block mb-2.5 text-dark">
+                      {locale === "ar" ? "البريد الإلكتروني" : "Email"}
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      value={user?.email || ""}
+                      disabled
+                      className="rounded-md border border-gray-3 bg-gray-2 text-dark-5 w-full py-2.5 px-5 outline-none cursor-not-allowed"
+                    />
+                    <p className="text-xs text-dark-5 mt-1">
+                      {locale === "ar"
+                        ? "لا يمكن تعديل البريد الإلكتروني"
+                        : "Email cannot be changed"}
+                    </p>
+                  </div>
+
+                  {/* Full Name - من جدول profiles */}
+                  <div className="mb-5">
+                    <label
+                      htmlFor="full_name"
+                      className="block mb-2.5 text-dark"
+                    >
                       {locale === "ar" ? "الاسم الكامل" : "Full Name"}{" "}
                       <span className="text-red">*</span>
                     </label>
@@ -547,33 +753,15 @@ const Profile = () => {
                       onChange={handleProfileChange}
                       className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                       placeholder={
-                        locale === "ar" ? "أدخل اسمك الكامل" : "Enter your full name"
-                      }
-                      required
-                    />
-                  </div>
-
-                  <div className="mb-5">
-                    <label htmlFor="email" className="block mb-2.5 text-dark">
-                      {locale === "ar" ? "البريد الإلكتروني" : "Email"}{" "}
-                      <span className="text-red">*</span>
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      id="email"
-                      value={profileData.email}
-                      onChange={handleProfileChange}
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
-                      placeholder={
                         locale === "ar"
-                          ? "أدخل بريدك الإلكتروني"
-                          : "Enter your email"
+                          ? "أدخل اسمك الكامل"
+                          : "Enter your full name"
                       }
                       required
                     />
                   </div>
 
+                  {/* Phone - من جدول profiles */}
                   <div className="mb-7">
                     <label htmlFor="phone" className="block mb-2.5 text-dark">
                       {locale === "ar" ? "رقم الهاتف" : "Phone Number"}
@@ -648,10 +836,11 @@ const Profile = () => {
                   </div>
 
                   <div className="mb-5">
-                    <label htmlFor="newPassword" className="block mb-2.5 text-dark">
-                      {locale === "ar"
-                        ? "كلمة المرور الجديدة"
-                        : "New Password"}{" "}
+                    <label
+                      htmlFor="newPassword"
+                      className="block mb-2.5 text-dark"
+                    >
+                      {locale === "ar" ? "كلمة المرور الجديدة" : "New Password"}{" "}
                       <span className="text-red">*</span>
                     </label>
                     <input
@@ -833,9 +1022,7 @@ const Profile = () => {
                                 {address.area}
                               </p>
                             )}
-                            <p className="font-medium">
-                              {address.city}
-                            </p>
+                            <p className="font-medium">{address.city}</p>
                             {address.notes && (
                               <p className="text-xs mt-2 italic">
                                 {address.notes}
@@ -847,10 +1034,14 @@ const Profile = () => {
                         <div className="flex gap-2 mt-4 pt-4 border-t border-gray-3">
                           {!address.is_default && (
                             <button
-                              onClick={() => handleSetDefaultAddress(address.id)}
+                              onClick={() =>
+                                handleSetDefaultAddress(address.id)
+                              }
                               className="flex-1 text-xs sm:text-sm py-2 px-3 border border-blue text-blue rounded hover:bg-blue hover:text-white duration-200"
                             >
-                              {locale === "ar" ? "اجعله افتراضي" : "Set Default"}
+                              {locale === "ar"
+                                ? "اجعله افتراضي"
+                                : "Set Default"}
                             </button>
                           )}
                           <button
@@ -865,6 +1056,173 @@ const Profile = () => {
                           >
                             {locale === "ar" ? "حذف" : "Delete"}
                           </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Orders Tab */}
+              <div
+                className={`bg-white rounded-xl shadow-1 p-4 sm:p-8.5 ${
+                  activeTab === "orders" ? "block" : "hidden"
+                }`}
+              >
+                <h3 className="font-medium text-xl sm:text-2xl text-dark mb-7">
+                  {locale === "ar" ? "طلباتي" : "My Orders"}
+                </h3>
+
+                {loadingOrders ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue"></div>
+                  </div>
+                ) : orders.length === 0 ? (
+                  <div className="text-center py-12 text-dark-5">
+                    <svg
+                      className="mx-auto mb-4 text-gray-3"
+                      width="80"
+                      height="80"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        fill="none"
+                      />
+                    </svg>
+                    <p className="text-lg">
+                      {locale === "ar" ? "لا توجد طلبات بعد" : "No orders yet"}
+                    </p>
+                    <p className="text-sm mt-2">
+                      {locale === "ar"
+                        ? "ابدأ التسوق الآن لتقديم طلبك الأول"
+                        : "Start shopping to place your first order"}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {orders.map((order) => (
+                      <div
+                        key={order.id}
+                        className="border border-gray-3 rounded-lg p-4 hover:border-blue transition-colors"
+                      >
+                        {/* Order Header */}
+                        <div className="flex flex-wrap items-center justify-between mb-4 pb-4 border-b border-gray-3">
+                          <div>
+                            <p className="text-sm text-dark-5">
+                              {locale === "ar" ? "رقم الطلب:" : "Order #"}
+                            </p>
+                            <p className="font-medium text-dark">
+                              {order.id.substring(0, 8)}...
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm text-dark-5">
+                              {locale === "ar" ? "التاريخ:" : "Date:"}
+                            </p>
+                            <p className="text-sm text-dark">
+                              {new Date(order.created_at).toLocaleDateString(
+                                locale === "ar" ? "ar-EG" : "en-US"
+                              )}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Order Items */}
+                        <div className="space-y-2 mb-4">
+                          {order.order_items?.map((item, index) => (
+                            <div
+                              key={item.id || index}
+                              className="flex items-center gap-3"
+                            >
+                              <div className="w-12 h-12 bg-gray-2 rounded overflow-hidden flex-shrink-0">
+                                {item.product?.images &&
+                                item.product.images[0] ? (
+                                  <Image
+                                    src={item.product.images[0]}
+                                    alt={item.product.title || "Product"}
+                                    width={48}
+                                    height={48}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full bg-gray-2" />
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-dark truncate">
+                                  {item.product?.title || locale === "ar"
+                                    ? "منتج"
+                                    : "Product"}
+                                </p>
+                                <p className="text-xs text-dark-5">
+                                  {locale === "ar" ? "الكمية:" : "Qty:"}{" "}
+                                  {item.quantity}
+                                </p>
+                              </div>
+                              <p className="text-sm font-medium text-dark">
+                                {item.price.toFixed(2)}{" "}
+                                {locale === "ar" ? "ج.م" : "EGP"}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Order Footer */}
+                        <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-gray-3">
+                          <div className="flex items-center gap-3">
+                            <span
+                              className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                                order.status === "delivered"
+                                  ? "bg-green-100 text-green-800"
+                                  : order.status === "shipped"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : order.status === "paid"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : order.status === "cancelled"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }`}
+                            >
+                              {locale === "ar"
+                                ? order.status === "delivered"
+                                  ? "تم التوصيل"
+                                  : order.status === "shipped"
+                                  ? "قيد الشحن"
+                                  : order.status === "paid"
+                                  ? "تم الدفع"
+                                  : order.status === "cancelled"
+                                  ? "ملغي"
+                                  : "قيد الانتظار"
+                                : order.status.charAt(0).toUpperCase() +
+                                  order.status.slice(1)}
+                            </span>
+                            {order.order_items && (
+                              <span className="text-xs text-dark-5">
+                                {order.order_items.length}{" "}
+                                {locale === "ar"
+                                  ? order.order_items.length === 1
+                                    ? "منتج"
+                                    : "منتجات"
+                                  : order.order_items.length === 1
+                                  ? "item"
+                                  : "items"}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm text-dark-5">
+                              {locale === "ar" ? "المجموع:" : "Total:"}
+                            </p>
+                            <p className="text-lg font-bold text-blue">
+                              {order.total_price.toFixed(2)}{" "}
+                              {locale === "ar" ? "ج.م" : "EGP"}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -929,7 +1287,9 @@ const Profile = () => {
                     onChange={handleAddressInputChange}
                     className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     placeholder={
-                      locale === "ar" ? "مثال: شارع التحرير" : "e.g., Tahrir Street"
+                      locale === "ar"
+                        ? "مثال: شارع التحرير"
+                        : "e.g., Tahrir Street"
                     }
                     required
                   />
@@ -1095,4 +1455,3 @@ const Profile = () => {
 };
 
 export default Profile;
-

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
-import toast from "react-hot-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { identifyLoginType, normalizeEgyptianPhone } from "@/utils/validation";
 
@@ -20,6 +19,7 @@ const LoginPage = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [identifierType, setIdentifierType] = useState<"email" | "phone" | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Detect identifier type (email or phone)
   useEffect(() => {
@@ -40,9 +40,10 @@ const LoginPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(""); // Clear previous errors
 
     if (!formData.identifier || !formData.password) {
-      toast.error(
+      setErrorMessage(
         locale === "ar"
           ? "الرجاء ملء جميع الحقول"
           : "Please fill all fields"
@@ -52,7 +53,7 @@ const LoginPage = () => {
 
     // Validate identifier type
     if (!identifierType) {
-      toast.error(
+      setErrorMessage(
         locale === "ar"
           ? "الرجاء إدخال بريد إلكتروني أو رقم هاتف صحيح"
           : "Please enter a valid email or phone number"
@@ -71,14 +72,22 @@ const LoginPage = () => {
 
       const result = await signIn(loginIdentifier, formData.password);
 
-      if (result.success) {
-        toast.success(
-          locale === "ar" ? "تم تسجيل الدخول بنجاح!" : "Login successful!"
-        );
-        // Redirect handled in useAuth hook
+      if (!result.success) {
+        // Display error in page instead of toast
+        setErrorMessage(result.error || (
+          locale === "ar" 
+            ? "فشل تسجيل الدخول. تحقق من بياناتك" 
+            : "Login failed. Check your credentials"
+        ));
       }
+      // Success toast is handled in useAuth hook
     } catch (error) {
       console.error("Login error:", error);
+      setErrorMessage(
+        locale === "ar"
+          ? "حدث خطأ أثناء تسجيل الدخول"
+          : "An error occurred during login"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -110,6 +119,51 @@ const LoginPage = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit}>
+            {/* Error Message */}
+            {errorMessage && (
+              <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200">
+                <div className="flex items-start gap-3">
+                  <svg
+                    className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-red-800">
+                      {errorMessage}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setErrorMessage("")}
+                    className="text-red-400 hover:text-red-600"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Email or Phone */}
             <div className="mb-6">
               <label

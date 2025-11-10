@@ -17,6 +17,28 @@ import {
   type LoginData,
 } from "@/services/apiAuth";
 
+/**
+ * Translate login error messages
+ */
+const translateLoginError = (error: string, locale: string): string => {
+  if (locale === "ar") {
+    if (error.includes("No account found with this email")) {
+      return "لا يوجد حساب مسجل بهذا البريد الإلكتروني";
+    }
+    if (error.includes("No account found with this phone")) {
+      return "لا يوجد حساب مسجل بهذا الرقم";
+    }
+    if (error.includes("Incorrect password")) {
+      return "كلمة المرور غير صحيحة. حاول مرة أخرى";
+    }
+    if (error.includes("Invalid credentials")) {
+      return "البريد الإلكتروني أو كلمة المرور غير صحيحة";
+    }
+    return "فشل تسجيل الدخول. تحقق من بياناتك";
+  }
+  return error || "Login failed";
+};
+
 interface AuthState {
   user: User | null;
   loading: boolean;
@@ -35,7 +57,7 @@ export const useAuth = () => {
     const initializeAuth = async () => {
       try {
         const storedUser = getStoredUser();
-        
+
         if (storedUser) {
           // Set user immediately from localStorage (optimistic)
           setAuthState({
@@ -47,11 +69,11 @@ export const useAuth = () => {
           try {
             const result = await Promise.race([
               getCurrentUser(),
-              new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Timeout')), 5000)
-              )
+              new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("Timeout")), 5000)
+              ),
             ]);
-            
+
             if (result && (result as any).success && (result as any).data) {
               setAuthState({
                 user: (result as any).data,
@@ -59,10 +81,13 @@ export const useAuth = () => {
               });
             } else {
               // Token expired or invalid, keep storedUser for now
-              console.warn('Failed to verify user, using cached user');
+              console.warn("Failed to verify user, using cached user");
             }
           } catch (error) {
-            console.warn('Backend verification failed, using cached user:', error);
+            console.warn(
+              "Backend verification failed, using cached user:",
+              error
+            );
             // Keep using storedUser, don't clear it
           }
         } else {
@@ -122,31 +147,26 @@ export const useAuth = () => {
         });
 
         toast.success(
-          locale === "ar"
-            ? "تم تسجيل الدخول بنجاح!"
-            : "Signed in successfully!"
+          locale === "ar" ? "تم تسجيل الدخول بنجاح!" : "Signed in successfully!"
         );
 
         // Redirect to profile or home
         router.push(`/${locale}/profile`);
         return { success: true, data: result.data };
       } else {
-        toast.error(
-          result.error ||
-            (locale === "ar"
-              ? "فشل تسجيل الدخول"
-              : "Login failed")
-        );
-        return { success: false, error: result.error };
+        // Translate error message to Arabic
+        const errorMessage = translateLoginError(result.error || "", locale);
+        // Don't show toast, return error for component to display
+        return { success: false, error: errorMessage };
       }
     } catch (error: any) {
       console.error("Signin error:", error);
-      toast.error(
-        locale === "ar"
-          ? "حدث خطأ أثناء تسجيل الدخول"
-          : "An error occurred during signin"
+      const errorMessage = translateLoginError(
+        error?.message || "An error occurred during signin",
+        locale
       );
-      return { success: false, error };
+      // Don't show toast, return error for component to display
+      return { success: false, error: errorMessage };
     }
   };
 
@@ -160,9 +180,7 @@ export const useAuth = () => {
       });
 
       toast.success(
-        locale === "ar"
-          ? "تم تسجيل الخروج بنجاح!"
-          : "Signed out successfully!"
+        locale === "ar" ? "تم تسجيل الخروج بنجاح!" : "Signed out successfully!"
       );
 
       router.push(`/${locale}`);
@@ -204,7 +222,10 @@ export const useAuth = () => {
     }
   };
 
-  const updatePassword = async (currentPassword: string, newPassword: string) => {
+  const updatePassword = async (
+    currentPassword: string,
+    newPassword: string
+  ) => {
     try {
       const result = await changePasswordApi(currentPassword, newPassword);
 

@@ -18,7 +18,7 @@ const ShopWithoutSidebar = () => {
   const searchParams = useSearchParams();
   const [productStyle, setProductStyle] = useState("grid");
   const [showFilters, setShowFilters] = useState(false);
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 });
+  const [priceRange, setPriceRange] = useState({ min: 0, max: Infinity });
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("latest");
 
@@ -34,7 +34,7 @@ const ShopWithoutSidebar = () => {
     data: products,
     isLoading: productsLoading,
     error: productsError,
-  } = useProducts();
+  } = useProducts({ limit: 10000 }); // جلب كل المنتجات
 
   const {
     data: limitedTimeProducts,
@@ -82,11 +82,12 @@ const ShopWithoutSidebar = () => {
     { label: "24", value: 24 },
     { label: "36", value: 36 },
     { label: "48", value: 48 },
+    { label: locale === "ar" ? "الكل" : "All", value: 9999 },
   ];
 
   // Calculate price range from actual products
   const priceRangeFromData = useMemo(() => {
-    if (!products || products.length === 0) return { min: 0, max: 1000 };
+    if (!products || products.length === 0) return { min: 0, max: Infinity };
 
     const prices = products.map(
       (product) => product.offer_price || product.price
@@ -99,10 +100,10 @@ const ShopWithoutSidebar = () => {
 
   // Initialize price range with actual data
   React.useEffect(() => {
-    if (priceRangeFromData.min !== 0 || priceRangeFromData.max !== 1000) {
+    if (products && products.length > 0) {
       setPriceRange(priceRangeFromData);
     }
-  }, [priceRangeFromData]);
+  }, [priceRangeFromData, products]);
 
   // Set category filter from URL on component mount
   useEffect(() => {
@@ -161,7 +162,14 @@ const ShopWithoutSidebar = () => {
     }
 
     return filtered;
-  }, [products, priceRange, selectedCategories, sortBy]);
+  }, [
+    products,
+    priceRange,
+    selectedCategories,
+    sortBy,
+    filterFromUrl,
+    limitedTimeProducts,
+  ]);
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredAndSortedProducts.length / itemsPerPage);
@@ -170,7 +178,7 @@ const ShopWithoutSidebar = () => {
   const currentProducts = filteredAndSortedProducts.slice(startIndex, endIndex);
 
   // Reset to first page when filters change
-  React.useEffect(() => {
+  useEffect(() => {
     setCurrentPage(1);
   }, [priceRange, selectedCategories, sortBy, itemsPerPage]);
 
@@ -289,17 +297,7 @@ const ShopWithoutSidebar = () => {
             ? "المنتجات"
             : "Explore All Products"
         }
-        pages={[
-          locale === "ar" ? "المتجر" : "shop",
-          "/",
-          filterFromUrl === "limited-offers"
-            ? locale === "ar"
-              ? "العروض المحدودة"
-              : "Limited Offers"
-            : locale === "ar"
-            ? "المتجر بدون جانب"
-            : "shop without sidebar",
-        ]}
+        pages={[locale === "ar" ? "المتجر" : "shop"]}
       />
       <section className="overflow-hidden relative pb-20 pt-5 lg:pt-20 xl:pt-28 bg-[#f3f4f6]">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
@@ -434,36 +432,39 @@ const ShopWithoutSidebar = () => {
                         <div className="flex gap-2">
                           <input
                             type="number"
-                            value={priceRange.min}
+                            value={priceRange.min === 0 ? "" : priceRange.min}
                             onChange={(e) =>
                               setPriceRange((prev) => ({
                                 ...prev,
-                                min: Number(e.target.value),
+                                min: Number(e.target.value) || 0,
                               }))
                             }
                             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                             placeholder={locale === "ar" ? "من" : "Min"}
                             min={priceRangeFromData.min}
-                            max={priceRangeFromData.max}
                           />
                           <input
                             type="number"
-                            value={priceRange.max}
+                            value={
+                              priceRange.max === Infinity ? "" : priceRange.max
+                            }
                             onChange={(e) =>
                               setPriceRange((prev) => ({
                                 ...prev,
-                                max: Number(e.target.value),
+                                max: Number(e.target.value) || Infinity,
                               }))
                             }
                             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                             placeholder={locale === "ar" ? "إلى" : "Max"}
                             min={priceRangeFromData.min}
-                            max={priceRangeFromData.max}
                           />
                         </div>
                         <div className="text-xs text-gray-500">
                           {locale === "ar" ? "النطاق:" : "Range:"} $
-                          {priceRangeFromData.min} - ${priceRangeFromData.max}
+                          {priceRangeFromData.min} - $
+                          {priceRangeFromData.max === Infinity
+                            ? "∞"
+                            : priceRangeFromData.max}
                         </div>
                       </div>
                     </div>
@@ -555,16 +556,31 @@ const ShopWithoutSidebar = () => {
                     </div>
 
                     <p>
-                      {locale === "ar" ? "عرض" : "Showing"}{" "}
-                      <span className="text-dark">
-                        {startIndex + 1}-
-                        {Math.min(endIndex, filteredAndSortedProducts.length)}
-                      </span>{" "}
-                      {locale === "ar" ? "من" : "of"}{" "}
-                      <span className="text-dark">
-                        {filteredAndSortedProducts.length}
-                      </span>{" "}
-                      {locale === "ar" ? "منتجات" : "Products"}
+                      {itemsPerPage >= 9999 ? (
+                        <>
+                          {locale === "ar" ? "عرض جميع" : "Showing all"}{" "}
+                          <span className="text-dark">
+                            {filteredAndSortedProducts.length}
+                          </span>{" "}
+                          {locale === "ar" ? "منتجات" : "Products"}
+                        </>
+                      ) : (
+                        <>
+                          {locale === "ar" ? "عرض" : "Showing"}{" "}
+                          <span className="text-dark">
+                            {startIndex + 1}-
+                            {Math.min(
+                              endIndex,
+                              filteredAndSortedProducts.length
+                            )}
+                          </span>{" "}
+                          {locale === "ar" ? "من" : "of"}{" "}
+                          <span className="text-dark">
+                            {filteredAndSortedProducts.length}
+                          </span>{" "}
+                          {locale === "ar" ? "منتجات" : "Products"}
+                        </>
+                      )}
                       {products &&
                         products.length !==
                           filteredAndSortedProducts.length && (
@@ -698,7 +714,7 @@ const ShopWithoutSidebar = () => {
               {/* <!-- Products Grid Tab Content End --> */}
 
               {/* <!-- Products Pagination Start --> */}
-              {totalPages > 1 && (
+              {totalPages > 1 && itemsPerPage < 9999 && (
                 <div className="flex justify-center mt-15">
                   <div className="bg-white shadow-1 rounded-md p-2">
                     <ul className="flex items-center">

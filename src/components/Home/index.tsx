@@ -1,6 +1,8 @@
 import React from "react";
 import VideoSection from "./VideoSection";
 import Hero from "./Hero";
+import HeroBanner from "./Hero/HeroBanner";
+import OffersSlider from "./OffersSlider";
 import Categories from "./Categories";
 import NewArrival from "./NewArrivals";
 import PromoBanner from "./PromoBanner";
@@ -11,11 +13,13 @@ import News from "./News";
 const Home = () => {
   return (
     <main>
-      <VideoSection />
-      <Hero />
+      {/* <Hero /> */}
+      <HeroBanner />
+      <OffersSlider />
       <Categories />
       <NewArrival />
-      <PromoBanner />
+      <VideoSection />
+      {/* <PromoBanner /> */}
       <BestSeller />
       <Testimonials />
       <News />

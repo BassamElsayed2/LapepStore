@@ -15,7 +15,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             refetchOnWindowFocus: true, // إعادة التحميل عند العودة للصفحة
             refetchOnMount: true, // إعادة التحميل عند mount
             retry: 1,
-            refetchInterval: false, // عدم التحديث التلقائي
+            refetchInterval: false,
           },
         },
       })

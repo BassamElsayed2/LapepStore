@@ -110,7 +110,7 @@ const UserDropdown = () => {
 
             <DropdownMenuItem asChild>
               <Link
-                href={`/${locale}/orders`}
+                href={`/${locale}/profile?tab=orders`}
                 className="flex items-center cursor-pointer"
               >
                 <ShoppingBag className="mr-2 h-4 w-4 text-[#22AD5C]" />

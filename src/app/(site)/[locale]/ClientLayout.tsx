@@ -13,6 +13,7 @@ import { ModalProvider } from "@/app/context/QuickViewModalContext";
 import { PreviewSliderProvider } from "@/app/context/PreviewSliderContext";
 import { Providers } from "@/app/context/QueryProvider";
 import { Toaster } from "react-hot-toast";
+import SplashCursor from "@/components/SplashCursor";
 
 interface ClientLayoutProps {
   children: React.ReactNode;
@@ -38,6 +39,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
               <PreviewSliderProvider>
                 <Navbar />
                 {children}
+                <SplashCursor />
                 <QuickViewModal />
                 <CartSidebarModal />
                 <PreviewSliderModal />

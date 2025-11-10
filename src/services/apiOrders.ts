@@ -145,41 +145,6 @@ export async function getOrderById(
 }
 
 /**
- * Track order (public - no authentication required)
- */
-export async function getOrderByIdForTracking(
-  orderId: string
-): Promise<{ order: Order | null; error: string | null }> {
-  try {
-    if (!orderId || orderId.trim().length === 0) {
-      return { order: null, error: 'رقم الطلب مطلوب' };
-    }
-
-    const response = await apiClient.get<ApiResponse<Order>>(`/orders/tracking/${orderId}`);
-
-    if (response.data.success && response.data.data) {
-      return { order: response.data.data, error: null };
-    }
-
-    return {
-      order: null,
-      error: response.data.error || 'لم يتم العثور على الطلب',
-    };
-  } catch (error: any) {
-    console.error('Error fetching order for tracking:', error);
-    
-    if (error.message.includes('404')) {
-      return { order: null, error: 'لم يتم العثور على الطلب' };
-    }
-    
-    return {
-      order: null,
-      error: 'حدث خطأ في جلب بيانات الطلب',
-    };
-  }
-}
-
-/**
  * Update order status (Admin only)
  */
 export async function updateOrderStatus(

@@ -5,47 +5,60 @@ import HeroFeature from "./HeroFeature";
 import Image from "next/image";
 import { Link } from "@/app/i18n/navigation";
 import { useLocale } from "next-intl";
-import { getLimitedTimeOfferProducts } from "@/services/apiProducts";
+import {
+  getLimitedTimeOfferProducts,
+  getBestSellerProducts,
+  getProducts,
+} from "@/services/apiProducts";
 import { useQuery } from "@tanstack/react-query";
+import { Product } from "@/types/product";
 
 const Hero = () => {
   const locale = useLocale();
-  const {
-    data: limitedTimeProducts,
-    isLoading,
-    error,
-  } = useQuery({
+
+  // Fetch products with offer first
+  const { data: offerProducts, isLoading: isLoadingOffers } = useQuery({
     queryKey: ["limitedTimeOfferProducts"],
     queryFn: getLimitedTimeOfferProducts,
   });
 
-  // Fallback data if no products available
-  const fallbackProducts = [
-    {
-      id: 1,
-      name_en: "iPhone 14 Plus & 14 Pro Max",
-      name_ar: "آيفون 14 بلس و 14 برو ماكس",
-      offer_price: 699,
-      price: 999,
-      image_url: "/images/hero/hero-02.png",
-    },
-    {
-      id: 2,
-      name_en: "Wireless Headphone",
-      name_ar: "سماعات لاسلكية",
-      offer_price: 299,
-      price: 399,
-      image_url: "/images/hero/hero-01.png",
-    },
-  ];
+  // Fetch best sellers as fallback
+  const { data: bestSellerProducts, isLoading: isLoadingBestSellers } =
+    useQuery({
+      queryKey: ["bestSellerProducts"],
+      queryFn: getBestSellerProducts,
+      enabled:
+        !isLoadingOffers && (!offerProducts || offerProducts.length === 0),
+    });
 
-  const productsToShow =
-    limitedTimeProducts && limitedTimeProducts.length > 0
-      ? limitedTimeProducts.slice(0, 2)
-      : fallbackProducts;
+  // Fetch random products as final fallback
+  const { data: randomProducts, isLoading: isLoadingRandom } = useQuery({
+    queryKey: ["randomProducts"],
+    queryFn: () => getProducts({ limit: 10 }),
+    enabled:
+      !isLoadingOffers &&
+      !isLoadingBestSellers &&
+      (!offerProducts || offerProducts.length === 0) &&
+      (!bestSellerProducts || bestSellerProducts.length === 0),
+  });
+
+  // Determine which products to show based on priority
+  let productsToShow: Product[] = [];
+  let productType: "offer" | "bestSeller" | "random" = "random";
+
+  if (offerProducts && offerProducts.length > 0) {
+    productsToShow = offerProducts.slice(0, 2);
+    productType = "offer";
+  } else if (bestSellerProducts && bestSellerProducts.length > 0) {
+    productsToShow = bestSellerProducts.slice(0, 2);
+    productType = "bestSeller";
+  } else if (randomProducts && randomProducts.length > 0) {
+    productsToShow = randomProducts.slice(0, 2);
+    productType = "random";
+  }
 
   return (
-    <section className="overflow-hidden ">
+    <section className="overflow-hidden mt-10">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
         <div className="flex flex-wrap gap-5">
           <div className="xl:max-w-[757px] w-full">
@@ -73,7 +86,17 @@ const Hero = () => {
 
                       <div>
                         <p className="font-medium text-dark-4 text-custom-sm mb-1.5">
-                          {locale === "en" ? "limited time offer" : "عرض محدود"}
+                          {productType === "offer"
+                            ? locale === "en"
+                              ? "Limited time offer"
+                              : "عرض محدود"
+                            : productType === "bestSeller"
+                            ? locale === "en"
+                              ? "Best Seller"
+                              : "الأكثر مبيعاً"
+                            : locale === "en"
+                            ? "Featured Product"
+                            : "منتج مميز"}
                         </p>
                         <span className="flex items-center gap-3">
                           <span className="font-medium text-heading-5 text-red">

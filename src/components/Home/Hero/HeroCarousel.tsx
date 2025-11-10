@@ -9,34 +9,96 @@ import "swiper/css";
 import Image from "next/image";
 import { Link } from "@/app/i18n/navigation";
 import { useLocale } from "next-intl";
-import { getLimitedTimeOfferProducts } from "@/services/apiProducts";
+import {
+  getLimitedTimeOfferProducts,
+  getBestSellerProducts,
+  getProducts,
+} from "@/services/apiProducts";
 import { useQuery } from "@tanstack/react-query";
+import { Product } from "@/types/product";
 
 const HeroCarousal = () => {
   const locale = useLocale();
-  const {
-    data: limitedTimeProducts,
-    isLoading,
-    error,
-  } = useQuery({
+
+  // Fetch products with offer first
+  const { data: offerProducts, isLoading: isLoadingOffers } = useQuery({
     queryKey: ["limitedTimeOfferProducts"],
     queryFn: getLimitedTimeOfferProducts,
   });
 
-  const productsToShow = limitedTimeProducts?.slice(0, 2) || [];
+  // Fetch best sellers as fallback
+  const { data: bestSellerProducts, isLoading: isLoadingBestSellers } =
+    useQuery({
+      queryKey: ["bestSellerProducts"],
+      queryFn: getBestSellerProducts,
+      enabled:
+        !isLoadingOffers && (!offerProducts || offerProducts.length === 0),
+    });
+
+  // Fetch random products as final fallback
+  const { data: randomProducts, isLoading: isLoadingRandom } = useQuery({
+    queryKey: ["randomProducts"],
+    queryFn: () => getProducts({ limit: 10 }),
+    enabled:
+      !isLoadingOffers &&
+      !isLoadingBestSellers &&
+      (!offerProducts || offerProducts.length === 0) &&
+      (!bestSellerProducts || bestSellerProducts.length === 0),
+  });
+
+  // Determine which products to show based on priority
+  let productsToShow: Product[] = [];
+  let productType: "offer" | "bestSeller" | "random" = "random";
+
+  if (offerProducts && offerProducts.length > 0) {
+    productsToShow = offerProducts.slice(0, 2);
+    productType = "offer";
+  } else if (bestSellerProducts && bestSellerProducts.length > 0) {
+    productsToShow = bestSellerProducts.slice(0, 2);
+    productType = "bestSeller";
+  } else if (randomProducts && randomProducts.length > 0) {
+    productsToShow = randomProducts.slice(0, 2);
+    productType = "random";
+  }
+
+  const isLoading = isLoadingOffers || isLoadingBestSellers || isLoadingRandom;
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[358px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-dark"></div>
+      </div>
+    );
+  }
+
+  // Show empty state if no products found
+  if (productsToShow.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[358px] p-6">
+        <div className="text-center">
+          <p className="text-lg text-dark-4">
+            {locale === "en"
+              ? "No products available at the moment"
+              : "لا توجد منتجات متاحة في الوقت الحالي"}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Swiper
       spaceBetween={30}
       centeredSlides={true}
-      // autoplay={{
-      //   delay: 2500,
-      //   disableOnInteraction: false,
-      // }}
+      autoplay={{
+        delay: 3500,
+        disableOnInteraction: false,
+      }}
       pagination={{
         clickable: true,
       }}
-      modules={[Pagination]}
+      modules={[Autoplay, Pagination]}
       className="hero-carousel"
     >
       {productsToShow.map((product, index) => (
@@ -76,10 +138,18 @@ const HeroCarousal = () => {
                 </Link>
               </h1>
 
-              <p>
-                {locale === "en"
-                  ? "Limited time offer - Don't miss this amazing deal!"
-                  : "عرض محدود - لا تفوت هذه الفرصة المذهلة!"}
+              <p className="text-sm sm:text-base text-center sm:text-left">
+                {productType === "offer"
+                  ? locale === "en"
+                    ? "Limited time offer - Don't miss this amazing deal!"
+                    : "عرض محدود - لا تفوت هذه الفرصة المذهلة!"
+                  : productType === "bestSeller"
+                  ? locale === "en"
+                    ? "Best Seller - Most popular product!"
+                    : "الأكثر مبيعاً - المنتج الأكثر شهرة!"
+                  : locale === "en"
+                  ? "Discover our amazing products!"
+                  : "اكتشف منتجاتنا المميزة!"}
               </p>
 
               <div className="flex items-center gap-3 mb-4">
