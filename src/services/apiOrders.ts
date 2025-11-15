@@ -25,7 +25,7 @@ export interface CreateOrderData {
 export interface Order {
   id: string;
   user_id?: string | null;
-  status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
+  status: 'pending' | 'paid' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
   total_price: number;
   created_at: string;
   updated_at: string;
@@ -149,7 +149,7 @@ export async function getOrderById(
  */
 export async function updateOrderStatus(
   orderId: string,
-  status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled'
+  status: 'pending' | 'paid' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled'
 ): Promise<{ success: boolean; error: string | null }> {
   try {
     const response = await apiClient.put<ApiResponse>(`/orders/${orderId}/status`, {

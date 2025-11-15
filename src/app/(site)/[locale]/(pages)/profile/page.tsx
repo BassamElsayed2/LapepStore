@@ -4,7 +4,7 @@ import Profile from "@/components/Profile";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Profile | NextCommerce E-commerce",
+  title: "Profile | lapip Store E-commerce",
   description: "Manage your profile information and settings",
 };
 
@@ -17,4 +17,3 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
-

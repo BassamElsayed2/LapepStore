@@ -80,7 +80,7 @@ const SingleListItem = ({ item }: { item: Product }) => {
       locale === "ar" ? "تمت إضافة المنتج إلى السلة" : "Product added to cart",
       {
         duration: 2000,
-        position: "top-right",
+        position: "bottom-left",
       }
     );
     setShowCartSuccess(true);

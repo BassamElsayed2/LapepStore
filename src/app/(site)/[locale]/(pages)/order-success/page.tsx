@@ -188,7 +188,7 @@ const OrderSuccessPage = () => {
                     className={`w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg ${
                       order.status === "pending"
                         ? "bg-yellow-500"
-                        : order.status === "paid"
+                        : order.status === "paid" || order.status === "confirmed"
                         ? "bg-green-500"
                         : order.status === "shipped"
                         ? "bg-purple-500"
@@ -200,7 +200,7 @@ const OrderSuccessPage = () => {
                     }`}
                   >
                     {order.status === "pending" && "⏳"}
-                    {order.status === "paid" && "💳"}
+                    {(order.status === "paid" || order.status === "confirmed") && "💳"}
                     {order.status === "shipped" && "🚛"}
                     {order.status === "delivered" && "✅"}
                     {order.status === "cancelled" && "❌"}
@@ -213,7 +213,7 @@ const OrderSuccessPage = () => {
                       ? locale === "ar"
                         ? "في الانتظار"
                         : "Pending"
-                      : order.status === "paid"
+                      : order.status === "paid" || order.status === "confirmed"
                       ? locale === "ar"
                         ? "تم الدفع"
                         : "Paid"
@@ -236,7 +236,7 @@ const OrderSuccessPage = () => {
                       (locale === "ar"
                         ? "طلبك قيد المراجعة وسنتواصل معك قريباً"
                         : "Your order is being reviewed and we'll contact you soon")}
-                    {order.status === "paid" &&
+                    {(order.status === "paid" || order.status === "confirmed") &&
                       (locale === "ar"
                         ? "تم تأكيد طلبك وهو قيد التحضير للشحن"
                         : "Your order is confirmed and being prepared for shipping")}

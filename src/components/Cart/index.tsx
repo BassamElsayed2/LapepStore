@@ -6,9 +6,11 @@ import { useAppSelector } from "@/redux/store";
 import SingleItem from "./SingleItem";
 import Breadcrumb from "../Common/Breadcrumb";
 import Link from "next/link";
+import { useLocale } from "next-intl";
 
 const Cart = () => {
   const cartItems = useAppSelector((state) => state.cartReducer.items);
+  const locale = useLocale();
 
   return (
     <>
@@ -68,7 +70,7 @@ const Cart = () => {
         </section>
       ) : (
         <>
-          <div className="text-center mt-8">
+          <div className="text-center mt-8 h-[50vh]">
             <div className="mx-auto pb-7.5">
               <svg
                 className="mx-auto"
@@ -100,13 +102,15 @@ const Cart = () => {
               </svg>
             </div>
 
-            <p className="pb-6">Your cart is empty!</p>
+            <p className="pb-6">
+              {locale === "ar" ? "السلة فارغة" : "Your cart is empty!"}
+            </p>
 
             <Link
-              href="/shop-with-sidebar"
+              href={`/${locale}/shop`}
               className="w-96 mx-auto flex justify-center font-medium text-white bg-dark py-[13px] px-6 rounded-md ease-out duration-200 hover:bg-opacity-95"
             >
-              Continue Shopping
+              {locale === "ar" ? "مواصلة التسوق" : "Continue Shopping"}
             </Link>
           </div>
         </>

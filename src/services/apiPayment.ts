@@ -6,12 +6,13 @@ export interface EasykashPaymentRequest {
   name: string;
   email?: string;
   mobile: string;
-  paymentOptions?: number[]; // Array of payment option IDs [2,3,4,5,6]
+  currency?: 'EGP' | 'USD' | 'SAR' | 'EUR';
 }
 
 export interface EasykashPaymentResponse {
   redirectUrl: string;
   order_id: string;
+  paymentId?: string;
 }
 
 export interface PaymentStatus {

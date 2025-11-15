@@ -17,6 +17,7 @@ import {
   type CreateAddressData,
 } from "@/services/apiAddresses";
 import { getUserOrders, type Order } from "@/services/apiOrders";
+import { EGYPTIAN_GOVERNORATES } from "@/constants/governorates";
 
 const Profile = () => {
   const locale = useLocale();
@@ -69,6 +70,8 @@ const Profile = () => {
   // Orders state
   const [orders, setOrders] = useState<Order[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
+  const [currentOrderPage, setCurrentOrderPage] = useState(1);
+  const ordersPerPage = 3;
 
   // Refresh profile data from server when component mounts
   useEffect(() => {
@@ -126,6 +129,7 @@ const Profile = () => {
   useEffect(() => {
     if (activeTab === "orders" && user) {
       loadOrders();
+      setCurrentOrderPage(1); // Reset to first page when loading orders
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, user]);
@@ -281,7 +285,9 @@ const Profile = () => {
 
   // Address handlers
   const handleAddressInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
@@ -1069,15 +1075,29 @@ const Profile = () => {
                   activeTab === "orders" ? "block" : "hidden"
                 }`}
               >
-                <h3 className="font-medium text-xl sm:text-2xl text-dark mb-7">
-                  {locale === "ar" ? "طلباتي" : "My Orders"}
-                </h3>
+                <div className="flex items-center justify-between mb-7">
+                  <h3 className="font-medium text-xl sm:text-2xl text-dark">
+                    {locale === "ar" ? "طلباتي" : "My Orders"}
+                  </h3>
+                  {orders.filter((order) => order.status !== "pending").length >
+                    0 && (
+                    <span className="bg-blue/10 text-blue px-3 py-1 rounded-full text-sm font-medium">
+                      {
+                        orders.filter((order) => order.status !== "pending")
+                          .length
+                      }{" "}
+                      {locale === "ar" ? "طلب" : "Orders"}
+                    </span>
+                  )}
+                </div>
 
                 {loadingOrders ? (
                   <div className="flex items-center justify-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue"></div>
                   </div>
-                ) : orders.length === 0 ? (
+                ) : orders.length === 0 ||
+                  orders.filter((order) => order.status !== "pending")
+                    .length === 0 ? (
                   <div className="text-center py-12 text-dark-5">
                     <svg
                       className="mx-auto mb-4 text-gray-3"
@@ -1104,129 +1124,320 @@ const Profile = () => {
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {orders.map((order) => (
-                      <div
-                        key={order.id}
-                        className="border border-gray-3 rounded-lg p-4 hover:border-blue transition-colors"
-                      >
-                        {/* Order Header */}
-                        <div className="flex flex-wrap items-center justify-between mb-4 pb-4 border-b border-gray-3">
-                          <div>
-                            <p className="text-sm text-dark-5">
-                              {locale === "ar" ? "رقم الطلب:" : "Order #"}
-                            </p>
-                            <p className="font-medium text-dark">
-                              {order.id.substring(0, 8)}...
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm text-dark-5">
-                              {locale === "ar" ? "التاريخ:" : "Date:"}
-                            </p>
-                            <p className="text-sm text-dark">
-                              {new Date(order.created_at).toLocaleDateString(
-                                locale === "ar" ? "ar-EG" : "en-US"
-                              )}
-                            </p>
-                          </div>
-                        </div>
+                  <>
+                    <div className="space-y-4">
+                      {orders
+                        .filter((order) => order.status !== "pending")
+                        .slice(
+                          (currentOrderPage - 1) * ordersPerPage,
+                          currentOrderPage * ordersPerPage
+                        )
+                        .map((order) => (
+                          <div
+                            key={order.id}
+                            className="border border-gray-3 rounded-lg p-4 hover:border-blue transition-colors"
+                          >
+                            {/* Order Header */}
+                            <div className="flex flex-wrap items-center justify-between mb-4 pb-4 border-b border-gray-3">
+                              <div>
+                                <p className="text-sm text-dark-5">
+                                  {locale === "ar" ? "رقم الطلب:" : "Order #"}
+                                </p>
+                                <p className="font-medium text-dark">
+                                  {order.id.substring(0, 8)}...
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm text-dark-5">
+                                  {locale === "ar" ? "التاريخ:" : "Date:"}
+                                </p>
+                                <p className="text-sm text-dark">
+                                  {new Date(
+                                    order.created_at
+                                  ).toLocaleDateString(
+                                    locale === "ar" ? "ar-EG" : "en-US"
+                                  )}
+                                </p>
+                              </div>
+                            </div>
 
-                        {/* Order Items */}
-                        <div className="space-y-2 mb-4">
-                          {order.order_items?.map((item, index) => (
-                            <div
-                              key={item.id || index}
-                              className="flex items-center gap-3"
-                            >
-                              <div className="w-12 h-12 bg-gray-2 rounded overflow-hidden flex-shrink-0">
-                                {item.product?.images &&
-                                item.product.images[0] ? (
-                                  <Image
-                                    src={item.product.images[0]}
-                                    alt={item.product.title || "Product"}
-                                    width={48}
-                                    height={48}
-                                    className="w-full h-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full bg-gray-2" />
+                            {/* Order Items */}
+                            <div className="space-y-3 mb-4">
+                              {order.order_items?.map((item, index) => (
+                                <div
+                                  key={item.id || index}
+                                  className="flex items-center gap-4 p-3 bg-gray-1 rounded-lg"
+                                >
+                                  <div className="w-16 h-16 bg-gray-2 rounded-lg overflow-hidden flex-shrink-0 border border-gray-3">
+                                    {item.product?.images &&
+                                    item.product.images[0] ? (
+                                      <Image
+                                        src={item.product.images[0]}
+                                        alt={item.product.title || "Product"}
+                                        width={64}
+                                        height={64}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    ) : (
+                                      <div className="w-full h-full bg-gray-2 flex items-center justify-center">
+                                        <svg
+                                          className="w-8 h-8 text-gray-4"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                          />
+                                        </svg>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-base font-semibold text-dark mb-1 truncate">
+                                      {item.product?.title ||
+                                        (locale === "ar" ? "منتج" : "Product")}
+                                    </p>
+                                    <div className="flex items-center gap-3 text-xs text-dark-5">
+                                      <span className="flex items-center gap-1">
+                                        <span className="font-medium">
+                                          {locale === "ar" ? "الكمية:" : "Qty:"}
+                                        </span>
+                                        <span className="font-bold text-dark">
+                                          {item.quantity}
+                                        </span>
+                                      </span>
+                                      <span className="text-gray-4">•</span>
+                                      <span className="flex items-center gap-1">
+                                        <span className="font-medium">
+                                          {locale === "ar"
+                                            ? "السعر:"
+                                            : "Price:"}
+                                        </span>
+                                        <span className="font-bold text-blue">
+                                          {item.price.toFixed(2)}{" "}
+                                          {locale === "ar" ? "ج.م" : "EGP"}
+                                        </span>
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Order Footer */}
+                            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-gray-3">
+                              <div className="flex items-center gap-3">
+                                <span
+                                  className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                                    order.status === "delivered"
+                                      ? "bg-green-100 text-green-800"
+                                      : order.status === "shipped"
+                                      ? "bg-blue-100 text-blue-800"
+                                      : order.status === "paid" ||
+                                        order.status === "confirmed"
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : order.status === "cancelled"
+                                      ? "bg-red-100 text-red-800"
+                                      : "bg-gray-100 text-gray-800"
+                                  }`}
+                                >
+                                  {locale === "ar"
+                                    ? order.status === "delivered"
+                                      ? "تم التوصيل"
+                                      : order.status === "shipped"
+                                      ? "قيد الشحن"
+                                      : order.status === "paid" ||
+                                        order.status === "confirmed"
+                                      ? "تم الدفع"
+                                      : order.status === "cancelled"
+                                      ? "ملغي"
+                                      : "قيد الانتظار"
+                                    : order.status.charAt(0).toUpperCase() +
+                                      order.status.slice(1)}
+                                </span>
+                                {order.order_items && (
+                                  <span className="text-xs text-dark-5">
+                                    {order.order_items.length}{" "}
+                                    {locale === "ar"
+                                      ? order.order_items.length === 1
+                                        ? "منتج"
+                                        : "منتجات"
+                                      : order.order_items.length === 1
+                                      ? "item"
+                                      : "items"}
+                                  </span>
                                 )}
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-dark truncate">
-                                  {item.product?.title || locale === "ar"
-                                    ? "منتج"
-                                    : "Product"}
+                              <div className="text-right">
+                                <p className="text-sm text-dark-5">
+                                  {locale === "ar" ? "المجموع:" : "Total:"}
                                 </p>
-                                <p className="text-xs text-dark-5">
-                                  {locale === "ar" ? "الكمية:" : "Qty:"}{" "}
-                                  {item.quantity}
+                                <p className="text-lg font-bold text-blue">
+                                  {order.total_price.toFixed(2)}{" "}
+                                  {locale === "ar" ? "ج.م" : "EGP"}
                                 </p>
                               </div>
-                              <p className="text-sm font-medium text-dark">
-                                {item.price.toFixed(2)}{" "}
-                                {locale === "ar" ? "ج.م" : "EGP"}
-                              </p>
                             </div>
+                          </div>
+                        ))}
+                    </div>
+
+                    {/* Pagination */}
+                    {orders.filter((order) => order.status !== "pending")
+                      .length > ordersPerPage && (
+                      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-2 mt-6 pt-6 border-t border-gray-3">
+                        <button
+                          onClick={() =>
+                            setCurrentOrderPage((prev) => Math.max(prev - 1, 1))
+                          }
+                          disabled={currentOrderPage === 1}
+                          className={`w-full sm:w-auto px-6 py-2.5 rounded-lg font-medium transition-all ${
+                            currentOrderPage === 1
+                              ? "bg-gray-2 text-gray-4 cursor-not-allowed"
+                              : "bg-blue text-white hover:bg-blue-dark hover:shadow-md"
+                          }`}
+                        >
+                          <span className="flex items-center justify-center gap-2">
+                            {locale === "ar" ? (
+                              <>
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 5l7 7-7 7"
+                                  />
+                                </svg>
+                                <span>السابق</span>
+                              </>
+                            ) : (
+                              <>
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M15 19l-7-7 7-7"
+                                  />
+                                </svg>
+                                <span>Previous</span>
+                              </>
+                            )}
+                          </span>
+                        </button>
+
+                        <div className="flex items-center gap-2">
+                          {Array.from(
+                            {
+                              length: Math.ceil(
+                                orders.filter(
+                                  (order) => order.status !== "pending"
+                                ).length / ordersPerPage
+                              ),
+                            },
+                            (_, i) => i + 1
+                          ).map((page) => (
+                            <button
+                              key={page}
+                              onClick={() => setCurrentOrderPage(page)}
+                              className={`w-10 h-10 rounded-lg font-semibold transition-all ${
+                                currentOrderPage === page
+                                  ? "bg-blue text-white shadow-md scale-110"
+                                  : "bg-gray-2 text-dark hover:bg-gray-3 hover:scale-105"
+                              }`}
+                            >
+                              {page}
+                            </button>
                           ))}
                         </div>
 
-                        {/* Order Footer */}
-                        <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-gray-3">
-                          <div className="flex items-center gap-3">
-                            <span
-                              className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                                order.status === "delivered"
-                                  ? "bg-green-100 text-green-800"
-                                  : order.status === "shipped"
-                                  ? "bg-blue-100 text-blue-800"
-                                  : order.status === "paid"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : order.status === "cancelled"
-                                  ? "bg-red-100 text-red-800"
-                                  : "bg-gray-100 text-gray-800"
-                              }`}
-                            >
-                              {locale === "ar"
-                                ? order.status === "delivered"
-                                  ? "تم التوصيل"
-                                  : order.status === "shipped"
-                                  ? "قيد الشحن"
-                                  : order.status === "paid"
-                                  ? "تم الدفع"
-                                  : order.status === "cancelled"
-                                  ? "ملغي"
-                                  : "قيد الانتظار"
-                                : order.status.charAt(0).toUpperCase() +
-                                  order.status.slice(1)}
-                            </span>
-                            {order.order_items && (
-                              <span className="text-xs text-dark-5">
-                                {order.order_items.length}{" "}
-                                {locale === "ar"
-                                  ? order.order_items.length === 1
-                                    ? "منتج"
-                                    : "منتجات"
-                                  : order.order_items.length === 1
-                                  ? "item"
-                                  : "items"}
-                              </span>
+                        <button
+                          onClick={() =>
+                            setCurrentOrderPage((prev) =>
+                              Math.min(
+                                prev + 1,
+                                Math.ceil(
+                                  orders.filter(
+                                    (order) => order.status !== "pending"
+                                  ).length / ordersPerPage
+                                )
+                              )
+                            )
+                          }
+                          disabled={
+                            currentOrderPage ===
+                            Math.ceil(
+                              orders.filter(
+                                (order) => order.status !== "pending"
+                              ).length / ordersPerPage
+                            )
+                          }
+                          className={`w-full sm:w-auto px-6 py-2.5 rounded-lg font-medium transition-all ${
+                            currentOrderPage ===
+                            Math.ceil(
+                              orders.filter(
+                                (order) => order.status !== "pending"
+                              ).length / ordersPerPage
+                            )
+                              ? "bg-gray-2 text-gray-4 cursor-not-allowed"
+                              : "bg-blue text-white hover:bg-blue-dark hover:shadow-md"
+                          }`}
+                        >
+                          <span className="flex items-center justify-center gap-2">
+                            {locale === "ar" ? (
+                              <>
+                                <span>التالي</span>
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M15 19l-7-7 7-7"
+                                  />
+                                </svg>
+                              </>
+                            ) : (
+                              <>
+                                <span>Next</span>
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 5l7 7-7 7"
+                                  />
+                                </svg>
+                              </>
                             )}
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm text-dark-5">
-                              {locale === "ar" ? "المجموع:" : "Total:"}
-                            </p>
-                            <p className="text-lg font-bold text-blue">
-                              {order.total_price.toFixed(2)}{" "}
-                              {locale === "ar" ? "ج.م" : "EGP"}
-                            </p>
-                          </div>
-                        </div>
+                          </span>
+                        </button>
                       </div>
-                    ))}
-                  </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -1364,21 +1575,26 @@ const Profile = () => {
                 {/* City */}
                 <div className="sm:col-span-2">
                   <label htmlFor="city" className="block mb-2.5 text-dark">
-                    {locale === "ar" ? "المدينة" : "City"}{" "}
+                    {locale === "ar" ? "المحافظة" : "Governorate"}{" "}
                     <span className="text-red">*</span>
                   </label>
-                  <input
-                    type="text"
+                  <select
                     name="city"
                     id="city"
-                    value={addressFormData.city}
+                    value={addressFormData.city || ""}
                     onChange={handleAddressInputChange}
                     className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
-                    placeholder={
-                      locale === "ar" ? "مثال: القاهرة" : "e.g., Cairo"
-                    }
                     required
-                  />
+                  >
+                    <option value="">
+                      {locale === "ar" ? "اختر المحافظة" : "Select Governorate"}
+                    </option>
+                    {EGYPTIAN_GOVERNORATES.map((gov) => (
+                      <option key={gov.ar} value={gov.ar}>
+                        {gov.ar}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 {/* Notes */}

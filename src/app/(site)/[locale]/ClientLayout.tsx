@@ -39,7 +39,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
               <PreviewSliderProvider>
                 <Navbar />
                 {children}
-                <SplashCursor />
+                {/* <SplashCursor /> */}
                 <QuickViewModal />
                 <CartSidebarModal />
                 <PreviewSliderModal />
@@ -50,7 +50,32 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
       </Providers>
       <ScrollToTop />
       <Footer />
-      <Toaster position="top-right" />
+      <Toaster
+        position="bottom-left"
+        reverseOrder={false}
+        gutter={8}
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: "#363636",
+            color: "#fff",
+          },
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: "#10B981",
+              secondary: "#fff",
+            },
+          },
+          error: {
+            duration: 4000,
+            iconTheme: {
+              primary: "#EF4444",
+              secondary: "#fff",
+            },
+          },
+        }}
+      />
     </>
   );
 }
