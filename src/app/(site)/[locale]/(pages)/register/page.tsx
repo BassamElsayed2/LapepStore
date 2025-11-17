@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
@@ -13,6 +13,10 @@ import {
   normalizeEgyptianPhone,
   validatePassword,
 } from "@/utils/validation";
+import {
+  checkEmailAvailability,
+  checkPhoneAvailability,
+} from "@/services/apiAuth";
 
 const RegisterPage = () => {
   const t = useTranslations();
@@ -34,39 +38,118 @@ const RegisterPage = () => {
   const [emailError, setEmailError] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [showPasswordStrength, setShowPasswordStrength] = useState(false);
+  
+  // Availability check states
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const [isCheckingPhone, setIsCheckingPhone] = useState(false);
+  const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
+  const [phoneAvailable, setPhoneAvailable] = useState<boolean | null>(null);
 
-  // Real-time email validation
+  // Real-time email validation with backend check
   useEffect(() => {
-    if (formData.email) {
+    const checkEmail = async () => {
+      if (!formData.email) {
+        setEmailError("");
+        setEmailAvailable(null);
+        return;
+      }
+
+      // First check if email format is valid
       if (!isRealEmail(formData.email)) {
         setEmailError(
           locale === "ar"
-            ? "الرجاء إدخال بريد إلكتروني حقيقي"
-            : "Please enter a real email "
+            ? "الرجاء إدخال بريد إلكتروني حقيقي (ليس مؤقت)"
+            : "Please enter a real email (not disposable)"
         );
-      } else {
-        setEmailError("");
+        setEmailAvailable(null);
+        return;
       }
-    } else {
-      setEmailError("");
-    }
+
+      // Debounce: wait before checking availability
+      const timer = setTimeout(async () => {
+        setIsCheckingEmail(true);
+        try {
+          const result = await checkEmailAvailability(formData.email);
+          if (result.success && result.data) {
+            if (result.data.available) {
+              setEmailError("");
+              setEmailAvailable(true);
+            } else {
+              setEmailError(
+                locale === "ar"
+                  ? "⚠️ هذا البريد الإلكتروني مسجل مسبقاً. هل تريد تسجيل الدخول؟"
+                  : "⚠️ This email is already registered. Would you like to sign in?"
+              );
+              setEmailAvailable(false);
+            }
+          }
+        } catch (error) {
+          console.error("Email check error:", error);
+          setEmailError("");
+          setEmailAvailable(null);
+        } finally {
+          setIsCheckingEmail(false);
+        }
+      }, 800); // Wait 800ms after user stops typing
+
+      return () => clearTimeout(timer);
+    };
+
+    checkEmail();
   }, [formData.email, locale]);
 
-  // Real-time phone validation
+  // Real-time phone validation with backend check
   useEffect(() => {
-    if (formData.phone) {
+    const checkPhone = async () => {
+      if (!formData.phone) {
+        setPhoneError("");
+        setPhoneAvailable(null);
+        return;
+      }
+
+      // First check if phone format is valid
       if (!isEgyptianPhone(formData.phone)) {
         setPhoneError(
           locale === "ar"
-            ? "الرجاء إدخال رقم  صحيح (01xxxxxxxxx)"
+            ? "الرجاء إدخال رقم هاتف صحيح (01xxxxxxxxx)"
             : "Please enter a valid Egyptian phone number (01xxxxxxxxx)"
         );
-      } else {
-        setPhoneError("");
+        setPhoneAvailable(null);
+        return;
       }
-    } else {
-      setPhoneError("");
-    }
+
+      // Debounce: wait before checking availability
+      const timer = setTimeout(async () => {
+        setIsCheckingPhone(true);
+        try {
+          const normalizedPhone = normalizeEgyptianPhone(formData.phone);
+          const result = await checkPhoneAvailability(normalizedPhone);
+          if (result.success && result.data) {
+            if (result.data.available) {
+              setPhoneError("");
+              setPhoneAvailable(true);
+            } else {
+              setPhoneError(
+                locale === "ar"
+                  ? "⚠️ هذا الرقم مسجل مسبقاً. هل تريد تسجيل الدخول؟"
+                  : "⚠️ This phone number is already registered. Would you like to sign in?"
+              );
+              setPhoneAvailable(false);
+            }
+          }
+        } catch (error) {
+          console.error("Phone check error:", error);
+          setPhoneError("");
+          setPhoneAvailable(null);
+        } finally {
+          setIsCheckingPhone(false);
+        }
+      }, 800); // Wait 800ms after user stops typing
+
+      return () => clearTimeout(timer);
+    };
+
+    checkPhone();
   }, [formData.phone, locale]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,6 +182,26 @@ const RegisterPage = () => {
         locale === "ar"
           ? "الرجاء ملء جميع الحقول المطلوبة"
           : "Please fill all required fields"
+      );
+      return;
+    }
+
+    // Check if email is already registered
+    if (emailAvailable === false) {
+      toast.error(
+        locale === "ar"
+          ? "هذا البريد الإلكتروني مسجل مسبقاً"
+          : "This email is already registered"
+      );
+      return;
+    }
+
+    // Check if phone is already registered
+    if (formData.phone && phoneAvailable === false) {
+      toast.error(
+        locale === "ar"
+          ? "هذا الرقم مسجل مسبقاً"
+          : "This phone number is already registered"
       );
       return;
     }
@@ -254,26 +357,116 @@ const RegisterPage = () => {
                 {locale === "ar" ? "البريد الإلكتروني" : "Email Address"}{" "}
                 <span className="text-red-500">*</span>
               </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                autoComplete="email"
-                className={`w-full rounded-md border ${
-                  emailError ? "border-red-500" : "border-stroke"
-                } bg-white py-3 px-6 text-base text-dark outline-none transition focus:border-blue focus:shadow-input`}
-                placeholder={
-                  locale === "ar" ? "example@gmail.com" : "example@gmail.com"
-                }
-                required
-              />
+              <div className="relative">
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  autoComplete="email"
+                  className={`w-full rounded-md border ${
+                    emailError
+                      ? "border-red-500"
+                      : emailAvailable
+                      ? "border-green-500"
+                      : "border-stroke"
+                  } bg-white py-3 px-6 ${
+                    locale === "ar" ? "pl-12" : "pr-12"
+                  } text-base text-dark outline-none transition focus:border-blue focus:shadow-input`}
+                  placeholder={
+                    locale === "ar" ? "example@gmail.com" : "example@gmail.com"
+                  }
+                  required
+                />
+                {isCheckingEmail && (
+                  <div
+                    className={`absolute top-1/2 transform -translate-y-1/2 ${
+                      locale === "ar" ? "left-4" : "right-4"
+                    }`}
+                  >
+                    <svg
+                      className="animate-spin h-5 w-5 text-blue"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  </div>
+                )}
+                {!isCheckingEmail && emailAvailable && (
+                  <div
+                    className={`absolute top-1/2 transform -translate-y-1/2 ${
+                      locale === "ar" ? "left-4" : "right-4"
+                    }`}
+                  >
+                    <svg
+                      className="w-5 h-5 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                )}
+                {!isCheckingEmail && emailAvailable === false && (
+                  <div
+                    className={`absolute top-1/2 transform -translate-y-1/2 ${
+                      locale === "ar" ? "left-4" : "right-4"
+                    }`}
+                  >
+                    <svg
+                      className="w-5 h-5 text-red-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </div>
+                )}
+              </div>
               {emailError && (
-                <p className="text-xs text-red-500 mt-1">{emailError}</p>
+                <div className="mt-2">
+                  <p className="text-xs text-red-500">{emailError}</p>
+                  {emailAvailable === false && (
+                    <Link
+                      href={`/${locale}/login`}
+                      className="text-xs text-blue hover:underline mt-1 inline-block"
+                    >
+                      {locale === "ar"
+                        ? "← الذهاب لتسجيل الدخول"
+                        : "Go to sign in →"}
+                    </Link>
+                  )}
+                </div>
               )}
-              {formData.email && !emailError && (
-                <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+              {!emailError && emailAvailable && (
+                <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
                   <svg
                     className="w-3 h-3"
                     fill="none"
@@ -287,7 +480,9 @@ const RegisterPage = () => {
                       d="M5 13l4 4L19 7"
                     />
                   </svg>
-                  {locale === "ar" ? "بريد إلكتروني صحيح" : "Valid email"}
+                  {locale === "ar"
+                    ? "✓ البريد الإلكتروني متاح"
+                    : "✓ Email is available"}
                 </p>
               )}
             </div>
@@ -302,24 +497,100 @@ const RegisterPage = () => {
                   ? "رقم الهاتف المصري"
                   : "Egyptian Phone Number"}
               </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                autoComplete="tel"
-                className={`w-full rounded-md border ${
-                  phoneError ? "border-red-500" : "border-stroke"
-                } bg-white py-3 px-6 text-base text-dark outline-none transition focus:border-blue focus:shadow-input`}
-                placeholder="01xxxxxxxxx"
-                dir="ltr"
-              />
+              <div className="relative">
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  autoComplete="tel"
+                  className={`w-full rounded-md border ${
+                    phoneError
+                      ? "border-red-500"
+                      : phoneAvailable
+                      ? "border-green-500"
+                      : "border-stroke"
+                  } bg-white py-3 px-6 pr-12 text-base text-dark outline-none transition focus:border-blue focus:shadow-input`}
+                  placeholder="01xxxxxxxxx"
+                  dir="ltr"
+                />
+                {isCheckingPhone && (
+                  <div className="absolute top-1/2 transform -translate-y-1/2 right-4">
+                    <svg
+                      className="animate-spin h-5 w-5 text-blue"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  </div>
+                )}
+                {!isCheckingPhone && phoneAvailable && (
+                  <div className="absolute top-1/2 transform -translate-y-1/2 right-4">
+                    <svg
+                      className="w-5 h-5 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                )}
+                {!isCheckingPhone && phoneAvailable === false && (
+                  <div className="absolute top-1/2 transform -translate-y-1/2 right-4">
+                    <svg
+                      className="w-5 h-5 text-red-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </div>
+                )}
+              </div>
               {phoneError && (
-                <p className="text-xs text-red-500 mt-1">{phoneError}</p>
+                <div className="mt-2">
+                  <p className="text-xs text-red-500">{phoneError}</p>
+                  {phoneAvailable === false && (
+                    <Link
+                      href={`/${locale}/login`}
+                      className="text-xs text-blue hover:underline mt-1 inline-block"
+                    >
+                      {locale === "ar"
+                        ? "← الذهاب لتسجيل الدخول"
+                        : "Go to sign in →"}
+                    </Link>
+                  )}
+                </div>
               )}
-              {formData.phone && !phoneError && (
-                <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+              {!phoneError && phoneAvailable && (
+                <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
                   <svg
                     className="w-3 h-3"
                     fill="none"
@@ -333,7 +604,9 @@ const RegisterPage = () => {
                       d="M5 13l4 4L19 7"
                     />
                   </svg>
-                  {locale === "ar" ? "رقم هاتف صحيح" : "Valid phone number"}
+                  {locale === "ar"
+                    ? "✓ رقم الهاتف متاح"
+                    : "✓ Phone number is available"}
                 </p>
               )}
             </div>

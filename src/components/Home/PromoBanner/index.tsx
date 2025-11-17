@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation, EffectFade } from "swiper/modules";
 import { getBanners, Banner } from "@/services/apiBanners";
+import { sanitizeHtml } from "@/utils/sanitize";
 
 // Import Swiper styles
 import "swiper/css";
@@ -90,9 +91,11 @@ const PromoBanner = () => {
                   >
                     <div
                       dangerouslySetInnerHTML={{
-                        __html: isRTL
-                          ? mainBanner.desc_ar || ""
-                          : mainBanner.desc_en || "",
+                        __html: sanitizeHtml(
+                          isRTL
+                            ? mainBanner.desc_ar || ""
+                            : mainBanner.desc_en || ""
+                        ),
                       }}
                       className="force-font mb-6"
                     />
@@ -171,9 +174,11 @@ const PromoBanner = () => {
                 <>
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: isRTL
-                        ? sideBanners[0].desc_ar || ""
-                        : sideBanners[0].desc_en || "",
+                      __html: sanitizeHtml(
+                        isRTL
+                          ? sideBanners[0].desc_ar || ""
+                          : sideBanners[0].desc_en || ""
+                      ),
                     }}
                     className="mb-4"
                   />
@@ -229,9 +234,11 @@ const PromoBanner = () => {
                 <>
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: isRTL
-                        ? sideBanners[1].desc_ar || ""
-                        : sideBanners[1].desc_en || "",
+                      __html: sanitizeHtml(
+                        isRTL
+                          ? sideBanners[1].desc_ar || ""
+                          : sideBanners[1].desc_en || ""
+                      ),
                     }}
                     className="mb-4"
                   />

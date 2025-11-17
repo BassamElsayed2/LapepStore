@@ -10,7 +10,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 5000, // 5 seconds timeout (reduced from 30s)
+  timeout: 30000, // 30 seconds timeout (increased for database operations)
   headers: {
     "Content-Type": "application/json",
   },
@@ -35,15 +35,29 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor
+// Response interceptor with retry logic
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;
   },
-  (error: AxiosError<any>) => {
+  async (error: AxiosError<any>) => {
+    const config = error.config as InternalAxiosRequestConfig & { _retry?: boolean; _retryCount?: number };
+
     // Handle errors
     if (error.code === "ECONNABORTED" || error.message.includes("timeout")) {
-      // Timeout error
+      // Timeout error - retry once for GET requests
+      if (config && config.method === "get" && !config._retry) {
+        config._retry = true;
+        console.warn("Request timeout - Retrying...");
+        
+        try {
+          return await apiClient.request(config);
+        } catch (retryError) {
+          console.error("Retry failed");
+          return Promise.reject(new Error("Request timeout. Please try again."));
+        }
+      }
+      
       console.warn("Request timeout - Backend might be slow or unavailable");
       return Promise.reject(new Error("Request timeout. Please try again."));
     } else if (error.response) {

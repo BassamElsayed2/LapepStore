@@ -6,6 +6,10 @@ import wishlistReducer from "./features/wishlist-slice";
 import productDetailsReducer from "./features/product-details";
 
 import { TypedUseSelectorHook, useSelector } from "react-redux";
+import { localStorageMiddleware, loadState } from "./middleware/localStorage";
+
+// Load persisted state from localStorage
+const persistedState = loadState();
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +18,9 @@ export const store = configureStore({
     wishlistReducer,
     productDetailsReducer,
   },
+  preloadedState: persistedState,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(localStorageMiddleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

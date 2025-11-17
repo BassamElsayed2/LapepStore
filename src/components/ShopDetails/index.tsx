@@ -13,6 +13,7 @@ import { getProductAttributes, getProductById } from "@/services/apiProducts";
 import { Link } from "@/app/i18n/navigation";
 import { useLocale } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
+import { sanitizeRichText } from "@/utils/sanitize";
 import { updateproductDetails } from "@/redux/features/product-details";
 import Categories from "../Home/Categories";
 
@@ -437,12 +438,13 @@ const ShopDetails = ({ productId }: ShopDetailsProps) => {
                       <div
                         className="text-dark-4 leading-relaxed"
                         dangerouslySetInnerHTML={{
-                          __html:
+                          __html: sanitizeRichText(
                             product.description ||
                             (locale === "ar"
                               ? product.description_ar
                               : product.description_en) ||
-                            "",
+                            ""
+                          ),
                         }}
                       />
                     </div>

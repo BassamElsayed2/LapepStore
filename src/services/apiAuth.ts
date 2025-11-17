@@ -180,4 +180,38 @@ export function getStoredUser(): User | null {
   return null;
 }
 
+/**
+ * Check if email is available (not already registered)
+ */
+export async function checkEmailAvailability(email: string): Promise<ApiResponse<{ available: boolean }>> {
+  try {
+    const response = await apiClient.get<ApiResponse<{ available: boolean }>>(
+      `/auth/check-email?email=${encodeURIComponent(email)}`
+    );
+    return response.data;
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || 'Failed to check email availability',
+    };
+  }
+}
+
+/**
+ * Check if phone is available (not already registered)
+ */
+export async function checkPhoneAvailability(phone: string): Promise<ApiResponse<{ available: boolean }>> {
+  try {
+    const response = await apiClient.get<ApiResponse<{ available: boolean }>>(
+      `/auth/check-phone?phone=${encodeURIComponent(phone)}`
+    );
+    return response.data;
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || 'Failed to check phone availability',
+    };
+  }
+}
+
 

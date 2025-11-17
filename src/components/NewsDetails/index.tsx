@@ -6,6 +6,7 @@ import Image from "next/image";
 import Breadcrumb from "../Common/Breadcrumb";
 import { getBlogById } from "@/services/apiBlogs";
 import { BlogData } from "@/types/blogItem";
+import { sanitizeRichText } from "@/utils/sanitize";
 
 const NewsDetails = () => {
   const searchParams = useSearchParams();
@@ -164,7 +165,7 @@ const NewsDetails = () => {
                 {displayContent ? (
                   <div
                     className="space-y-4"
-                    dangerouslySetInnerHTML={{ __html: displayContent }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeRichText(displayContent) }}
                   />
                 ) : (
                   <div className="space-y-4">

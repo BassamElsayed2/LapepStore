@@ -11,6 +11,7 @@ import { resetQuickView } from "@/redux/features/quickView-slice";
 import { updateproductDetails } from "@/redux/features/product-details";
 import { useLocale } from "next-intl";
 import { Link } from "@/app/i18n/navigation";
+import { sanitizeRichText } from "@/utils/sanitize";
 
 const QuickViewModal = () => {
   const { isModalOpen, closeModal } = useModalContext();
@@ -275,10 +276,11 @@ const QuickViewModal = () => {
 
               <div
                 dangerouslySetInnerHTML={{
-                  __html:
+                  __html: sanitizeRichText(
                     locale === "ar"
                       ? product.description_ar ?? ""
-                      : product.description_en ?? "",
+                      : product.description_en ?? ""
+                  ),
                 }}
               />
 
