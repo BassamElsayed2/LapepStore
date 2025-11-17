@@ -56,13 +56,16 @@ export const localStorageMiddleware: Middleware = (store) => (next) => (action) 
   // Get the updated state
   const state = store.getState();
 
+  // Type assertion for action
+  const typedAction = action as { type?: string };
+
   // Save cart if cart actions are dispatched
-  if (action.type?.startsWith('cart/')) {
+  if (typedAction.type?.startsWith('cart/')) {
     saveState(CART_STORAGE_KEY, state.cartReducer);
   }
 
   // Save wishlist if wishlist actions are dispatched
-  if (action.type?.startsWith('wishlist/')) {
+  if (typedAction.type?.startsWith('wishlist/')) {
     saveState(WISHLIST_STORAGE_KEY, state.wishlistReducer);
   }
 
