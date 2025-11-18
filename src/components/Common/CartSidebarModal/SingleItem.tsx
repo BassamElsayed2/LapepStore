@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import Image from "next/image";
 import { Link } from "@/app/i18n/navigation";
 import { useTranslations, useLocale } from "next-intl";
+import { updateCartItemQuantity } from "@/redux/features/cart-slice";
 
 const SingleItem = ({
   item,
@@ -15,43 +16,58 @@ const SingleItem = ({
   const dispatch = useDispatch<AppDispatch>();
   const t = useTranslations("cart");
   const locale = useLocale();
+  const [quantity, setQuantity] = useState(item.quantity);
 
   const handleRemoveFromCart = () => {
     dispatch(removeItemFromCart(item.id));
   };
 
+  const handleIncreaseQuantity = () => {
+    const newQuantity = quantity + 1;
+    setQuantity(newQuantity);
+    dispatch(updateCartItemQuantity({ id: item.id, quantity: newQuantity }));
+  };
+
+  const handleDecreaseQuantity = () => {
+    if (quantity > 1) {
+      const newQuantity = quantity - 1;
+      setQuantity(newQuantity);
+      dispatch(updateCartItemQuantity({ id: item.id, quantity: newQuantity }));
+    }
+  };
+
   return (
-    <div className="flex items-center justify-between gap-5">
-      <div className="w-full flex items-center gap-6">
-        <div className="flex items-center justify-center rounded-[10px] bg-gray-3 max-w-[90px] w-full h-22.5">
-          <Image
-            src={item.imgs?.thumbnails[0]}
-            alt="product"
-            width={100}
-            height={100}
-          />
+    <div className="flex flex-col gap-3 border-b border-gray-3 pb-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3 flex-1">
+          <div className="flex items-center justify-center rounded-[10px] bg-gray-3 min-w-[70px] w-[70px] h-[70px]">
+            <Image
+              src={item.imgs?.thumbnails[0]}
+              alt="product"
+              width={70}
+              height={70}
+              className="object-contain"
+            />
+          </div>
+
+          <div className="flex-1">
+            <h3 className="font-medium text-dark text-sm mb-1 ease-out duration-200 hover:text-blue line-clamp-2">
+              <Link href={`/shop-details?id=${item.id}`}> {item.title} </Link>
+            </h3>
+            <p className="text-xs text-gray-5">
+              {t("price")} ${item.discountedPrice}
+            </p>
+            <p className="text-sm font-medium text-[#22AD5C] mt-1">
+              {t("itemTotal")}: ${(item.discountedPrice * quantity).toFixed(2)}
+            </p>
+          </div>
         </div>
 
-        <div>
-          <h3 className="font-medium text-dark mb-1 ease-out duration-200 hover:text-blue">
-            <Link href={`/shop-details?id=${item.id}`}> {item.title} </Link>
-          </h3>
-          <p className="text-custom-sm">
-            {t("price")} ${item.discountedPrice}{" "}
-            <span className="text-gray-5">× {item.quantity}</span>
-          </p>
-          <p className="text-custom-sm font-medium text-blue">
-            {t("itemTotal")}: $
-            {(item.discountedPrice * item.quantity).toFixed(2)}
-          </p>
-        </div>
-      </div>
-
-      <button
-        onClick={handleRemoveFromCart}
-        aria-label="button for remove product from cart"
-        className="flex items-center justify-center rounded-lg max-w-[38px] w-full h-9.5 bg-gray-2 border border-gray-3 text-dark ease-out duration-200 hover:bg-red-light-6 hover:border-red-light-4 hover:text-red"
-      >
+        <button
+          onClick={handleRemoveFromCart}
+          aria-label="button for remove product from cart"
+          className="flex items-center justify-center rounded-lg w-8 h-8 bg-gray-2 border border-gray-3 text-dark ease-out duration-200 hover:bg-red-light-6 hover:border-red-light-4 hover:text-red flex-shrink-0"
+        >
         <svg
           className="fill-current"
           width="22"
@@ -79,7 +95,63 @@ const SingleItem = ({
             fill=""
           />
         </svg>
-      </button>
+        </button>
+      </div>
+
+      {/* Quantity Controls */}
+      <div className="flex items-center gap-3">
+        <span className="text-sm text-gray-5">{t("quantity")}:</span>
+        <div className="flex items-center rounded-md border border-gray-3 bg-white">
+          <button
+            onClick={handleDecreaseQuantity}
+            disabled={quantity <= 1}
+            aria-label="decrease quantity"
+            className="flex items-center justify-center w-8 h-8 ease-out duration-200 hover:text-[#22AD5C] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg
+              className="fill-current"
+              width="16"
+              height="16"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3.33301 10.0001C3.33301 9.53984 3.7061 9.16675 4.16634 9.16675H15.833C16.2932 9.16675 16.6663 9.53984 16.6663 10.0001C16.6663 10.4603 16.2932 10.8334 15.833 10.8334H4.16634C3.7061 10.8334 3.33301 10.4603 3.33301 10.0001Z"
+                fill=""
+              />
+            </svg>
+          </button>
+
+          <span className="flex items-center justify-center min-w-[40px] h-8 text-sm font-medium border-x border-gray-3">
+            {quantity}
+          </span>
+
+          <button
+            onClick={handleIncreaseQuantity}
+            aria-label="increase quantity"
+            className="flex items-center justify-center w-8 h-8 ease-out duration-200 hover:text-[#22AD5C]"
+          >
+            <svg
+              className="fill-current"
+              width="16"
+              height="16"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3.33301 10C3.33301 9.5398 3.7061 9.16671 4.16634 9.16671H15.833C16.2932 9.16671 16.6663 9.5398 16.6663 10C16.6663 10.4603 16.2932 10.8334 15.833 10.8334H4.16634C3.7061 10.8334 3.33301 10.4603 3.33301 10Z"
+                fill=""
+              />
+              <path
+                d="M9.99967 16.6667C9.53944 16.6667 9.16634 16.2936 9.16634 15.8334L9.16634 4.16671C9.16634 3.70647 9.53944 3.33337 9.99967 3.33337C10.4599 3.33337 10.833 3.70647 10.833 4.16671L10.833 15.8334C10.833 16.2936 10.4599 16.6667 9.99967 16.6667Z"
+                fill=""
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

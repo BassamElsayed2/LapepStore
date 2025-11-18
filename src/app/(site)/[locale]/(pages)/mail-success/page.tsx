@@ -3,7 +3,7 @@ import MailSuccess from "@/components/MailSuccess";
 
 import { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Mail Success Page | lapip Store Nextjs E-commerce template",
+  title: "Mail Success Page | lapip Store",
   description: "This is Mail Success Page for lapip Store Template",
   // other metadata
 };

@@ -78,7 +78,7 @@ const CartSidebarModal = () => {
           </div>
 
           <div className="h-[66vh] overflow-y-auto no-scrollbar">
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4">
               {/* <!-- cart item --> */}
               {cartItems.length > 0 ? (
                 cartItems.map((item, key) => (
@@ -102,14 +102,6 @@ const CartSidebarModal = () => {
             </div>
 
             <div className="flex items-center gap-4">
-              <Link
-                onClick={() => closeCartModal()}
-                href={`/${locale}/cart`}
-                className="w-full flex justify-center font-medium text-white bg-blue py-[13px] px-6 rounded-md ease-out duration-200 hover:bg-blue-dark"
-              >
-                {t("viewCart")}
-              </Link>
-
               <Link
                 onClick={() => {
                   console.log(

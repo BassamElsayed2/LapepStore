@@ -7,6 +7,7 @@ import PreviewSliderModal from "@/components/Common/PreviewSlider";
 import ScrollToTop from "@/components/Common/ScrollToTop";
 import PreLoader from "@/components/Common/PreLoader";
 import Navbar from "@/components/Navbar";
+import BottomNav from "@/components/Navbar/BottomNav";
 import Footer from "@/components/Footer";
 import { CartModalProvider } from "@/app/context/CartSidebarModalContext";
 import { ModalProvider } from "@/app/context/QuickViewModalContext";
@@ -38,6 +39,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
             <ModalProvider>
               <PreviewSliderProvider>
                 <Navbar />
+                <BottomNav />
                 {children}
                 {/* <SplashCursor /> */}
                 <QuickViewModal />

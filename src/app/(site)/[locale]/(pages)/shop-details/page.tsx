@@ -3,7 +3,7 @@ import ShopDetails from "@/components/ShopDetails";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Shop Details Page | lapip Store Nextjs E-commerce template",
+  title: "Shop Details Page | lapip Store",
   description: "This is Shop Details Page for lapip Store Template",
   // other metadata
 };

@@ -3,7 +3,7 @@ import BlogGridWithSidebar from "@/components/BlogGridWithSidebar";
 
 import { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Blog Grid Page | lapip Store Nextjs E-commerce template",
+  title: "Blog Grid Page | lapip Store",
   description: "This is Blog Grid Page for lapip Store Template",
   // other metadata
 };

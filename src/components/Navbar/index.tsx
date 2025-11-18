@@ -26,10 +26,15 @@ const Navbar = () => {
   const cartItems = useAppSelector((state) => state.cartReducer.items);
   const totalPrice = useSelector(selectTotalPrice);
 
-  // Sticky menu on scroll
+  // Sticky menu on scroll - only for desktop
   const handleStickyMenu = () => {
-    if (window.scrollY >= 80) {
-      setStickyMenu(true);
+    // Only apply sticky behavior on desktop (lg breakpoint and above)
+    if (window.innerWidth >= 1024) {
+      if (window.scrollY >= 80) {
+        setStickyMenu(true);
+      } else {
+        setStickyMenu(false);
+      }
     } else {
       setStickyMenu(false);
     }
@@ -37,20 +42,24 @@ const Navbar = () => {
 
   useEffect(() => {
     window.addEventListener("scroll", handleStickyMenu);
-    return () => window.removeEventListener("scroll", handleStickyMenu);
+    window.addEventListener("resize", handleStickyMenu);
+    return () => {
+      window.removeEventListener("scroll", handleStickyMenu);
+      window.removeEventListener("resize", handleStickyMenu);
+    };
   }, []);
 
   return (
     <>
       <header
-        className={`fixed left-0 top-0 w-full z-[20] bg-white transition-all ease-in-out duration-300 ${
-          stickyMenu ? "shadow-md" : ""
+        className={`relative lg:fixed left-0 top-0 w-full z-[20] bg-white shadow-md lg:shadow-none lg:transition-all lg:ease-in-out lg:duration-300 ${
+          stickyMenu ? "lg:shadow-md" : ""
         }`}
       >
         <div className="w-full mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
           <div
-            className={`flex items-center justify-between gap-2 transition-all duration-200 ${
-              stickyMenu ? "py-2 sm:py-3" : "py-3 sm:py-4"
+            className={`flex items-center justify-between gap-2 py-3 sm:py-4 lg:transition-all lg:duration-200 ${
+              stickyMenu ? "lg:!py-3" : ""
             }`}
           >
             {/* Logo */}
@@ -125,8 +134,8 @@ const Navbar = () => {
         <NavigationLinks stickyMenu={stickyMenu} />
       </header>
 
-      {/* Spacer to prevent content from going under fixed navbar */}
-      <div className="h-[160px] sm:h-[170px] md:h-[180px] lg:h-[130px]" />
+      {/* Spacer to prevent content from going under fixed navbar - only on desktop */}
+      <div className="hidden lg:block lg:h-[130px]" />
     </>
   );
 };

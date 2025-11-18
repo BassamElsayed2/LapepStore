@@ -3,7 +3,7 @@ import React from "react";
 
 import { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Blog Details Page | lapip Store Nextjs E-commerce template",
+  title: "Blog Details Page | lapip Store",
   description: "This is Blog Details Page for lapip Store Template",
   // other metadata
 };

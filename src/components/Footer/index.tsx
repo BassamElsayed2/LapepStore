@@ -23,22 +23,22 @@ const Footer = () => {
               <p className="font-medium">{t("weAccept")}</p>
 
               <div className="flex flex-wrap items-center gap-6">
-                <a href="#" aria-label="payment system with visa card">
+                {/* <a href="#" aria-label="payment system with visa card">
                   <Image
                     src="/images/payment/payment-01.svg"
                     alt="visa card"
                     width={66}
                     height={22}
                   />
-                </a>
-                <a href="#" aria-label="payment system with paypal">
+                </a> */}
+                {/* <a href="#" aria-label="payment system with paypal">
                   <Image
                     src="/images/payment/payment-02.svg"
                     alt="paypal"
                     width={18}
                     height={21}
                   />
-                </a>
+                </a> */}
                 <a href="#" aria-label="payment system with master card">
                   <Image
                     src="/images/payment/payment-03.svg"
@@ -47,7 +47,7 @@ const Footer = () => {
                     height={24}
                   />
                 </a>
-                <a href="#" aria-label="payment system with apple pay">
+                {/* <a href="#" aria-label="payment system with apple pay">
                   <Image
                     src="/images/payment/payment-04.svg"
                     alt="apple pay"
@@ -62,7 +62,7 @@ const Footer = () => {
                     width={56}
                     height={22}
                   />
-                </a>
+                </a> */}
               </div>
             </div>
           </div>
