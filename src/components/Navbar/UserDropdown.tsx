@@ -23,8 +23,6 @@ const UserDropdown = () => {
   const router = useRouter();
   const { user, signOut } = useAuth();
 
-  console.log("👤 UserDropdown: Received user:", user ? user.email : "null");
-
   const isGuest = !user;
 
   const handleLogout = async () => {

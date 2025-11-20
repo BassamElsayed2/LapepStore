@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import toast from "react-hot-toast";
@@ -44,11 +50,21 @@ const translateLoginError = (error: string, locale: string): string => {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signUp: (data: RegisterData) => Promise<{ success: boolean; data?: any; error?: string }>;
-  signIn: (email: string, password: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+  signUp: (
+    data: RegisterData
+  ) => Promise<{ success: boolean; data?: any; error?: string }>;
+  signIn: (
+    email: string,
+    password: string
+  ) => Promise<{ success: boolean; data?: any; error?: string }>;
   signOut: () => Promise<void>;
-  updateUserProfile: (data: Partial<User>) => Promise<{ success: boolean; data?: any; error?: string }>;
-  updatePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
+  updateUserProfile: (
+    data: Partial<User>
+  ) => Promise<{ success: boolean; data?: any; error?: string }>;
+  updatePassword: (
+    currentPassword: string,
+    newPassword: string
+  ) => Promise<{ success: boolean; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -58,8 +74,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const locale = useLocale();
-
-  console.log("🎯 AuthProvider: Rendering with user:", user ? user.email : "null");
 
   useEffect(() => {
     // Get initial user from localStorage
@@ -136,9 +150,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const result = await loginApi({ email, password });
 
       if (result.success && result.data) {
-        console.log("🔐 AuthContext: Setting user data", result.data.user);
         setUser(result.data.user);
-        console.log("✅ AuthContext: User data set successfully");
 
         toast.success(
           locale === "ar" ? "تم تسجيل الدخول بنجاح!" : "Signed in successfully!"
@@ -151,9 +163,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // Check addresses
         const addressesResult = await getAddresses();
-        const hasAddress = addressesResult.success && 
-                          addressesResult.data && 
-                          addressesResult.data.length > 0;
+        const hasAddress =
+          addressesResult.success &&
+          addressesResult.data &&
+          addressesResult.data.length > 0;
 
         // Redirect logic based on cart and address state
         if (hasAddress && hasCartItems) {
@@ -280,4 +293,3 @@ export const useAuth = () => {
   }
   return context;
 };
-

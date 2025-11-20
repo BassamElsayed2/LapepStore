@@ -267,9 +267,6 @@ const Header = () => {
                   </svg>
 
                   <div>
-                    <span className="block text-2xs text-dark-4 uppercase">
-                      {t("support")}
-                    </span>
                     <p className="font-medium text-custom-sm text-dark">
                       {t("contactUs")}
                     </p>
@@ -319,9 +316,6 @@ const Header = () => {
                   </span>
 
                   <div>
-                    <span className="block text-2xs text-dark-4 uppercase">
-                      {commonT("cart")}
-                    </span>
                     <p className="font-medium text-custom-sm text-dark">
                       {totalPrice} {locale === "ar" ? "جنية" : "Pound"}
                     </p>

@@ -106,10 +106,6 @@ const CartSidebarModal = () => {
             <div className="flex items-center gap-4">
               <Link
                 onClick={() => {
-                  console.log(
-                    "Checkout clicked, navigating to:",
-                    `/${locale}/checkout`
-                  );
                   closeCartModal();
                 }}
                 href={`/${locale}/checkout`}
