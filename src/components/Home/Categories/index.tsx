@@ -136,6 +136,9 @@ const Categories = () => {
           <Swiper
             ref={sliderRef}
             slidesPerView={6}
+            autoHeight={false}
+            observer={true}
+            observeParents={true}
             breakpoints={{
               // when window width is >= 640px
               0: {
@@ -152,7 +155,7 @@ const Categories = () => {
             }}
           >
             {categories?.map((item, key) => (
-              <SwiperSlide key={key}>
+              <SwiperSlide key={key} className="!h-auto">
                 <SingleItem item={item} />
               </SwiperSlide>
             ))}

@@ -284,5 +284,12 @@
     "phone": "Phone",
     "address": "Address",
     "area": "Area"
+  },
+  "ageVerification": {
+    "title": "Age Verification",
+    "message": "You must be 18 years or older to enter this website. Are you 18 years or older?",
+    "yes": "Yes, I am 18 or older",
+    "no": "No, I am under 18",
+    "note": "By clicking Yes, you certify that you are 18 years of age or older."
   }
 }

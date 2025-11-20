@@ -10,13 +10,14 @@ const SingleItem = ({ item }: { item: Category }) => {
   return (
     <Link
       href={`/${locale}/shop?category=${item.id}`}
-      className="group flex flex-col items-center"
+      className="group flex flex-col items-center h-full"
     >
-      <div className="max-w-[130px] w-full bg-[#F2F3F8] h-32.5 rounded-full flex items-center justify-center mb-4">
+      <div className="max-w-[130px] w-full bg-[#F2F3F8] h-32.5 rounded-full flex items-center justify-center mb-4 overflow-hidden flex-shrink-0">
         <img
           src={item.image_url || "/images/category/default-category.png"}
           alt="Category"
           className="w-full h-full object-cover rounded-full"
+          loading="lazy"
         />
       </div>
 

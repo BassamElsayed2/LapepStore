@@ -204,22 +204,6 @@ const QuickViewModal = () => {
             </div>
 
             <div className="max-w-[445px] w-full">
-              {product.offer_price && product.offer_price < product.price && (
-                <span className="inline-block text-custom-xs font-medium text-white py-1 px-3 bg-green mb-6.5">
-                  {locale === "ar"
-                    ? `خصم ${Math.round(
-                        ((product.price - product.offer_price) /
-                          product.price) *
-                          100
-                      )}%`
-                    : `SALE ${Math.round(
-                        ((product.price - product.offer_price) /
-                          product.price) *
-                          100
-                      )}% OFF`}
-                </span>
-              )}
-
               <h3 className="font-semibold text-xl xl:text-heading-5 text-dark mb-4">
                 {locale === "ar" ? product.name_ar : product.name_en}
               </h3>
