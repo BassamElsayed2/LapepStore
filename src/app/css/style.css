@@ -340,8 +340,6 @@ input[type="search"]::-webkit-search-results-decoration {
   font-family: Cairo;
 }
 
-
-
 @layer base {
   * {
     @apply border-border;
@@ -402,4 +400,12 @@ input[type="search"]::-webkit-search-results-decoration {
 
 .animate-slideInRight {
   animation: slideInRight 0.5s ease-out;
+}
+
+.react-slick {
+  height: 450px;
+}
+
+.react-slick-categories {
+  height: 280px;
 }
