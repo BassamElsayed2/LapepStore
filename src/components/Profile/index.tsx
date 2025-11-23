@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import { useLocale } from "next-intl";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useAppSelector } from "@/redux/store";
 import Breadcrumb from "../Common/Breadcrumb";
 import {
   getAddresses,
@@ -22,7 +23,9 @@ import { EGYPTIAN_GOVERNORATES } from "@/constants/governorates";
 const Profile = () => {
   const locale = useLocale();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { user, updateUserProfile, updatePassword, loading } = useAuth();
+  const cartItems = useAppSelector((state) => state.cartReducer.items);
 
   // Get tab from URL or default to "profile"
   const tabFromUrl = searchParams.get("tab") || "profile";
@@ -376,6 +379,18 @@ const Profile = () => {
         );
         closeAddressModal();
         loadAddresses();
+
+        // Redirect after adding a new address (not when editing)
+        if (!editingAddress) {
+          // Check if there are items in cart
+          if (cartItems.length > 0) {
+            // Redirect to checkout if cart has items
+            router.push(`/${locale}/checkout`);
+          } else {
+            // Redirect to shop if cart is empty
+            router.push(`/${locale}/shop`);
+          }
+        }
       } else {
         toast.error(response.error || "Failed to save address");
       }

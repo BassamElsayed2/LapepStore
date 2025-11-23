@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
@@ -10,7 +10,6 @@ import { useSelector } from "react-redux";
 import { selectTotalPrice } from "@/redux/features/cart-slice";
 
 const BottomNav = () => {
-  const [showBottomNav, setShowBottomNav] = useState(false);
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
@@ -25,20 +24,6 @@ const BottomNav = () => {
 
   const isCartPage = pathname === `/${locale}/cart`;
   const isCheckoutPage = pathname === `/${locale}/checkout`;
-
-  useEffect(() => {
-    const handleScroll = () => {
-      // Show bottom nav after scrolling 400px (after hero section typically)
-      if (window.scrollY > 400) {
-        setShowBottomNav(true);
-      } else {
-        setShowBottomNav(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const navItems = [
     {
@@ -82,7 +67,7 @@ const BottomNav = () => {
       {/* Cart Summary Bar - Shows when cart has items and not on cart page */}
       <div
         className={`fixed left-0 right-0 bg-[#22AD5C] text-white z-50 lg:hidden cursor-pointer overflow-hidden transition-all duration-500 ease-out ${
-          cartItemsCount > 0 && !isCartPage && showBottomNav
+          cartItemsCount > 0 && !isCartPage
             ? "bottom-16 sm:bottom-18 opacity-100 translate-y-0"
             : "bottom-16 sm:bottom-18 opacity-0 translate-y-full pointer-events-none"
         }`}
@@ -121,13 +106,7 @@ const BottomNav = () => {
       </div>
 
       {/* Bottom Navigation */}
-      <nav
-        className={`fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 lg:hidden transition-all duration-500 ease-out ${
-          showBottomNav
-            ? "translate-y-0 opacity-100"
-            : "translate-y-full opacity-0"
-        }`}
-      >
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 lg:hidden">
         <div className="grid grid-cols-4 h-16 sm:h-18">
           {navItems.map((item, index) => {
             const isActive = pathname === item.href;
@@ -142,11 +121,6 @@ const BottomNav = () => {
                     ? "text-[#22AD5C]"
                     : "text-gray-600 hover:text-[#22AD5C]"
                 }`}
-                style={{
-                  animation: showBottomNav
-                    ? `slideUpFade 0.4s ease-out ${index * 0.1}s both`
-                    : "none",
-                }}
               >
                 <div className="relative transition-transform hover:scale-110 duration-200">
                   <Icon className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2} />
