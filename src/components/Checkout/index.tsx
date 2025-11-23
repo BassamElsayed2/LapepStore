@@ -310,7 +310,8 @@ const Checkout = () => {
                           {item.title}
                         </h3>
                         <p className="text-gray-5 text-sm">
-                          {locale === "ar" ? "السعر:" : "Price:"} $
+                          {locale === "ar" ? "السعر:" : "Price:"}{" "}
+                          {locale === "ar" ? "ج.م" : "EGP"}{" "}
                           {item.discountedPrice}
                         </p>
                       </div>
@@ -380,7 +381,8 @@ const Checkout = () => {
                         {/* Item Total */}
                         <div className="min-w-[80px] text-right">
                           <p className="font-medium text-dark">
-                            ${(item.discountedPrice * item.quantity).toFixed(2)}
+                            {locale === "ar" ? "ج.م" : "EGP"}{" "}
+                            {(item.discountedPrice * item.quantity).toFixed(2)}
                           </p>
                         </div>
 
@@ -543,7 +545,8 @@ const Checkout = () => {
                     </div>
                     <div>
                       <p className="text-dark text-right">
-                        ${totalPrice.toFixed(2)}
+                        {locale === "ar" ? "ج.م" : "EGP"}{" "}
+                        {totalPrice.toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -562,7 +565,8 @@ const Checkout = () => {
                         </p>
                       ) : shippingFee !== null ? (
                         <p className="text-dark text-right">
-                          ${shippingFee.toFixed(2)}
+                          {locale === "ar" ? "ج.م" : "EGP"}{" "}
+                          {shippingFee.toFixed(2)}
                         </p>
                       ) : selectedAddress ? (
                         <p className="text-gray-5 text-sm text-right">
@@ -585,7 +589,8 @@ const Checkout = () => {
                     </div>
                     <div>
                       <p className="font-medium text-lg text-dark text-right">
-                        ${calculateTotal().toFixed(2)}
+                        {locale === "ar" ? "ج.م" : "EGP"}{" "}
+                        {calculateTotal().toFixed(2)}
                       </p>
                     </div>
                   </div>

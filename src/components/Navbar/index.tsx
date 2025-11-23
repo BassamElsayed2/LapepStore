@@ -122,7 +122,9 @@ const Navbar = () => {
               {/* Logo */}
               <Link href={`/${locale}`} className="flex-shrink-0">
                 <img
-                  src="/images/logo/logo.png"
+                  src={`/images/logo/${
+                    locale === "ar" ? "logoar.png" : "logoen.png"
+                  }`}
                   alt="Lapip Store"
                   className="h-8 sm:h-10 md:h-12 w-auto object-contain"
                 />

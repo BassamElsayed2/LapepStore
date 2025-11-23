@@ -1,24 +1,20 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { useLocale } from "next-intl";
 import Link from "next/link";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination, Navigation, EffectFade } from "swiper/modules";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import { getBanners, Banner } from "@/services/apiBanners";
 import { sanitizeHtml } from "@/utils/sanitize";
-
-// Import Swiper styles
-import "swiper/css";
-import "swiper/css/pagination";
-import "swiper/css/navigation";
-import "swiper/css/effect-fade";
 
 const PromoBanner = () => {
   const locale = useLocale();
   const [currentLocale, setCurrentLocale] = useState(locale);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [loading, setLoading] = useState(true);
+  const sliderRef = useRef<Slider>(null);
   const isRTL = currentLocale === "ar";
 
   // Monitor locale changes
@@ -64,30 +60,41 @@ const PromoBanner = () => {
     <section className="overflow-hidden py-20">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
         {/* Main Promo Banner with Slider */}
-        <div className="mb-7.5 rounded-lg bg-gradient-to-r from-[#F5F5F7] to-[#E8E8EA] overflow-hidden">
-          <Swiper
-            modules={[Autoplay, Pagination, Navigation, EffectFade]}
-            spaceBetween={0}
-            slidesPerView={1}
-            effect="fade"
-            autoplay={{
-              delay: 5000,
-              disableOnInteraction: false,
-            }}
-            pagination={{
-              clickable: true,
-              dynamicBullets: true,
-            }}
-            navigation={true}
-            loop={true}
+        <div className="mb-7.5 rounded-lg bg-gradient-to-r from-[#F5F5F7] to-[#E8E8EA] overflow-hidden relative">
+          <Slider
+            ref={sliderRef}
+            slidesToShow={1}
+            slidesToScroll={1}
+            infinite={true}
+            autoplay={true}
+            autoplaySpeed={5000}
+            fade={true}
+            arrows={true}
+            dots={true}
+            rtl={isRTL}
             className="promo-swiper"
-            dir={isRTL ? "rtl" : "ltr"}
+            prevArrow={
+              <button
+                type="button"
+                className="slick-prev"
+                onClick={() => sliderRef.current?.slickPrev()}
+              />
+            }
+            nextArrow={
+              <button
+                type="button"
+                className="slick-next"
+                onClick={() => sliderRef.current?.slickNext()}
+              />
+            }
           >
             {mainBanner ? (
-              <SwiperSlide>
+              <div>
                 <div className="flex flex-col md:flex-row items-center gap-8 px-6 py-8 min-h-[350px]">
                   <div
-                    className={`flex-1 ${isRTL ? "text-right" : "text-left"} animate-fade-in-up`}
+                    className={`flex-1 ${
+                      isRTL ? "text-right" : "text-left"
+                    } animate-fade-in-up`}
                   >
                     <div
                       dangerouslySetInnerHTML={{
@@ -115,11 +122,13 @@ const PromoBanner = () => {
                     />
                   </div>
                 </div>
-              </SwiperSlide>
+              </div>
             ) : (
-              <SwiperSlide>
+              <div>
                 <div className="flex flex-col md:flex-row items-center gap-8 px-6 py-8 min-h-[350px]">
-                  <div className={`flex-1 ${isRTL ? "text-right" : "text-left"}`}>
+                  <div
+                    className={`flex-1 ${isRTL ? "text-right" : "text-left"}`}
+                  >
                     <span className="block font-medium text-xl text-dark mb-3">
                       {isRTL ? "آيفون 14 بلس" : "Apple iPhone 14 Plus"}
                     </span>
@@ -146,9 +155,9 @@ const PromoBanner = () => {
                     />
                   </div>
                 </div>
-              </SwiperSlide>
+              </div>
             )}
-          </Swiper>
+          </Slider>
         </div>
 
         {/* Side Banners Grid */}
@@ -157,9 +166,7 @@ const PromoBanner = () => {
           <div className="group flex flex-col md:flex-row items-center gap-4 rounded-lg bg-[#DBF4F3] py-4 px-4 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
             <div className="flex-shrink-0 overflow-hidden rounded-lg">
               <Image
-                src={
-                  sideBanners[0]?.image || "/images/promo/promo-02.png"
-                }
+                src={sideBanners[0]?.image || "/images/promo/promo-02.png"}
                 alt="promo img"
                 width={241}
                 height={241}
@@ -167,9 +174,7 @@ const PromoBanner = () => {
               />
             </div>
 
-            <div
-              className={`flex-1 ${isRTL ? "text-right" : "text-left"}`}
-            >
+            <div className={`flex-1 ${isRTL ? "text-right" : "text-left"}`}>
               {sideBanners[0] ? (
                 <>
                   <div
@@ -217,9 +222,7 @@ const PromoBanner = () => {
           <div className="group flex flex-col md:flex-row items-center gap-4 rounded-lg bg-[#FFECE1] py-4 px-4 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
             <div className="flex-shrink-0 overflow-hidden rounded-lg">
               <Image
-                src={
-                  sideBanners[1]?.image || "/images/promo/promo-03.png"
-                }
+                src={sideBanners[1]?.image || "/images/promo/promo-03.png"}
                 alt="promo img"
                 width={200}
                 height={200}
@@ -227,9 +230,7 @@ const PromoBanner = () => {
               />
             </div>
 
-            <div
-              className={`flex-1 ${isRTL ? "text-right" : "text-left"}`}
-            >
+            <div className={`flex-1 ${isRTL ? "text-right" : "text-left"}`}>
               {sideBanners[1] ? (
                 <>
                   <div
@@ -276,27 +277,29 @@ const PromoBanner = () => {
       </div>
 
       <style jsx global>{`
-        .promo-swiper .swiper-button-next,
-        .promo-swiper .swiper-button-prev {
-          color: #0063F7;
+        .promo-swiper .slick-prev,
+        .promo-swiper .slick-next {
+          color: #0063f7;
           background: white;
           width: 40px;
           height: 40px;
           border-radius: 50%;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          z-index: 10;
         }
 
-        .promo-swiper .swiper-button-next:after,
-        .promo-swiper .swiper-button-prev:after {
+        .promo-swiper .slick-prev:before,
+        .promo-swiper .slick-next:before {
+          color: #0063f7;
           font-size: 16px;
         }
 
-        .promo-swiper .swiper-pagination-bullet {
-          background: #0063F7;
+        .promo-swiper .slick-dots li button:before {
+          color: #0063f7;
           opacity: 0.5;
         }
 
-        .promo-swiper .swiper-pagination-bullet-active {
+        .promo-swiper .slick-dots li.slick-active button:before {
           opacity: 1;
         }
 

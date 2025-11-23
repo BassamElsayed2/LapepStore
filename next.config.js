@@ -49,7 +49,7 @@ const nextConfig = {
   experimental: {
     optimizeCss: true,
     scrollRestoration: true,
-    optimizePackageImports: ["swiper", "react-redux", "@reduxjs/toolkit"],
+    optimizePackageImports: ["react-redux", "@reduxjs/toolkit"],
   },
   // Mobile performance optimizations
   onDemandEntries: {

@@ -1,19 +1,17 @@
 "use client";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { useCallback, useRef, useEffect, useState } from "react";
+import Slider from "react-slick";
+import { useRef, useEffect, useState } from "react";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 import type { BlogData } from "@/types/blogItem";
 import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { getBlogs } from "@/services/apiBlogs";
-
-// Import Swiper styles
-import "swiper/css/navigation";
-import "swiper/css";
 import SingleItem from "./SingleItem";
 
 const News = () => {
-  const sliderRef = useRef<any>(null);
+  const sliderRef = useRef<Slider>(null);
   const t = useTranslations("news");
   const locale = useLocale();
   const isRTL = locale === "ar";
@@ -33,16 +31,6 @@ const News = () => {
     };
 
     fetchBlogs();
-  }, []);
-
-  const handlePrev = useCallback(() => {
-    if (!sliderRef.current) return;
-    sliderRef.current.swiper.slidePrev();
-  }, []);
-
-  const handleNext = useCallback(() => {
-    if (!sliderRef.current) return;
-    sliderRef.current.swiper.slideNext();
   }, []);
 
   // Don't render the section if there are no blogs
@@ -78,7 +66,11 @@ const News = () => {
 
               <div className="flex items-center gap-3">
                 <div
-                  onClick={isRTL ? handleNext : handlePrev}
+                  onClick={() =>
+                    isRTL
+                      ? sliderRef.current?.slickNext()
+                      : sliderRef.current?.slickPrev()
+                  }
                   className="swiper-button-prev"
                 >
                   <svg
@@ -100,7 +92,11 @@ const News = () => {
                 </div>
 
                 <div
-                  onClick={isRTL ? handlePrev : handleNext}
+                  onClick={() =>
+                    isRTL
+                      ? sliderRef.current?.slickPrev()
+                      : sliderRef.current?.slickNext()
+                  }
                   className="swiper-button-next"
                 >
                   <svg
@@ -123,30 +119,44 @@ const News = () => {
               </div>
             </div>
 
-            <Swiper
+            <Slider
               ref={sliderRef}
-              slidesPerView={3}
-              spaceBetween={20}
-              breakpoints={{
-                // when window width is >= 640px
-                0: {
-                  slidesPerView: 1,
+              slidesToShow={3}
+              slidesToScroll={1}
+              infinite={false}
+              arrows={false}
+              dots={false}
+              rtl={isRTL}
+              responsive={[
+                {
+                  breakpoint: 1024,
+                  settings: {
+                    slidesToShow: 3,
+                    slidesToScroll: 1,
+                  },
                 },
-                768: {
-                  slidesPerView: 2,
+                {
+                  breakpoint: 768,
+                  settings: {
+                    slidesToShow: 2,
+                    slidesToScroll: 1,
+                  },
                 },
-                // when window width is >= 768px
-                1024: {
-                  slidesPerView: 3,
+                {
+                  breakpoint: 640,
+                  settings: {
+                    slidesToShow: 1,
+                    slidesToScroll: 1,
+                  },
                 },
-              }}
+              ]}
             >
               {blogs.map((item: BlogData) => (
-                <SwiperSlide key={item.id}>
+                <div key={item.id} className="px-2">
                   <SingleItem newsItem={item} />
-                </SwiperSlide>
+                </div>
               ))}
-            </Swiper>
+            </Slider>
           </div>
         </div>
       </div>

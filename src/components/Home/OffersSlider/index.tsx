@@ -1,30 +1,18 @@
 "use client";
-import React, { useCallback, useRef } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
+import React, { useRef } from "react";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import { useLimitedOffers } from "@/hooks/useProducts";
 import { useLocale } from "next-intl";
 import ProductItem from "@/components/Common/ProductItem";
 import Image from "next/image";
 
-// Import Swiper styles
-import "swiper/css/navigation";
-import "swiper/css";
-
 const OffersSlider = () => {
   const locale = useLocale();
-  const sliderRef = useRef<any>(null);
+  const sliderRef = useRef<Slider>(null);
 
   const { data: products, isLoading, error } = useLimitedOffers();
-
-  const handlePrev = useCallback(() => {
-    if (!sliderRef.current) return;
-    sliderRef.current.swiper.slidePrev();
-  }, []);
-
-  const handleNext = useCallback(() => {
-    if (!sliderRef.current) return;
-    sliderRef.current.swiper.slideNext();
-  }, []);
 
   // Don't render if no products
   if (!isLoading && (!products || products.length === 0)) {
@@ -68,7 +56,10 @@ const OffersSlider = () => {
                 locale === "ar" ? "flex-row-reverse" : ""
               }`}
             >
-              <button onClick={handlePrev} className="swiper-button-prev">
+              <button
+                onClick={() => sliderRef.current?.slickPrev()}
+                className="swiper-button-prev"
+              >
                 <svg
                   className="fill-current"
                   width="24"
@@ -86,7 +77,10 @@ const OffersSlider = () => {
                 </svg>
               </button>
 
-              <button onClick={handleNext} className="swiper-button-next">
+              <button
+                onClick={() => sliderRef.current?.slickNext()}
+                className="swiper-button-next"
+              >
                 <svg
                   className="fill-current"
                   width="24"
@@ -129,35 +123,50 @@ const OffersSlider = () => {
 
           {/* Products Slider */}
           {!isLoading && !error && products && products.length > 0 && (
-            <Swiper
+            <Slider
               ref={sliderRef}
-              slidesPerView={4}
-              spaceBetween={30}
-              breakpoints={{
-                0: {
-                  slidesPerView: 1,
-                  spaceBetween: 20,
+              slidesToShow={4}
+              slidesToScroll={1}
+              infinite={true}
+              arrows={false}
+              dots={false}
+              responsive={[
+                {
+                  breakpoint: 1280,
+                  settings: {
+                    slidesToShow: 4,
+                    slidesToScroll: 1,
+                  },
                 },
-                640: {
-                  slidesPerView: 2,
-                  spaceBetween: 20,
+                {
+                  breakpoint: 1024,
+                  settings: {
+                    slidesToShow: 3,
+                    slidesToScroll: 1,
+                  },
                 },
-                1024: {
-                  slidesPerView: 3,
-                  spaceBetween: 25,
+                {
+                  breakpoint: 640,
+                  settings: {
+                    slidesToShow: 2,
+                    slidesToScroll: 1,
+                  },
                 },
-                1280: {
-                  slidesPerView: 4,
-                  spaceBetween: 30,
+                {
+                  breakpoint: 0,
+                  settings: {
+                    slidesToShow: 1,
+                    slidesToScroll: 1,
+                  },
                 },
-              }}
+              ]}
             >
               {products.map((product, index) => (
-                <SwiperSlide key={product.id || index}>
+                <div key={product.id || index} className="px-3">
                   <ProductItem item={product} />
-                </SwiperSlide>
+                </div>
               ))}
-            </Swiper>
+            </Slider>
           )}
         </div>
       </div>

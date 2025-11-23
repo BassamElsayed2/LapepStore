@@ -1,30 +1,17 @@
 "use client";
-import React from "react";
+import React, { useRef } from "react";
 import shopData from "@/components/Shop/shopData";
 import ProductItem from "@/components/Common/ProductItem";
 import Image from "next/image";
 import { Link } from "@/app/i18n/navigation";
-
-import { Swiper, SwiperSlide } from "swiper/react";
-import { useCallback, useRef } from "react";
-import "swiper/css/navigation";
-import "swiper/css";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import { useLocale } from "next-intl";
 
 const RecentlyViewdItems = () => {
-  const sliderRef = useRef<any>(null);
-
+  const sliderRef = useRef<Slider>(null);
   const locale = useLocale();
-
-  const handlePrev = useCallback(() => {
-    if (!sliderRef.current) return;
-    sliderRef.current.swiper.slidePrev();
-  }, []);
-
-  const handleNext = useCallback(() => {
-    if (!sliderRef.current) return;
-    sliderRef.current.swiper.slideNext();
-  }, []);
 
   return (
     <section className="overflow-hidden pt-17.5">
@@ -48,7 +35,10 @@ const RecentlyViewdItems = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              <button onClick={handlePrev} className="swiper-button-prev">
+              <button
+                onClick={() => sliderRef.current?.slickPrev()}
+                className="swiper-button-prev"
+              >
                 {locale === "en" ? (
                   <svg
                     className="fill-current"
@@ -84,7 +74,10 @@ const RecentlyViewdItems = () => {
                 )}
               </button>
 
-              <button onClick={handleNext} className="swiper-button-next">
+              <button
+                onClick={() => sliderRef.current?.slickNext()}
+                className="swiper-button-next"
+              >
                 {locale === "en" ? (
                   <svg
                     className="fill-current"
@@ -122,18 +115,50 @@ const RecentlyViewdItems = () => {
             </div>
           </div>
 
-          <Swiper
+          <Slider
             ref={sliderRef}
-            slidesPerView={4}
-            spaceBetween={20}
-            className="justify-between"
+            slidesToShow={4}
+            slidesToScroll={1}
+            infinite={false}
+            arrows={false}
+            dots={false}
+            responsive={[
+              {
+                breakpoint: 1280,
+                settings: {
+                  slidesToShow: 4,
+                  slidesToScroll: 1,
+                },
+              },
+              {
+                breakpoint: 1024,
+                settings: {
+                  slidesToShow: 3,
+                  slidesToScroll: 1,
+                },
+              },
+              {
+                breakpoint: 640,
+                settings: {
+                  slidesToShow: 2,
+                  slidesToScroll: 1,
+                },
+              },
+              {
+                breakpoint: 0,
+                settings: {
+                  slidesToShow: 1,
+                  slidesToScroll: 1,
+                },
+              },
+            ]}
           >
             {shopData.map((item, key) => (
-              <SwiperSlide key={key}>
+              <div key={key} className="px-2">
                 <ProductItem item={item} />
-              </SwiperSlide>
+              </div>
             ))}
-          </Swiper>
+          </Slider>
         </div>
       </div>
     </section>

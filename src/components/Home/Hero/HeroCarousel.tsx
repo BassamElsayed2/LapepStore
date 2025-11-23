@@ -1,10 +1,7 @@
 "use client";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination } from "swiper/modules";
-
-// Import Swiper styles
-import "swiper/css/pagination";
-import "swiper/css";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 import Image from "next/image";
 import { Link } from "@/app/i18n/navigation";
@@ -88,21 +85,18 @@ const HeroCarousal = () => {
   }
 
   return (
-    <Swiper
-      spaceBetween={30}
-      centeredSlides={true}
-      autoplay={{
-        delay: 3500,
-        disableOnInteraction: false,
-      }}
-      pagination={{
-        clickable: true,
-      }}
-      modules={[Autoplay, Pagination]}
+    <Slider
+      slidesToShow={1}
+      slidesToScroll={1}
+      infinite={true}
+      autoplay={true}
+      autoplaySpeed={3500}
+      arrows={false}
+      dots={true}
       className="hero-carousel"
     >
       {productsToShow.map((product, index) => (
-        <SwiperSlide key={product.id}>
+        <div key={product.id}>
           <div className="flex items-center justify-between pt-6 sm:pt-0 flex-col-reverse sm:flex-row bg-gradient-to-r from-[#fff] to-[#f4f1f1] ">
             <div
               className={`max-w-[394px] flex flex-col items-center justify-center md:block  ${
@@ -193,9 +187,9 @@ const HeroCarousal = () => {
               />
             </div>
           </div>
-        </SwiperSlide>
+        </div>
       ))}
-    </Swiper>
+    </Slider>
   );
 };
 

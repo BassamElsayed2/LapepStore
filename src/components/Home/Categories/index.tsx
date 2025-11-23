@@ -1,12 +1,8 @@
 "use client";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { useCallback, useRef, useEffect } from "react";
-import data from "./categoryData";
-import Image from "next/image";
-
-// Import Swiper styles
-import "swiper/css/navigation";
-import "swiper/css";
+import Slider from "react-slick";
+import { useRef } from "react";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import SingleItem from "./SingleItem";
 import { useLocale } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
@@ -14,23 +10,7 @@ import { getCategories } from "@/services/apiCat";
 
 const Categories = () => {
   const locale = useLocale();
-  const sliderRef = useRef<any>(null);
-
-  const handlePrev = useCallback(() => {
-    if (!sliderRef.current) return;
-    sliderRef.current.swiper.slidePrev();
-  }, []);
-
-  const handleNext = useCallback(() => {
-    if (!sliderRef.current) return;
-    sliderRef.current.swiper.slideNext();
-  }, []);
-
-  useEffect(() => {
-    if (sliderRef.current) {
-      sliderRef.current.swiper.init();
-    }
-  }, []);
+  const sliderRef = useRef<Slider>(null);
 
   const {
     data: categories,
@@ -95,7 +75,10 @@ const Categories = () => {
                 locale === "ar" ? "flex-row-reverse" : ""
               }`}
             >
-              <button onClick={handlePrev} className="swiper-button-prev">
+              <button
+                onClick={() => sliderRef.current?.slickPrev()}
+                className="swiper-button-prev"
+              >
                 <svg
                   className="fill-current"
                   width="24"
@@ -113,7 +96,10 @@ const Categories = () => {
                 </svg>
               </button>
 
-              <button onClick={handleNext} className="swiper-button-next">
+              <button
+                onClick={() => sliderRef.current?.slickNext()}
+                className="swiper-button-next"
+              >
                 <svg
                   className="fill-current"
                   width="24"
@@ -133,33 +119,44 @@ const Categories = () => {
             </div>
           </div>
 
-          <Swiper
+          <Slider
             ref={sliderRef}
-            slidesPerView={6}
-            autoHeight={false}
-            observer={true}
-            observeParents={true}
-            breakpoints={{
-              // when window width is >= 640px
-              0: {
-                slidesPerView: 2,
+            slidesToShow={6}
+            slidesToScroll={1}
+            infinite={true}
+            arrows={false}
+            dots={false}
+            rtl={locale === "ar"}
+            responsive={[
+              {
+                breakpoint: 1200,
+                settings: {
+                  slidesToShow: 6,
+                  slidesToScroll: 1,
+                },
               },
-              1000: {
-                slidesPerView: 4,
-                // spaceBetween: 4,
+              {
+                breakpoint: 1000,
+                settings: {
+                  slidesToShow: 4,
+                  slidesToScroll: 1,
+                },
               },
-              // when window width is >= 768px
-              1200: {
-                slidesPerView: 6,
+              {
+                breakpoint: 640,
+                settings: {
+                  slidesToShow: 2,
+                  slidesToScroll: 1,
+                },
               },
-            }}
+            ]}
           >
             {categories?.map((item, key) => (
-              <SwiperSlide key={key} className="!h-auto">
+              <div key={key} className="px-2">
                 <SingleItem item={item} />
-              </SwiperSlide>
+              </div>
             ))}
-          </Swiper>
+          </Slider>
         </div>
       </div>
     </section>

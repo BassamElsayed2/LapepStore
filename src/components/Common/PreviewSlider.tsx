@@ -1,8 +1,8 @@
 "use client";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { useCallback, useRef } from "react";
-import "swiper/css/navigation";
-import "swiper/css";
+import Slider from "react-slick";
+import { useRef } from "react";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import Image from "next/image";
 
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
@@ -13,17 +13,7 @@ const PreviewSliderModal = () => {
 
   const data = useAppSelector((state) => state.productDetailsReducer.value);
 
-  const sliderRef = useRef<any>(null);
-
-  const handlePrev = useCallback(() => {
-    if (!sliderRef.current) return;
-    sliderRef.current.swiper.slidePrev();
-  }, []);
-
-  const handleNext = useCallback(() => {
-    if (!sliderRef.current) return;
-    sliderRef.current.swiper.slideNext();
-  }, []);
+  const sliderRef = useRef<Slider>(null);
 
   // Get product images
   const productImages = data?.imgs?.previews ||
@@ -67,7 +57,7 @@ const PreviewSliderModal = () => {
       <div>
         <button
           className="rotate-180 absolute left-100 p-5 cursor-pointer z-10 "
-          onClick={handlePrev}
+          onClick={() => sliderRef.current?.slickPrev()}
         >
           <svg
             width="36"
@@ -87,7 +77,7 @@ const PreviewSliderModal = () => {
 
         <button
           className="absolute right-100 p-5 cursor-pointer z-10"
-          onClick={handleNext}
+          onClick={() => sliderRef.current?.slickNext()}
         >
           <svg
             width="36"
@@ -106,9 +96,16 @@ const PreviewSliderModal = () => {
         </button>
       </div>
 
-      <Swiper ref={sliderRef} slidesPerView={1} spaceBetween={20}>
+      <Slider
+        ref={sliderRef}
+        slidesToShow={1}
+        slidesToScroll={1}
+        infinite={false}
+        arrows={false}
+        dots={false}
+      >
         {productImages.map((img, index) => (
-          <SwiperSlide key={index}>
+          <div key={index}>
             <div className="flex justify-center items-center">
               <Image
                 src={img || "/images/products/product-1-bg-1.png"}
@@ -120,9 +117,9 @@ const PreviewSliderModal = () => {
                 }}
               />
             </div>
-          </SwiperSlide>
+          </div>
         ))}
-      </Swiper>
+      </Slider>
     </div>
   );
 };
