@@ -16,10 +16,14 @@ const LoginPage = () => {
   const [formData, setFormData] = useState({
     identifier: "", // Email or Phone
     password: "",
+    rememberMe: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [identifierType, setIdentifierType] = useState<"email" | "phone" | null>(null);
+  const [identifierType, setIdentifierType] = useState<
+    "email" | "phone" | null
+  >(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [attemptsLeft, setAttemptsLeft] = useState<number | null>(null);
 
   // Detect identifier type (email or phone)
   useEffect(() => {
@@ -32,21 +36,22 @@ const LoginPage = () => {
   }, [formData.identifier]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value =
+      e.target.type === "checkbox" ? e.target.checked : e.target.value;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [e.target.name]: value,
     });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(""); // Clear previous errors
+    setAttemptsLeft(null); // Clear previous attempts info
 
     if (!formData.identifier || !formData.password) {
       setErrorMessage(
-        locale === "ar"
-          ? "الرجاء ملء جميع الحقول"
-          : "Please fill all fields"
+        locale === "ar" ? "الرجاء ملء جميع الحقول" : "Please fill all fields"
       );
       return;
     }
@@ -70,24 +75,70 @@ const LoginPage = () => {
           ? normalizeEgyptianPhone(formData.identifier)
           : formData.identifier;
 
-      const result = await signIn(loginIdentifier, formData.password);
+      const result = await signIn(
+        loginIdentifier,
+        formData.password,
+        formData.rememberMe
+      );
 
       if (!result.success) {
         // Display error in page instead of toast
-        setErrorMessage(result.error || (
-          locale === "ar" 
-            ? "فشل تسجيل الدخول. تحقق من بياناتك" 
-            : "Login failed. Check your credentials"
-        ));
+        const errorMsg =
+          result.error ||
+          (locale === "ar"
+            ? "فشل تسجيل الدخول. تحقق من بياناتك"
+            : "Login failed. Check your credentials");
+        setErrorMessage(errorMsg);
+
+        // Extract attempts left if available
+        if ((result as any).attemptsLeft !== undefined) {
+          setAttemptsLeft((result as any).attemptsLeft);
+        }
+
+        // Log error for debugging (but don't expose to user)
+        console.error("Login failed:", errorMsg);
       }
       // Success toast is handled in useAuth hook
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
-      setErrorMessage(
+
+      // Handle specific error types
+      let errorMsg =
         locale === "ar"
           ? "حدث خطأ أثناء تسجيل الدخول"
-          : "An error occurred during login"
-      );
+          : "An error occurred during login";
+
+      // Extract attempts left if available
+      if (error.attemptsLeft !== undefined) {
+        setAttemptsLeft(error.attemptsLeft);
+      }
+
+      // Check for network errors
+      if (
+        error.message?.includes("Network") ||
+        error.message?.includes("timeout")
+      ) {
+        errorMsg =
+          locale === "ar"
+            ? "خطأ في الاتصال. تحقق من اتصالك بالإنترنت"
+            : "Connection error. Check your internet connection";
+      } else if (
+        error.message?.includes("Rate limit") ||
+        error.status === 429
+      ) {
+        errorMsg =
+          locale === "ar"
+            ? "تم تجاوز عدد المحاولات المسموح بها. حاول مرة أخرى بعد قليل"
+            : "Too many attempts. Please try again later";
+      } else if (error.status === 423) {
+        // Account locked
+        errorMsg =
+          locale === "ar"
+            ? "تم قفل الحساب مؤقتاً بسبب محاولات تسجيل دخول فاشلة متعددة"
+            : "Account temporarily locked due to multiple failed login attempts";
+      }
+
+      setErrorMessage(errorMsg);
     } finally {
       setIsSubmitting(false);
     }
@@ -140,10 +191,27 @@ const LoginPage = () => {
                     <p className="text-sm font-medium text-red-800">
                       {errorMessage}
                     </p>
+                    {attemptsLeft !== null && attemptsLeft > 0 && (
+                      <p className="text-xs text-red-600 mt-1">
+                        {locale === "ar"
+                          ? `عدد المحاولات المتبقية: ${attemptsLeft}`
+                          : `Attempts remaining: ${attemptsLeft}`}
+                      </p>
+                    )}
+                    {attemptsLeft === 0 && (
+                      <p className="text-xs text-red-600 mt-1 font-semibold">
+                        {locale === "ar"
+                          ? "⚠️ تحذير: تم قفل حسابك مؤقتاً"
+                          : "⚠️ Warning: Your account has been temporarily locked"}
+                      </p>
+                    )}
                   </div>
                   <button
                     type="button"
-                    onClick={() => setErrorMessage("")}
+                    onClick={() => {
+                      setErrorMessage("");
+                      setAttemptsLeft(null);
+                    }}
                     className="text-red-400 hover:text-red-600"
                   >
                     <svg
@@ -261,6 +329,24 @@ const LoginPage = () => {
               />
             </div>
 
+            {/* Remember Me */}
+            <div className="mb-6 flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="rememberMe"
+                name="rememberMe"
+                checked={formData.rememberMe}
+                onChange={handleChange}
+                className="w-4 h-4 text-blue border-gray-300 rounded focus:ring-blue focus:ring-2"
+              />
+              <label
+                htmlFor="rememberMe"
+                className="text-sm text-gray-700 cursor-pointer select-none"
+              >
+                {locale === "ar" ? "تذكرني " : "Remember me "}
+              </label>
+            </div>
+
             {/* Submit Button */}
             <button
               type="submit"
@@ -302,9 +388,7 @@ const LoginPage = () => {
           {/* Register Link */}
           <div className="mt-6 text-center">
             <p className="text-gray-600">
-              {locale === "ar"
-                ? "ليس لديك حساب؟"
-                : "Don't have an account?"}{" "}
+              {locale === "ar" ? "ليس لديك حساب؟" : "Don't have an account?"}{" "}
               <Link
                 href={`/${locale}/register`}
                 className="text-blue font-medium hover:underline"
@@ -320,5 +404,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-
-

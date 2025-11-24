@@ -1,16 +1,14 @@
 "use client";
-import Slider from "react-slick";
 import { useRef } from "react";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
 import SingleItem from "./SingleItem";
 import { useLocale } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { getCategories } from "@/services/apiCat";
+import DynamicSlider from "@/components/Common/DynamicSlider";
 
 const Categories = () => {
   const locale = useLocale();
-  const sliderRef = useRef<Slider>(null);
+  const sliderRef = useRef<any>(null);
 
   const {
     data: categories,
@@ -19,6 +17,23 @@ const Categories = () => {
   } = useQuery({
     queryKey: ["categories"],
     queryFn: getCategories,
+    retry: (failureCount, error: any) => {
+      // Don't retry on 429 (Too Many Requests)
+      if (error?.isRateLimit || error?.status === 429) {
+        return false;
+      }
+      // Retry up to 1 time for other errors
+      return failureCount < 1;
+    },
+    retryDelay: (attemptIndex, error: any) => {
+      // If it's a rate limit error, use the retry-after header value
+      if (error?.isRateLimit || error?.status === 429) {
+        return error.retryAfter || 60000; // Default 60 seconds
+      }
+      // Exponential backoff for other errors
+      return Math.min(1000 * 2 ** attemptIndex, 30000);
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes - categories don't change often
   });
 
   return (
@@ -119,7 +134,7 @@ const Categories = () => {
             </div>
           </div>
 
-          <Slider
+          <DynamicSlider
             ref={sliderRef}
             slidesToShow={6}
             slidesToScroll={1}
@@ -129,16 +144,16 @@ const Categories = () => {
             rtl={locale === "ar"}
             responsive={[
               {
-                breakpoint: 1200,
+                breakpoint: 1024,
                 settings: {
-                  slidesToShow: 6,
+                  slidesToShow: 4,
                   slidesToScroll: 1,
                 },
               },
               {
-                breakpoint: 1000,
+                breakpoint: 768,
                 settings: {
-                  slidesToShow: 4,
+                  slidesToShow: 3,
                   slidesToScroll: 1,
                 },
               },
@@ -149,6 +164,13 @@ const Categories = () => {
                   slidesToScroll: 1,
                 },
               },
+              {
+                breakpoint: 480,
+                settings: {
+                  slidesToShow: 1,
+                  slidesToScroll: 1,
+                },
+              },
             ]}
           >
             {categories?.map((item, key) => (
@@ -156,7 +178,7 @@ const Categories = () => {
                 <SingleItem item={item} />
               </div>
             ))}
-          </Slider>
+          </DynamicSlider>
         </div>
       </div>
     </section>

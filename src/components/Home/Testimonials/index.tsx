@@ -1,16 +1,14 @@
 "use client";
-import Slider from "react-slick";
 import { useRef, useEffect, useState } from "react";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
 import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { getTestimonials } from "@/services/apiTestimonials";
 import { TestimonialData } from "@/types/testimonial";
 import SingleItem from "./SingleItem";
+import DynamicSlider from "@/components/Common/DynamicSlider";
 
 const Testimonials = () => {
-  const sliderRef = useRef<Slider>(null);
+  const sliderRef = useRef<any>(null);
   const t = useTranslations("testimonials");
   const locale = useLocale();
   const isRTL = locale === "ar";
@@ -118,7 +116,7 @@ const Testimonials = () => {
               </div>
             </div>
 
-            <Slider
+            <DynamicSlider
               ref={sliderRef}
               slidesToShow={3}
               slidesToScroll={1}
@@ -155,7 +153,7 @@ const Testimonials = () => {
                   <SingleItem testimonial={item} />
                 </div>
               ))}
-            </Slider>
+            </DynamicSlider>
           </div>
         </div>
       </div>

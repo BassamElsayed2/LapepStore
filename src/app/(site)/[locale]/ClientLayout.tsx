@@ -13,7 +13,6 @@ import Footer from "@/components/Footer";
 import { CartModalProvider } from "@/app/context/CartSidebarModalContext";
 import { ModalProvider } from "@/app/context/QuickViewModalContext";
 import { PreviewSliderProvider } from "@/app/context/PreviewSliderContext";
-import { Providers } from "@/app/context/QueryProvider";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import SplashCursor from "@/components/SplashCursor";
@@ -26,7 +25,20 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    setTimeout(() => setLoading(false), 1000);
+    // تحقق من حالة التحميل الفعلية
+    if (document.readyState === "complete") {
+      setLoading(false);
+    } else {
+      const handleLoad = () => setLoading(false);
+      window.addEventListener("load", handleLoad);
+      // Fallback timeout بعد 800ms كحد أقصى للأداء الأفضل
+      const timeout = setTimeout(() => setLoading(false), 800);
+      
+      return () => {
+        window.removeEventListener("load", handleLoad);
+        clearTimeout(timeout);
+      };
+    }
   }, []);
 
   if (loading) {
@@ -36,25 +48,23 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
   return (
     <>
       <AgeVerificationModal />
-      <Providers>
-        <ReduxProvider>
-          <AuthProvider>
-            <CartModalProvider>
-              <ModalProvider>
-                <PreviewSliderProvider>
-                  <Navbar />
-                  <BottomNav />
-                  {children}
-                  {/* <SplashCursor /> */}
-                  <QuickViewModal />
-                  <CartSidebarModal />
-                  <PreviewSliderModal />
-                </PreviewSliderProvider>
-              </ModalProvider>
-            </CartModalProvider>
-          </AuthProvider>
-        </ReduxProvider>
-      </Providers>
+      <ReduxProvider>
+        <AuthProvider>
+          <CartModalProvider>
+            <ModalProvider>
+              <PreviewSliderProvider>
+                <Navbar />
+                <BottomNav />
+                {children}
+                {/* <SplashCursor /> */}
+                <QuickViewModal />
+                <CartSidebarModal />
+                <PreviewSliderModal />
+              </PreviewSliderProvider>
+            </ModalProvider>
+          </CartModalProvider>
+        </AuthProvider>
+      </ReduxProvider>
       <ScrollToTop />
       <Footer />
       <Toaster

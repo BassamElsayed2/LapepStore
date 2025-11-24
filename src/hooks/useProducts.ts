@@ -16,24 +16,34 @@ export interface GetProductsParams {
 // =====================================================
 
 const fetchProducts = async (params?: GetProductsParams): Promise<Product[]> => {
-  const response = await apiClient.get<PaginatedResponse<Product> | ApiResponse<Product[]>>(
-    '/products',
-    { params }
-  );
+  try {
+    const response = await apiClient.get<PaginatedResponse<Product> | ApiResponse<Product[]>>(
+      '/products',
+      { params }
+    );
 
-  if (response.data.success) {
-    let products = 'pagination' in response.data ? response.data.data : (response.data.data || []);
-    
-    // Map images to image_url for backward compatibility
-    products = products.map((product: any) => ({
-      ...product,
-      image_url: product.images || product.image_url,
-    }));
-    
-    return products;
+    if (response.data.success) {
+      let products = 'pagination' in response.data ? response.data.data : (response.data.data || []);
+      
+      // Map images to image_url for backward compatibility
+      products = products.map((product: any) => ({
+        ...product,
+        image_url: product.images || product.image_url,
+      }));
+      
+      return products;
+    }
+
+    throw new Error(response.data.error || 'Failed to fetch products');
+  } catch (error: any) {
+    // Preserve error status for retry logic
+    if (error.response?.status) {
+      const enhancedError = new Error(error.message || 'Failed to fetch products') as Error & { status?: number };
+      enhancedError.status = error.response.status;
+      throw enhancedError;
+    }
+    throw error;
   }
-
-  throw new Error(response.data.error || 'Failed to fetch products');
 };
 
 const fetchProductById = async (id: string): Promise<Product> => {
@@ -92,7 +102,27 @@ export const useProducts = (params?: GetProductsParams) => {
   return useQuery({
     queryKey: ['products', params],
     queryFn: () => fetchProducts(params),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 15 * 60 * 1000, // 15 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: (failureCount, error: any) => {
+      // Don't retry on 429 (Too Many Requests)
+      if (error?.isRateLimit || error?.status === 429) {
+        return false;
+      }
+      // Retry up to 1 time for other errors
+      return failureCount < 1;
+    },
+    retryDelay: (attemptIndex, error: any) => {
+      // If it's a rate limit error, use the retry-after header value
+      if (error?.isRateLimit || error?.status === 429) {
+        return error.retryAfter || 60000; // Default 60 seconds
+      }
+      // Exponential backoff for other errors
+      return Math.min(1000 * 2 ** attemptIndex, 30000);
+    },
   });
 };
 
@@ -105,6 +135,22 @@ export const useProduct = (id: string) => {
     queryFn: () => fetchProductById(id),
     enabled: !!id, // Only run if id exists
     staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: (failureCount, error: any) => {
+      // Don't retry on 429 (Too Many Requests)
+      if (error?.isRateLimit || error?.status === 429) {
+        return false;
+      }
+      // Retry up to 1 time for other errors
+      return failureCount < 1;
+    },
+    retryDelay: (attemptIndex, error: any) => {
+      // If it's a rate limit error, use the retry-after header value
+      if (error?.isRateLimit || error?.status === 429) {
+        return error.retryAfter || 60000; // Default 60 seconds
+      }
+      // Exponential backoff for other errors
+      return Math.min(1000 * 2 ** attemptIndex, 30000);
+    },
   });
 };
 
@@ -115,7 +161,27 @@ export const useBestSellers = () => {
   return useQuery({
     queryKey: ['products', 'best-sellers'],
     queryFn: fetchBestSellers,
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 60 * 60 * 1000, // 60 minutes
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: (failureCount, error: any) => {
+      // Don't retry on 429 (Too Many Requests)
+      if (error?.isRateLimit || error?.status === 429) {
+        return false;
+      }
+      // Retry up to 1 time for other errors
+      return failureCount < 1;
+    },
+    retryDelay: (attemptIndex, error: any) => {
+      // If it's a rate limit error, use the retry-after header value
+      if (error?.isRateLimit || error?.status === 429) {
+        return error.retryAfter || 60000; // Default 60 seconds
+      }
+      // Exponential backoff for other errors
+      return Math.min(1000 * 2 ** attemptIndex, 30000);
+    },
   });
 };
 
@@ -126,7 +192,27 @@ export const useLimitedOffers = () => {
   return useQuery({
     queryKey: ['products', 'limited-offers'],
     queryFn: fetchLimitedOffers,
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 30 * 60 * 1000, // 30 minutes - البيانات تبقى "طازجة" لمدة 30 دقيقة
+    gcTime: 60 * 60 * 1000, // 60 minutes - البيانات تبقى في الـ cache لمدة ساعة
+    refetchOnMount: false, // لا تعيد الطلب عند mount إذا كانت البيانات موجودة
+    refetchOnWindowFocus: false, // لا تعيد الطلب عند العودة للنافذة
+    refetchOnReconnect: false, // لا تعيد الطلب عند إعادة الاتصال
+    retry: (failureCount, error: any) => {
+      // Don't retry on 429 (Too Many Requests)
+      if (error?.isRateLimit || error?.status === 429) {
+        return false;
+      }
+      // Retry up to 1 time for other errors
+      return failureCount < 1;
+    },
+    retryDelay: (attemptIndex, error: any) => {
+      // If it's a rate limit error, use the retry-after header value
+      if (error?.isRateLimit || error?.status === 429) {
+        return error.retryAfter || 60000; // Default 60 seconds
+      }
+      // Exponential backoff for other errors
+      return Math.min(1000 * 2 ** attemptIndex, 30000);
+    },
   });
 };
 

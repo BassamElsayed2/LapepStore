@@ -1,11 +1,8 @@
 "use client";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-
 import Image from "next/image";
 import { Link } from "@/app/i18n/navigation";
 import { useLocale } from "next-intl";
+import DynamicSlider from "@/components/Common/DynamicSlider";
 import {
   getLimitedTimeOfferProducts,
   getBestSellerProducts,
@@ -85,7 +82,7 @@ const HeroCarousal = () => {
   }
 
   return (
-    <Slider
+    <DynamicSlider
       slidesToShow={1}
       slidesToScroll={1}
       infinite={true}
@@ -189,7 +186,7 @@ const HeroCarousal = () => {
           </div>
         </div>
       ))}
-    </Slider>
+    </DynamicSlider>
   );
 };
 

@@ -15,7 +15,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { getCategories } from "@/services/apiCat";
 
-const Header = () => {
+// تحسين الأداء باستخدام React.memo
+const Header = React.memo(() => {
   const [searchQuery, setSearchQuery] = useState("");
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
@@ -36,6 +37,14 @@ const Header = () => {
   } = useQuery({
     queryKey: ["categories"],
     queryFn: getCategories,
+    staleTime: 10 * 60 * 1000, // 10 minutes - categories don't change often
+    retry: (failureCount, error: any) => {
+      // Don't retry on 429 (Too Many Requests)
+      if (error?.isRateLimit || error?.status === 429) {
+        return false;
+      }
+      return failureCount < 1;
+    },
   });
 
   const handleOpenCartModal = () => {
@@ -55,12 +64,15 @@ const Header = () => {
 
   useEffect(() => {
     window.addEventListener("scroll", handleStickyMenu);
-  });
+    return () => {
+      window.removeEventListener("scroll", handleStickyMenu);
+    };
+  }, []);
 
   // Removed user menu event handlers
 
-  // Create options from categories data
-  const options = React.useMemo(() => {
+  // تحسين الأداء باستخدام useMemo للخيارات
+  const categoryOptions = React.useMemo(() => {
     if (!categories || categoriesLoading) {
       return [
         { label: t("allCategories"), value: "0", id: "0" },
@@ -74,7 +86,7 @@ const Header = () => {
       ];
     }
 
-    const categoryOptions = [
+    return [
       { label: t("allCategories"), value: "0", id: "0" },
       ...categories.map((category) => ({
         label: locale === "ar" ? category.name_ar : category.name_en,
@@ -82,8 +94,6 @@ const Header = () => {
         id: category.id?.toString() || "",
       })),
     ];
-
-    return categoryOptions;
   }, [categories, categoriesLoading, locale, t]);
 
   return (
@@ -104,10 +114,11 @@ const Header = () => {
             {/* Logo for large screens */}
             <Link className="flex-shrink-0 hidden lg:block" href={`/${locale}`}>
               <h1 className="text-2xl font-bold">
-                <img
+                <Image
                   src="/images/logo/logo.png"
                   alt="logo"
-                  className="w-[120px] h-[60px]"
+                  width={120}
+                  height={60}
                 />
               </h1>
             </Link>
@@ -118,7 +129,7 @@ const Header = () => {
                 <div className="flex items-center">
                   {locale === "en" && (
                     <CustomSelect
-                      options={options}
+                      options={categoryOptions}
                       isLoading={categoriesLoading}
                     />
                   )}
@@ -160,7 +171,7 @@ const Header = () => {
                   </div>
                   {locale === "ar" && (
                     <CustomSelect
-                      options={options}
+                      options={categoryOptions}
                       isLoading={categoriesLoading}
                     />
                   )}
@@ -184,10 +195,11 @@ const Header = () => {
                 {/* Logo for small screens */}
                 <Link className="flex-shrink-0 lg:hidden" href={`/${locale}`}>
                   <h1 className="text-2xl font-bold">
-                    <img
+                    <Image
                       src="/images/logo/logo.png"
                       alt="logo"
-                      className="w-[120px] h-[60px]"
+                      width={120}
+                      height={60}
                     />
                   </h1>
                 </Link>
@@ -198,7 +210,7 @@ const Header = () => {
                     <div className="flex items-center">
                       {locale === "en" && (
                         <CustomSelect
-                          options={options}
+                          options={categoryOptions}
                           isLoading={categoriesLoading}
                         />
                       )}
@@ -240,7 +252,7 @@ const Header = () => {
                       </div>
                       {locale === "ar" && (
                         <CustomSelect
-                          options={options}
+                          options={categoryOptions}
                           isLoading={categoriesLoading}
                         />
                       )}
@@ -421,6 +433,8 @@ const Header = () => {
       </div>
     </header>
   );
-};
+});
+
+Header.displayName = "Header";
 
 export default Header;

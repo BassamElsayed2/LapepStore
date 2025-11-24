@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 
@@ -14,9 +14,9 @@ const CustomSelect = ({
   const router = useRouter();
   const locale = useLocale();
 
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
-  };
+  const toggleDropdown = useCallback(() => {
+    setIsOpen((prev) => !prev);
+  }, []);
 
   const handleOptionClick = (option: any) => {
     setSelectedOption(option);
@@ -41,7 +41,7 @@ const CustomSelect = ({
     // closing modal while clicking outside
     function handleClickOutside(event: any) {
       if (!event.target.closest(".dropdown-content")) {
-        toggleDropdown();
+        setIsOpen(false);
       }
     }
 
@@ -52,7 +52,7 @@ const CustomSelect = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [isOpen]);
 
   return (
     <div

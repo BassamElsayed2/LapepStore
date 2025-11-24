@@ -49,6 +49,14 @@ const ShopWithoutSidebar = () => {
   } = useQuery({
     queryKey: ["categories"],
     queryFn: getCategories,
+    staleTime: 10 * 60 * 1000, // 10 minutes - categories don't change often
+    retry: (failureCount, error: any) => {
+      // Don't retry on 429 (Too Many Requests)
+      if (error?.isRateLimit || error?.status === 429) {
+        return false;
+      }
+      return failureCount < 1;
+    },
   });
 
   const options = [

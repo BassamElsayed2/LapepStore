@@ -37,7 +37,8 @@ export default function OptimizedImage({
   onLoad,
   objectFit = "cover",
 }: OptimizedImageProps) {
-  const [isLoading, setIsLoading] = useState(true);
+  // تحسين: عدم عرض loading للصور ذات الأولوية
+  const [isLoading, setIsLoading] = useState(!priority);
   const [hasError, setHasError] = useState(false);
 
   const handleLoad = () => {

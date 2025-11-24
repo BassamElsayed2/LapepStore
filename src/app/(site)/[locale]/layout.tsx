@@ -5,6 +5,16 @@ import { routing } from "@/app/i18n/routing";
 import { notFound } from "next/navigation";
 import ClientLayout from "@/app/(site)/[locale]/ClientLayout";
 import { Providers } from "@/app/context/QueryProvider";
+import { Cairo } from "next/font/google";
+
+const cairo = Cairo({
+  subsets: ["latin", "arabic"],
+  weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
+  display: "swap",
+  variable: "--font-cairo",
+  preload: true,
+  adjustFontFallback: true,
+});
 
 export default async function RootLayout({
   children,
@@ -30,13 +40,10 @@ export default async function RootLayout({
       lang={locale}
       suppressHydrationWarning={true}
       dir={locale === "ar" ? "rtl" : "ltr"}
+      className={cairo.variable}
     >
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet" />
-      </head>
-      <body className={locale === "ar" ? "rtl" : "ltr"}>
+      <head />
+      <body className={`${locale === "ar" ? "rtl" : "ltr"} ${cairo.className}`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>
             <ClientLayout>{children}</ClientLayout>

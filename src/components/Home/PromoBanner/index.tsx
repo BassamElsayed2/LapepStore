@@ -3,18 +3,16 @@ import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { useLocale } from "next-intl";
 import Link from "next/link";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
 import { getBanners, Banner } from "@/services/apiBanners";
 import { sanitizeHtml } from "@/utils/sanitize";
+import DynamicSlider from "@/components/Common/DynamicSlider";
 
 const PromoBanner = () => {
   const locale = useLocale();
   const [currentLocale, setCurrentLocale] = useState(locale);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [loading, setLoading] = useState(true);
-  const sliderRef = useRef<Slider>(null);
+  const sliderRef = useRef<any>(null);
   const isRTL = currentLocale === "ar";
 
   // Monitor locale changes
@@ -61,7 +59,7 @@ const PromoBanner = () => {
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
         {/* Main Promo Banner with Slider */}
         <div className="mb-7.5 rounded-lg bg-gradient-to-r from-[#F5F5F7] to-[#E8E8EA] overflow-hidden relative">
-          <Slider
+          <DynamicSlider
             ref={sliderRef}
             slidesToShow={1}
             slidesToScroll={1}
@@ -115,9 +113,11 @@ const PromoBanner = () => {
                   </div>
 
                   <div className="flex-shrink-0 animate-fade-in-right">
-                    <img
+                    <Image
                       src={mainBanner.image || "/images/promo/promo-01.png"}
                       alt="promo img"
+                      width={450}
+                      height={300}
                       className="h-[300px] w-[450px] object-contain transform hover:scale-105 transition-transform duration-300"
                     />
                   </div>
@@ -148,16 +148,18 @@ const PromoBanner = () => {
                     </Link>
                   </div>
                   <div className="flex-shrink-0">
-                    <img
+                    <Image
                       src="/images/promo/promo-01.png"
                       alt="promo img"
+                      width={450}
+                      height={300}
                       className="h-[300px] w-[450px]"
                     />
                   </div>
                 </div>
               </div>
             )}
-          </Slider>
+          </DynamicSlider>
         </div>
 
         {/* Side Banners Grid */}

@@ -10,8 +10,9 @@ export interface RegisterData {
 }
 
 export interface LoginData {
-  email: string;
+  email: string; // Can be email OR phone number
   password: string;
+  rememberMe?: boolean;
 }
 
 export interface User {
@@ -57,7 +58,9 @@ export async function register(data: RegisterData): Promise<ApiResponse<AuthResp
 }
 
 /**
- * Login user
+ * Login user with email or phone number
+ * @param data.email - Can be either email address or phone number
+ * @param data.password - User password
  */
 export async function login(data: LoginData): Promise<ApiResponse<AuthResponse>> {
   try {

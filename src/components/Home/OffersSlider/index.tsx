@@ -1,16 +1,14 @@
 "use client";
 import React, { useRef } from "react";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
 import { useLimitedOffers } from "@/hooks/useProducts";
 import { useLocale } from "next-intl";
 import ProductItem from "@/components/Common/ProductItem";
 import Image from "next/image";
+import DynamicSlider from "@/components/Common/DynamicSlider";
 
 const OffersSlider = () => {
   const locale = useLocale();
-  const sliderRef = useRef<Slider>(null);
+  const sliderRef = useRef<any>(null);
 
   const { data: products, isLoading, error } = useLimitedOffers();
 
@@ -123,7 +121,7 @@ const OffersSlider = () => {
 
           {/* Products Slider */}
           {!isLoading && !error && products && products.length > 0 && (
-            <Slider
+            <DynamicSlider
               ref={sliderRef}
               slidesToShow={4}
               slidesToScroll={1}
@@ -132,28 +130,28 @@ const OffersSlider = () => {
               dots={false}
               responsive={[
                 {
-                  breakpoint: 1280,
+                  breakpoint: 1024,
                   settings: {
                     slidesToShow: 4,
                     slidesToScroll: 1,
                   },
                 },
                 {
-                  breakpoint: 1024,
+                  breakpoint: 920,
                   settings: {
                     slidesToShow: 3,
                     slidesToScroll: 1,
                   },
                 },
                 {
-                  breakpoint: 640,
+                  breakpoint: 720,
                   settings: {
                     slidesToShow: 2,
                     slidesToScroll: 1,
                   },
                 },
                 {
-                  breakpoint: 0,
+                  breakpoint: 600,
                   settings: {
                     slidesToShow: 1,
                     slidesToScroll: 1,
@@ -166,7 +164,7 @@ const OffersSlider = () => {
                   <ProductItem item={product} />
                 </div>
               ))}
-            </Slider>
+            </DynamicSlider>
           )}
         </div>
       </div>

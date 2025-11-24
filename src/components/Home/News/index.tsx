@@ -1,17 +1,14 @@
 "use client";
-import Slider from "react-slick";
 import { useRef, useEffect, useState } from "react";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-
 import type { BlogData } from "@/types/blogItem";
 import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { getBlogs } from "@/services/apiBlogs";
 import SingleItem from "./SingleItem";
+import DynamicSlider from "@/components/Common/DynamicSlider";
 
 const News = () => {
-  const sliderRef = useRef<Slider>(null);
+  const sliderRef = useRef<any>(null);
   const t = useTranslations("news");
   const locale = useLocale();
   const isRTL = locale === "ar";
@@ -119,7 +116,7 @@ const News = () => {
               </div>
             </div>
 
-            <Slider
+            <DynamicSlider
               ref={sliderRef}
               slidesToShow={3}
               slidesToScroll={1}
@@ -156,7 +153,7 @@ const News = () => {
                   <SingleItem newsItem={item} />
                 </div>
               ))}
-            </Slider>
+            </DynamicSlider>
           </div>
         </div>
       </div>

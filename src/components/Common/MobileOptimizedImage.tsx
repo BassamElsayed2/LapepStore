@@ -45,16 +45,26 @@ export default function MobileOptimizedImage({
   const [isMobile, setIsMobile] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Detect mobile device
+  // Detect mobile device with debounce for better performance
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT);
     };
     
     checkMobile();
-    window.addEventListener("resize", checkMobile);
     
-    return () => window.removeEventListener("resize", checkMobile);
+    let timeoutId: NodeJS.Timeout;
+    const debouncedCheckMobile = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(checkMobile, 150);
+    };
+    
+    window.addEventListener("resize", debouncedCheckMobile);
+    
+    return () => {
+      window.removeEventListener("resize", debouncedCheckMobile);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   // Intersection Observer for lazy loading

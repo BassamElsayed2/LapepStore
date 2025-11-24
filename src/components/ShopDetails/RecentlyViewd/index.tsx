@@ -4,13 +4,11 @@ import shopData from "@/components/Shop/shopData";
 import ProductItem from "@/components/Common/ProductItem";
 import Image from "next/image";
 import { Link } from "@/app/i18n/navigation";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
 import { useLocale } from "next-intl";
+import DynamicSlider from "@/components/Common/DynamicSlider";
 
 const RecentlyViewdItems = () => {
-  const sliderRef = useRef<Slider>(null);
+  const sliderRef = useRef<any>(null);
   const locale = useLocale();
 
   return (
@@ -115,7 +113,7 @@ const RecentlyViewdItems = () => {
             </div>
           </div>
 
-          <Slider
+          <DynamicSlider
             ref={sliderRef}
             slidesToShow={4}
             slidesToScroll={1}
@@ -158,7 +156,7 @@ const RecentlyViewdItems = () => {
                 <ProductItem item={item} />
               </div>
             ))}
-          </Slider>
+          </DynamicSlider>
         </div>
       </div>
     </section>

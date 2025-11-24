@@ -55,7 +55,8 @@ interface AuthContextType {
   ) => Promise<{ success: boolean; data?: any; error?: string }>;
   signIn: (
     email: string,
-    password: string
+    password: string,
+    rememberMe?: boolean
   ) => Promise<{ success: boolean; data?: any; error?: string }>;
   signOut: () => Promise<void>;
   updateUserProfile: (
@@ -145,9 +146,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, rememberMe: boolean = false) => {
     try {
-      const result = await loginApi({ email, password });
+      const result = await loginApi({ email, password, rememberMe });
 
       if (result.success && result.data) {
         setUser(result.data.user);

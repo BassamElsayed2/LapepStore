@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { useAppSelector } from "@/redux/store";
 import { useSelector } from "react-redux";
@@ -16,7 +17,8 @@ import LanguageDropdown from "./LanguageDropdown";
 import CartButton from "./CartButton";
 import NavigationLinks from "./NavigationLinks";
 
-const Navbar = () => {
+// تحسين الأداء باستخدام React.memo
+const Navbar = React.memo(() => {
   const [stickyMenu, setStickyMenu] = useState(false);
   const { openCartModal } = useCartModalContext();
   const t = useTranslations("header");
@@ -121,11 +123,14 @@ const Navbar = () => {
             >
               {/* Logo */}
               <Link href={`/${locale}`} className="flex-shrink-0">
-                <img
+                <Image
                   src={`/images/logo/${
                     locale === "ar" ? "logoar.png" : "logoen.png"
                   }`}
                   alt="Lapip Store"
+                  width={120}
+                  height={60}
+                  priority
                   className="h-8 sm:h-10 md:h-12 w-auto object-contain"
                 />
               </Link>
@@ -202,6 +207,8 @@ const Navbar = () => {
       />
     </>
   );
-};
+});
+
+Navbar.displayName = "Navbar";
 
 export default Navbar;

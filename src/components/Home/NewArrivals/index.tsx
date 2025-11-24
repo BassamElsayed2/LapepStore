@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ProductItem from "@/components/Common/ProductItem";
 import shopData from "@/components/Shop/shopData";
-import { useProducts, useLimitedOffers } from "@/hooks/useProducts";
+import { useProducts } from "@/hooks/useProducts";
 import { useLocale } from "next-intl";
 
 const NewArrival = () => {
@@ -15,12 +15,6 @@ const NewArrival = () => {
     isLoading,
     error,
   } = useProducts();
-
-  const {
-    data: limitedTimeProducts,
-    isLoading: limitedTimeLoading,
-    error: limitedTimeError,
-  } = useLimitedOffers();
 
   return (
     <section className="overflow-hidden pt-15">

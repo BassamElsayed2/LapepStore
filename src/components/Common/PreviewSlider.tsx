@@ -1,19 +1,16 @@
 "use client";
-import Slider from "react-slick";
 import { useRef } from "react";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
 import Image from "next/image";
-
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { useAppSelector } from "@/redux/store";
+import DynamicSlider from "@/components/Common/DynamicSlider";
 
 const PreviewSliderModal = () => {
   const { closePreviewModal, isModalPreviewOpen } = usePreviewSlider();
 
   const data = useAppSelector((state) => state.productDetailsReducer.value);
 
-  const sliderRef = useRef<Slider>(null);
+  const sliderRef = useRef<any>(null);
 
   // Get product images
   const productImages = data?.imgs?.previews ||
@@ -96,7 +93,7 @@ const PreviewSliderModal = () => {
         </button>
       </div>
 
-      <Slider
+      <DynamicSlider
         ref={sliderRef}
         slidesToShow={1}
         slidesToScroll={1}
@@ -119,7 +116,7 @@ const PreviewSliderModal = () => {
             </div>
           </div>
         ))}
-      </Slider>
+      </DynamicSlider>
     </div>
   );
 };

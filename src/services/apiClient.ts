@@ -77,6 +77,26 @@ apiClient.interceptors.response.use(
         }
       }
 
+      // Handle 429 Too Many Requests - don't retry immediately
+      if (error.response.status === 429) {
+        const retryAfter = error.response.headers?.['retry-after'] || error.response.headers?.['Retry-After'];
+        const retryDelay = retryAfter ? parseInt(retryAfter) * 1000 : 60000; // Default 60 seconds
+        
+        console.warn(`Rate limit exceeded. Retry after ${retryDelay / 1000} seconds`);
+        
+        // Create a custom error that includes retry delay info
+        const rateLimitError = new Error(message) as Error & { 
+          status: number; 
+          retryAfter: number;
+          isRateLimit: boolean;
+        };
+        rateLimitError.status = 429;
+        rateLimitError.retryAfter = retryDelay;
+        rateLimitError.isRateLimit = true;
+        
+        return Promise.reject(rateLimitError);
+      }
+
       return Promise.reject(new Error(message));
     } else if (error.request) {
       // Request made but no response

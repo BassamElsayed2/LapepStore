@@ -420,10 +420,35 @@ const Checkout = () => {
 
               {/* Address Section */}
               <div className="bg-white rounded-[10px] shadow-1">
-                <div className="border-b border-gray-3 py-5 px-4 sm:px-8.5">
+                <div className="border-b border-gray-3 py-5 px-4 sm:px-8.5 flex items-center justify-between">
                   <h2 className="font-medium text-xl text-dark">
                     {locale === "ar" ? "عنوان التوصيل" : "Delivery Address"}
                   </h2>
+                  {addresses.length > 0 && (
+                    <I18nLink
+                      href={`/profile?tab=addresses`}
+                      className="inline-flex items-center gap-2 font-medium text-blue hover:text-blue-dark ease-out duration-200 text-sm"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4v16m8-8H4"
+                        />
+                      </svg>
+                      <span>
+                        {locale === "ar"
+                          ? "إضافة عنوان جديد"
+                          : "Add New Address"}
+                      </span>
+                    </I18nLink>
+                  )}
                 </div>
 
                 <div className="p-4 sm:px-8.5 py-6">

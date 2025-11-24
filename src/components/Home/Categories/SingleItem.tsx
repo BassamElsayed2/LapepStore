@@ -13,11 +13,12 @@ const SingleItem = ({ item }: { item: Category }) => {
       className="group flex flex-col items-center h-full"
     >
       <div className="max-w-[130px] w-full bg-[#F2F3F8] h-32.5 rounded-full flex items-center justify-center mb-4 overflow-hidden flex-shrink-0">
-        <img
+        <Image
           src={item.image_url || "/images/category/default-category.png"}
-          alt="Category"
+          alt={locale === "ar" ? item.name_ar : item.name_en}
+          width={130}
+          height={130}
           className="w-full h-full object-cover rounded-full"
-          loading="lazy"
         />
       </div>
 

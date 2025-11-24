@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Product } from "@/types/product";
 import { getProducts } from "@/hooks/useProducts";
 import { Search, Loader2 } from "lucide-react";
+import Image from "next/image";
 
 const SearchBar = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,14 +28,37 @@ const SearchBar = () => {
   }, [searchQuery]);
 
   // Fetch products based on search query
-  const { data: products, isLoading } = useQuery({
+  const {
+    data: products,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["search-products", debouncedQuery],
-    queryFn: () => getProducts({
-      search: debouncedQuery,
-      limit: 8,
-    }),
+    queryFn: () =>
+      getProducts({
+        search: debouncedQuery,
+        limit: 8,
+      }),
     enabled: debouncedQuery.length > 0,
+    retry: (failureCount, error: any) => {
+      // Don't retry on 429 (Too Many Requests) or 500 (Server Error)
+      if (
+        error?.isRateLimit ||
+        error?.status === 429 ||
+        error?.status === 500
+      ) {
+        return false;
+      }
+      return failureCount < 1;
+    },
   });
+
+  // Show results when products are loaded or when there's an error
+  useEffect(() => {
+    if (debouncedQuery.length > 0 && (products !== undefined || error)) {
+      setShowResults(true);
+    }
+  }, [debouncedQuery, products, error]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -52,8 +76,13 @@ const SearchBar = () => {
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setShowResults(true);
+    const value = e.target.value;
+    setSearchQuery(value);
+    if (value.length > 0) {
+      setShowResults(true);
+    } else {
+      setShowResults(false);
+    }
   };
 
   const handleProductClick = () => {
@@ -70,7 +99,11 @@ const SearchBar = () => {
           placeholder={t("searchPlaceholder")}
           value={searchQuery}
           onChange={handleInputChange}
-          onFocus={() => searchQuery && setShowResults(true)}
+          onFocus={() => {
+            if (searchQuery.length > 0) {
+              setShowResults(true);
+            }
+          }}
           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#22AD5C] focus:border-transparent"
         />
       </div>
@@ -82,27 +115,49 @@ const SearchBar = () => {
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-[#22AD5C]" />
             </div>
+          ) : error ? (
+            <div className="py-8 text-center">
+              <p className="text-sm text-red-500 mb-2">
+                {locale === "ar"
+                  ? "حدث خطأ أثناء البحث. يرجى المحاولة مرة أخرى."
+                  : "An error occurred while searching. Please try again."}
+              </p>
+              <p className="text-xs text-gray-400">
+                {locale === "ar" ? "خطأ في الخادم (500)" : "Server Error (500)"}
+              </p>
+            </div>
           ) : products && products.length > 0 ? (
             <div className="py-2">
               {products.map((product) => (
                 <Link
                   key={product.id}
-                  href={`/${locale}/products/${product.id}`}
+                  href={`/${locale}/shop-details?id=${product.id}`}
                   onClick={handleProductClick}
                   className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
                 >
                   {/* Product Image */}
-                  {product.image_url && (
-                    <div className="flex-shrink-0 w-12 h-12 rounded-md overflow-hidden bg-gray-100">
-                      <img
-                        src={Array.isArray(product.image_url) ? product.image_url[0] : product.image_url}
+                  <div className="flex-shrink-0 w-12 h-12 rounded-md overflow-hidden bg-gray-100 relative">
+                    {product.image_url ? (
+                      <Image
+                        src={
+                          Array.isArray(product.image_url)
+                            ? product.image_url[0]
+                            : product.image_url
+                        }
                         alt={
                           locale === "ar" ? product.name_ar : product.name_en
                         }
-                        className="w-full h-full object-cover"
+                        width={48}
+                        height={48}
+                        className="object-cover w-full h-full"
+                        unoptimized
                       />
-                    </div>
-                  )}
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                        <Search className="h-4 w-4 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
 
                   {/* Product Info */}
                   <div className="flex-1 min-w-0">
@@ -142,4 +197,3 @@ const SearchBar = () => {
 };
 
 export default SearchBar;
-
