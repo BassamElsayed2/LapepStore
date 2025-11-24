@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useLimitedOffers } from "@/hooks/useProducts";
 import { useLocale } from "next-intl";
 import ProductItem from "@/components/Common/ProductItem";
@@ -9,8 +9,36 @@ import DynamicSlider from "@/components/Common/DynamicSlider";
 const OffersSlider = () => {
   const locale = useLocale();
   const sliderRef = useRef<any>(null);
+  const [slidesToShow, setSlidesToShow] = useState(1); // Start with 1 for mobile-first
+  const [isMounted, setIsMounted] = useState(false);
 
   const { data: products, isLoading, error } = useLimitedOffers();
+
+  // Calculate initial slidesToShow based on window width
+  useEffect(() => {
+    const calculateSlidesToShow = () => {
+      if (typeof window === "undefined") return 1;
+
+      const width = window.innerWidth;
+      if (width >= 1280) return 4;
+      if (width >= 1024) return 3;
+      if (width >= 768) return 2;
+      if (width >= 640) return 2;
+      return 1;
+    };
+
+    // Set initial value
+    setSlidesToShow(calculateSlidesToShow());
+    setIsMounted(true);
+
+    // Update on resize
+    const handleResize = () => {
+      setSlidesToShow(calculateSlidesToShow());
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Don't render if no products
   if (!isLoading && (!products || products.length === 0)) {
@@ -120,52 +148,64 @@ const OffersSlider = () => {
           )}
 
           {/* Products Slider */}
-          {!isLoading && !error && products && products.length > 0 && (
-            <DynamicSlider
-              ref={sliderRef}
-              slidesToShow={4}
-              slidesToScroll={1}
-              infinite={true}
-              arrows={false}
-              dots={false}
-              responsive={[
-                {
-                  breakpoint: 1024,
-                  settings: {
-                    slidesToShow: 4,
-                    slidesToScroll: 1,
+          {!isLoading &&
+            !error &&
+            products &&
+            products.length > 0 &&
+            isMounted && (
+              <DynamicSlider
+                ref={sliderRef}
+                slidesToShow={slidesToShow}
+                slidesToScroll={1}
+                infinite={true}
+                arrows={false}
+                dots={false}
+                key={slidesToShow}
+                responsive={[
+                  {
+                    breakpoint: 1280,
+                    settings: {
+                      slidesToShow: 3,
+                      slidesToScroll: 1,
+                    },
                   },
-                },
-                {
-                  breakpoint: 920,
-                  settings: {
-                    slidesToShow: 3,
-                    slidesToScroll: 1,
+                  {
+                    breakpoint: 1024,
+                    settings: {
+                      slidesToShow: 2,
+                      slidesToScroll: 1,
+                    },
                   },
-                },
-                {
-                  breakpoint: 720,
-                  settings: {
-                    slidesToShow: 2,
-                    slidesToScroll: 1,
+                  {
+                    breakpoint: 768,
+                    settings: {
+                      slidesToShow: 2,
+                      slidesToScroll: 1,
+                    },
                   },
-                },
-                {
-                  breakpoint: 600,
-                  settings: {
-                    slidesToShow: 1,
-                    slidesToScroll: 1,
+                  {
+                    breakpoint: 640,
+                    settings: {
+                      slidesToShow: 1,
+                      slidesToScroll: 1,
+                    },
                   },
-                },
-              ]}
-            >
-              {products.map((product, index) => (
-                <div key={product.id || index} className="px-3">
-                  <ProductItem item={product} />
-                </div>
-              ))}
-            </DynamicSlider>
-          )}
+                  {
+                    breakpoint: 480,
+                    settings: {
+                      slidesToShow: 1,
+                      slidesToScroll: 1,
+                    },
+                  },
+                ]}
+              >
+                {products.map((product, index) => (
+                  <div key={product.id || index} className="px-3">
+                    <ProductItem item={product} />
+                  </div>
+                ))}
+              </DynamicSlider>
+            )}
         </div>
       </div>
     </section>

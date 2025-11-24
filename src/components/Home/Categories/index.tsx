@@ -1,5 +1,5 @@
 "use client";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import SingleItem from "./SingleItem";
 import { useLocale } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
@@ -9,6 +9,35 @@ import DynamicSlider from "@/components/Common/DynamicSlider";
 const Categories = () => {
   const locale = useLocale();
   const sliderRef = useRef<any>(null);
+  const [slidesToShow, setSlidesToShow] = useState(2); // Start with 2 for mobile-first
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Calculate initial slidesToShow based on window width
+  useEffect(() => {
+    const calculateSlidesToShow = () => {
+      if (typeof window === "undefined") return 2;
+
+      const width = window.innerWidth;
+      if (width >= 1280) return 6;
+      if (width >= 1024) return 4;
+      if (width >= 768) return 3;
+      if (width >= 640) return 2;
+      if (width >= 480) return 2;
+      return 1;
+    };
+
+    // Set initial value
+    setSlidesToShow(calculateSlidesToShow());
+    setIsMounted(true);
+
+    // Update on resize
+    const handleResize = () => {
+      setSlidesToShow(calculateSlidesToShow());
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const {
     data: categories,
@@ -134,51 +163,68 @@ const Categories = () => {
             </div>
           </div>
 
-          <DynamicSlider
-            ref={sliderRef}
-            slidesToShow={6}
-            slidesToScroll={1}
-            infinite={true}
-            arrows={false}
-            dots={false}
-            rtl={locale === "ar"}
-            responsive={[
-              {
-                breakpoint: 1024,
-                settings: {
-                  slidesToShow: 4,
-                  slidesToScroll: 1,
+          {isMounted && (
+            <DynamicSlider
+              ref={sliderRef}
+              slidesToShow={slidesToShow}
+              slidesToScroll={1}
+              infinite={true}
+              arrows={false}
+              dots={false}
+              rtl={locale === "ar"}
+              key={slidesToShow}
+              responsive={[
+                {
+                  breakpoint: 1280,
+                  settings: {
+                    slidesToShow: 4,
+                    slidesToScroll: 1,
+                  },
                 },
-              },
-              {
-                breakpoint: 768,
-                settings: {
-                  slidesToShow: 3,
-                  slidesToScroll: 1,
+                {
+                  breakpoint: 1024,
+                  settings: {
+                    slidesToShow: 3,
+                    slidesToScroll: 1,
+                  },
                 },
-              },
-              {
-                breakpoint: 640,
-                settings: {
-                  slidesToShow: 2,
-                  slidesToScroll: 1,
+                {
+                  breakpoint: 768,
+                  settings: {
+                    slidesToShow: 3,
+                    slidesToScroll: 1,
+                  },
                 },
-              },
-              {
-                breakpoint: 480,
-                settings: {
-                  slidesToShow: 1,
-                  slidesToScroll: 1,
+                {
+                  breakpoint: 640,
+                  settings: {
+                    slidesToShow: 2,
+                    slidesToScroll: 1,
+                  },
                 },
-              },
-            ]}
-          >
-            {categories?.map((item, key) => (
-              <div key={key} className="px-2">
-                <SingleItem item={item} />
-              </div>
-            ))}
-          </DynamicSlider>
+                {
+                  breakpoint: 480,
+                  settings: {
+                    slidesToShow: 2,
+                    slidesToScroll: 1,
+                  },
+                },
+                {
+                  breakpoint: 375,
+                  settings: {
+                    slidesToShow: 1,
+                    slidesToScroll: 1,
+                  },
+                },
+              ]}
+            >
+              {categories?.map((item, key) => (
+                <div key={key} className="px-2">
+                  <SingleItem item={item} />
+                </div>
+              ))}
+            </DynamicSlider>
+          )}
         </div>
       </div>
     </section>

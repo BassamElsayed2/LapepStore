@@ -273,7 +273,12 @@
     "getInOn": "احصل عليه من",
     "googlePlay": "جوجل بلاي",
     "allRightsReserved": "جميع الحقوق محفوظة لشركة ENS.",
-    "weAccept": "نحن نقبل:"
+    "weAccept": "نحن نقبل:",
+    "branches": "الفروع",
+    "blog": "المدونة",
+    "aboutUs": "من نحن",
+    "orders": "الطلبات",
+    "contactInfo": "معلومات الاتصال"
   },
   "branches": {
     "title": "فروعنا",

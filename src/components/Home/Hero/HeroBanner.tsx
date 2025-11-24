@@ -9,7 +9,7 @@ const HeroBanner = () => {
     <section className="w-full relative overflow-hidden">
       <div className="relative w-full h-auto">
         <video
-          src="/hero.mp4"
+          src="/lapip.mp4"
           autoPlay
           loop
           muted

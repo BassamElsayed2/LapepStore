@@ -273,7 +273,12 @@
     "getInOn": "Get in On",
     "googlePlay": "Google Play",
     "allRightsReserved": "All rights reserved by ENS.",
-    "weAccept": "We Accept:"
+    "weAccept": "We Accept:",
+    "branches": "Branches",
+    "blog": "Blog",
+    "aboutUs": "About Us",
+    "orders": "Orders",
+    "contactInfo": "Contact Info"
   },
   "branches": {
     "title": "Our Branches",

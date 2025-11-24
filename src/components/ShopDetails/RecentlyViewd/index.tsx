@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import shopData from "@/components/Shop/shopData";
 import ProductItem from "@/components/Common/ProductItem";
 import Image from "next/image";
@@ -10,6 +10,34 @@ import DynamicSlider from "@/components/Common/DynamicSlider";
 const RecentlyViewdItems = () => {
   const sliderRef = useRef<any>(null);
   const locale = useLocale();
+  const [slidesToShow, setSlidesToShow] = useState(1); // Start with 1 for mobile-first
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Calculate initial slidesToShow based on window width
+  useEffect(() => {
+    const calculateSlidesToShow = () => {
+      if (typeof window === "undefined") return 1;
+
+      const width = window.innerWidth;
+      if (width >= 1280) return 4;
+      if (width >= 1024) return 3;
+      if (width >= 768) return 2;
+      if (width >= 640) return 1;
+      return 1;
+    };
+
+    // Set initial value
+    setSlidesToShow(calculateSlidesToShow());
+    setIsMounted(true);
+
+    // Update on resize
+    const handleResize = () => {
+      setSlidesToShow(calculateSlidesToShow());
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <section className="overflow-hidden pt-17.5">
@@ -113,50 +141,60 @@ const RecentlyViewdItems = () => {
             </div>
           </div>
 
-          <DynamicSlider
-            ref={sliderRef}
-            slidesToShow={4}
-            slidesToScroll={1}
-            infinite={false}
-            arrows={false}
-            dots={false}
-            responsive={[
-              {
-                breakpoint: 1280,
-                settings: {
-                  slidesToShow: 4,
-                  slidesToScroll: 1,
+          {isMounted && (
+            <DynamicSlider
+              ref={sliderRef}
+              slidesToShow={slidesToShow}
+              slidesToScroll={1}
+              infinite={false}
+              arrows={false}
+              dots={false}
+              key={slidesToShow}
+              responsive={[
+                {
+                  breakpoint: 1280,
+                  settings: {
+                    slidesToShow: 3,
+                    slidesToScroll: 1,
+                  },
                 },
-              },
-              {
-                breakpoint: 1024,
-                settings: {
-                  slidesToShow: 3,
-                  slidesToScroll: 1,
+                {
+                  breakpoint: 1024,
+                  settings: {
+                    slidesToShow: 2,
+                    slidesToScroll: 1,
+                  },
                 },
-              },
-              {
-                breakpoint: 640,
-                settings: {
-                  slidesToShow: 2,
-                  slidesToScroll: 1,
+                {
+                  breakpoint: 768,
+                  settings: {
+                    slidesToShow: 2,
+                    slidesToScroll: 1,
+                  },
                 },
-              },
-              {
-                breakpoint: 0,
-                settings: {
-                  slidesToShow: 1,
-                  slidesToScroll: 1,
+                {
+                  breakpoint: 640,
+                  settings: {
+                    slidesToShow: 1,
+                    slidesToScroll: 1,
+                  },
                 },
-              },
-            ]}
-          >
-            {shopData.map((item, key) => (
-              <div key={key} className="px-2">
-                <ProductItem item={item} />
-              </div>
-            ))}
-          </DynamicSlider>
+                {
+                  breakpoint: 480,
+                  settings: {
+                    slidesToShow: 1,
+                    slidesToScroll: 1,
+                  },
+                },
+              ]}
+            >
+              {shopData.map((item, key) => (
+                <div key={key} className="px-2">
+                  <ProductItem item={item} />
+                </div>
+              ))}
+            </DynamicSlider>
+          )}
         </div>
       </div>
     </section>
