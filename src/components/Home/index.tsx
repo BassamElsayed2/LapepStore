@@ -5,8 +5,6 @@ import OffersSlider from "./OffersSlider";
 import Categories from "./Categories";
 
 import BestSeller from "./BestSeller";
-import Testimonials from "./Testimonials";
-import News from "./News";
 
 const Home = () => {
   return (
@@ -19,8 +17,6 @@ const Home = () => {
       {/* <VideoSection /> */}
       {/* <PromoBanner /> */}
       <BestSeller />
-      <Testimonials />
-      <News />
       {/* <CounDown /> */}
       {/* <Newsletter /> */}
     </main>
