@@ -3,8 +3,8 @@ import React from "react";
 import HeroBanner from "./Hero/HeroBanner";
 import OffersSlider from "./OffersSlider";
 import Categories from "./Categories";
-
 import BestSeller from "./BestSeller";
+import GoogleRatingPromo from "./GoogleRatingPromo";
 
 const Home = () => {
   return (
@@ -17,6 +17,8 @@ const Home = () => {
       {/* <VideoSection /> */}
       {/* <PromoBanner /> */}
       <BestSeller />
+      {/* Google Rating Promo - Get discount for rating */}
+      {/* <GoogleRatingPromo /> */}
       {/* <CounDown /> */}
       {/* <Newsletter /> */}
     </main>

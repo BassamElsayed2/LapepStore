@@ -99,7 +99,7 @@ export function formatPhoneNumber(phoneNumber: string): string {
  */
 export function getWhatsAppNotificationNumber(): string {
   const envNumber = process.env.WHATSAPP_NOTIFICATION_NUMBER;
-  const defaultNumber = "201065223412";
+  const defaultNumber = "201270127380";
 
   if (envNumber) {
     return formatPhoneNumber(envNumber);

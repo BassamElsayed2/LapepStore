@@ -16,6 +16,7 @@ import { PreviewSliderProvider } from "@/app/context/PreviewSliderContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import SplashCursor from "@/components/SplashCursor";
+import VoucherNotification from "@/components/Common/VoucherNotification";
 
 interface ClientLayoutProps {
   children: React.ReactNode;
@@ -60,6 +61,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
                 <QuickViewModal />
                 <CartSidebarModal />
                 <PreviewSliderModal />
+                <VoucherNotification showAsPopup={true} />
               </PreviewSliderProvider>
             </ModalProvider>
           </CartModalProvider>

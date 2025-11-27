@@ -296,5 +296,32 @@
     "yes": "Yes, I am 18 or older",
     "no": "No, I am under 18",
     "note": "By clicking Yes, you certify that you are 18 years of age or older."
+  },
+  "vouchers": {
+    "title": "Discount Vouchers",
+    "yourVouchers": "Your Discount Vouchers",
+    "noVouchers": "No vouchers yet",
+    "getVoucherMessage": "Rate our store on Google to get an exclusive discount code!",
+    "discountCode": "Discount Code",
+    "validUntil": "Valid until",
+    "useNow": "Use Now",
+    "percentOff": "% off",
+    "egpOff": "EGP off",
+    "howToUse": "How to use the discount code",
+    "howToUseDescription": "Enter the discount code on the checkout page before completing your order to apply the discount.",
+    "goToHome": "Go to Home",
+    "codeCopied": "Code copied!",
+    "applyVoucher": "Apply",
+    "enterVoucherCode": "Enter voucher code",
+    "voucherApplied": "Voucher applied successfully!",
+    "invalidVoucher": "Invalid voucher code",
+    "discount": "Discount",
+    "rateAndGetDiscount": "Rate & Get Discount!",
+    "rateDescription": "Rate our store on Google and send us a screenshot via WhatsApp to get an exclusive discount code for your next order!",
+    "rateOnGoogle": "Rate on Google",
+    "sendOnWhatsapp": "Send on WhatsApp",
+    "loginToGetPhone": "Login first to automatically include your phone number",
+    "hasActiveVoucher": "You have a discount code!",
+    "viewVouchers": "View Vouchers"
   }
 }

@@ -20,8 +20,15 @@ import { getShippingFeeByGovernorate } from "@/services/apiShipping";
 import { useAuth } from "@/hooks/useAuth";
 import { createOrder, type CreateOrderData } from "@/services/apiOrders";
 import { initiateEasykashPayment } from "@/services/apiPayment";
+import {
+  validateVoucher,
+  Voucher,
+  calculateDiscount,
+  getMyVouchers,
+} from "@/services/apiVouchers";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import GoogleRatingPromo from "../Home/GoogleRatingPromo";
 
 const Checkout = () => {
   const locale = useLocale();
@@ -38,6 +45,13 @@ const Checkout = () => {
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [shippingFee, setShippingFee] = useState<number | null>(null);
   const [loadingShipping, setLoadingShipping] = useState(false);
+
+  // Voucher state
+  const [voucherCode, setVoucherCode] = useState("");
+  const [appliedVoucher, setAppliedVoucher] = useState<Voucher | null>(null);
+  const [voucherLoading, setVoucherLoading] = useState(false);
+  const [voucherError, setVoucherError] = useState<string | null>(null);
+  const [hasReceivedVoucher, setHasReceivedVoucher] = useState(false);
 
   // Fetch user addresses
   useEffect(() => {
@@ -87,6 +101,24 @@ const Checkout = () => {
     fetchShippingFee();
   }, [selectedAddress]);
 
+  // Check if user has received any vouchers before
+  useEffect(() => {
+    const checkUserVouchers = async () => {
+      if (!user) return;
+
+      try {
+        const result = await getMyVouchers();
+        if (result.success && result.data && result.data.length > 0) {
+          setHasReceivedVoucher(true);
+        }
+      } catch (error) {
+        console.error("Error checking user vouchers:", error);
+      }
+    };
+
+    checkUserVouchers();
+  }, [user]);
+
   const handleRemoveFromCart = (itemId: number) => {
     dispatch(removeItemFromCart(itemId));
   };
@@ -114,7 +146,59 @@ const Checkout = () => {
   const calculateTotal = () => {
     const subtotal = totalPrice;
     const shipping = shippingFee !== null ? shippingFee : 0;
-    return subtotal + shipping;
+    const discount = appliedVoucher
+      ? calculateDiscount(appliedVoucher, subtotal)
+      : 0;
+    return Math.max(0, subtotal + shipping - discount);
+  };
+
+  const getDiscountAmount = () => {
+    if (!appliedVoucher) return 0;
+    return calculateDiscount(appliedVoucher, totalPrice);
+  };
+
+  const handleApplyVoucher = async () => {
+    if (!voucherCode.trim()) {
+      setVoucherError(
+        locale === "ar" ? "يرجى إدخال كود الخصم" : "Please enter a voucher code"
+      );
+      return;
+    }
+
+    setVoucherLoading(true);
+    setVoucherError(null);
+
+    try {
+      const result = await validateVoucher(voucherCode.trim(), totalPrice);
+
+      if (result.success && result.data?.valid && result.data?.voucher) {
+        setAppliedVoucher(result.data.voucher);
+        toast.success(
+          locale === "ar"
+            ? "تم تطبيق كود الخصم بنجاح!"
+            : "Voucher applied successfully!"
+        );
+      } else {
+        setVoucherError(
+          result.error ||
+            (locale === "ar" ? "كود الخصم غير صالح" : "Invalid voucher code")
+        );
+      }
+    } catch (error) {
+      setVoucherError(
+        locale === "ar"
+          ? "حدث خطأ أثناء التحقق من الكود"
+          : "Error validating voucher"
+      );
+    } finally {
+      setVoucherLoading(false);
+    }
+  };
+
+  const handleRemoveVoucher = () => {
+    setAppliedVoucher(null);
+    setVoucherCode("");
+    setVoucherError(null);
   };
 
   const handleEasyKashPayment = async () => {
@@ -155,13 +239,13 @@ const Checkout = () => {
 
     try {
       // Prepare order data
+      // Note: total_price is now calculated by backend from database prices
       const orderData: CreateOrderData = {
         user_id: user.id || null,
-        total_price: calculateTotal(),
         items: cartItems.map((item) => ({
           product_id: String(item.id),
           quantity: item.quantity,
-          price: item.discountedPrice,
+          price: item.discountedPrice, // Backend will validate/override with DB price
         })),
         payment_method: "easykash",
         customer_first_name:
@@ -191,6 +275,7 @@ const Checkout = () => {
         }`.trim(),
         customer_city: selectedAddress.city || "",
         customer_state: selectedAddress.area || undefined,
+        voucher_code: appliedVoucher?.code || undefined,
       };
 
       // Create order
@@ -206,11 +291,11 @@ const Checkout = () => {
         return;
       }
 
-      // Initiate EasyKash payment
+      // Initiate EasyKash payment with the actual total from the order
       const { data: paymentData, error: paymentError } =
         await initiateEasykashPayment({
           order_id: order.id,
-          amount: calculateTotal(),
+          amount: order.total_price, // Use actual price from backend
           name: user.full_name || user.name || "",
           email: user.email || undefined,
           mobile: user.phone || "",
@@ -274,10 +359,18 @@ const Checkout = () => {
     <>
       <Breadcrumb title={t("checkout")} pages={[t("checkout")]} />
       <section className="overflow-hidden py-20 bg-gray-2 ">
-        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-          <div className="flex flex-col lg:flex-row gap-7.5">
+        <div
+          className={`w-full mx-auto px-4 sm:px-8 xl:px-0 ${
+            hasReceivedVoucher ? "max-w-[1170px]" : "max-w-[1400px]"
+          }`}
+        >
+          <div
+            className={`grid grid-cols-1 gap-7.5 ${
+              hasReceivedVoucher ? "lg:grid-cols-[1fr_400px]" : "lg:grid-cols-3"
+            }`}
+          >
             {/* Order Items Section */}
-            <div className="lg:flex-1">
+            <div className="lg:col-span-1">
               <div className="bg-white rounded-[10px] shadow-1 mb-7.5">
                 <div className="border-b border-gray-3 py-5 px-4 sm:px-8.5">
                   <h2 className="font-medium text-xl text-dark">
@@ -289,129 +382,139 @@ const Checkout = () => {
                   {cartItems.map((item) => (
                     <div
                       key={item.id}
-                      className="flex items-center gap-4 py-5 border-b border-gray-3 last:border-0"
+                      className="py-5 border-b border-gray-3 last:border-0"
                     >
-                      {/* Product Image */}
-                      <div className="flex-shrink-0 w-20 h-20 rounded-[5px] bg-gray-2 overflow-hidden">
-                        {item.imgs?.thumbnails?.[0] && (
-                          <Image
-                            width={80}
-                            height={80}
-                            src={item.imgs.thumbnails[0]}
-                            alt={item.title}
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                      </div>
-
-                      {/* Product Info */}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-dark mb-1">
-                          {item.title}
-                        </h3>
-                        <p className="text-gray-5 text-sm">
-                          {locale === "ar" ? "السعر:" : "Price:"}{" "}
-                          {locale === "ar" ? "ج.م" : "EGP"}{" "}
-                          {item.discountedPrice}
-                        </p>
-                      </div>
-
-                      {/* Quantity Controls */}
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center rounded-md border border-gray-3">
-                          <button
-                            onClick={() =>
-                              handleDecreaseQuantity(item.id, item.quantity)
-                            }
-                            disabled={item.quantity <= 1}
-                            className="flex items-center justify-center w-10 h-10 ease-out duration-200 hover:text-blue disabled:opacity-50 disabled:cursor-not-allowed"
-                            aria-label="Decrease quantity"
-                          >
-                            <svg
-                              className="fill-current"
-                              width="20"
-                              height="20"
-                              viewBox="0 0 20 20"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M3.33301 10.0001C3.33301 9.53984 3.7061 9.16675 4.16634 9.16675H15.833C16.2932 9.16675 16.6663 9.53984 16.6663 10.0001C16.6663 10.4603 16.2932 10.8334 15.833 10.8334H4.16634C3.7061 10.8334 3.33301 10.4603 3.33301 10.0001Z"
-                                fill="currentColor"
-                              />
-                            </svg>
-                          </button>
-
-                          <span className="flex items-center justify-center w-12 h-10 border-x border-gray-4 text-dark">
-                            {item.quantity}
-                          </span>
-
-                          <button
-                            onClick={() =>
-                              handleIncreaseQuantity(
-                                item.id,
-                                item.quantity,
-                                item.stock
-                              )
-                            }
-                            disabled={item.quantity >= item.stock}
-                            className="flex items-center justify-center w-10 h-10 ease-out duration-200 hover:text-blue disabled:opacity-50 disabled:cursor-not-allowed"
-                            aria-label="Increase quantity"
-                          >
-                            <svg
-                              className="fill-current"
-                              width="20"
-                              height="20"
-                              viewBox="0 0 20 20"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M3.33301 10C3.33301 9.5398 3.7061 9.16671 4.16634 9.16671H15.833C16.2932 9.16671 16.6663 9.5398 16.6663 10C16.6663 10.4603 16.2932 10.8334 15.833 10.8334H4.16634C3.7061 10.8334 3.33301 10.4603 3.33301 10Z"
-                                fill="currentColor"
-                              />
-                              <path
-                                d="M9.99967 16.6667C9.53944 16.6667 9.16634 16.2936 9.16634 15.8334L9.16634 4.16671C9.16634 3.70647 9.53944 3.33337 9.99967 3.33337C10.4599 3.33337 10.833 3.70647 10.833 4.16671L10.833 15.8334C10.833 16.2936 10.4599 16.6667 9.99967 16.6667Z"
-                                fill="currentColor"
-                              />
-                            </svg>
-                          </button>
+                      <div className="flex gap-4">
+                        {/* Product Image */}
+                        <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-[5px] bg-gray-2 overflow-hidden">
+                          {item.imgs?.thumbnails?.[0] && (
+                            <Image
+                              width={80}
+                              height={80}
+                              src={item.imgs.thumbnails[0]}
+                              alt={item.title}
+                              className="w-full h-full object-cover"
+                            />
+                          )}
                         </div>
 
-                        {/* Item Total */}
-                        <div className="min-w-[80px] text-right">
-                          <p className="font-medium text-dark">
-                            {locale === "ar" ? "ج.م" : "EGP"}{" "}
-                            {(item.discountedPrice * item.quantity).toFixed(2)}
-                          </p>
-                        </div>
+                        {/* Product Info & Controls */}
+                        <div className="flex-1 min-w-0 flex flex-col gap-3">
+                          {/* Title and Remove Button */}
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-medium text-dark mb-1 text-sm sm:text-base line-clamp-2">
+                                {item.title}
+                              </h3>
+                              <p className="text-gray-5 text-xs sm:text-sm">
+                                {locale === "ar" ? "السعر:" : "Price:"}{" "}
+                                {locale === "ar" ? "ج.م" : "EGP"}{" "}
+                                {item.discountedPrice}
+                              </p>
+                            </div>
 
-                        {/* Remove Button */}
-                        <button
-                          onClick={() => handleRemoveFromCart(item.id)}
-                          className="flex items-center justify-center rounded-lg w-9 h-9 bg-gray-2 border border-gray-3 text-dark ease-out duration-200 hover:bg-red-light-6 hover:border-red-light-4 hover:text-red"
-                          aria-label="Remove item"
-                        >
-                          <svg
-                            className="fill-current"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 22 22"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              clipRule="evenodd"
-                              d="M9.45017 2.06252H12.5498C12.7482 2.06239 12.921 2.06228 13.0842 2.08834C13.7289 2.19129 14.2868 2.59338 14.5883 3.17244C14.6646 3.319 14.7192 3.48298 14.7818 3.6712L14.8841 3.97819C14.9014 4.03015 14.9064 4.04486 14.9105 4.05645C15.0711 4.50022 15.4873 4.80021 15.959 4.81217C15.9714 4.81248 15.9866 4.81254 16.0417 4.81254H18.7917C19.1714 4.81254 19.4792 5.12034 19.4792 5.50004C19.4792 5.87973 19.1714 6.18754 18.7917 6.18754H3.20825C2.82856 6.18754 2.52075 5.87973 2.52075 5.50004C2.52075 5.12034 2.82856 4.81254 3.20825 4.81254H5.95833C6.01337 4.81254 6.02856 4.81248 6.04097 4.81217C6.51273 4.80021 6.92892 4.50024 7.08944 4.05647C7.09366 4.0448 7.09852 4.03041 7.11592 3.97819L7.21823 3.67122C7.28083 3.48301 7.33538 3.319 7.41171 3.17244C7.71324 2.59339 8.27112 2.19129 8.91581 2.08834C9.079 2.06228 9.25181 2.06239 9.45017 2.06252ZM8.25739 4.81254C8.30461 4.71993 8.34645 4.6237 8.38245 4.52419C8.39338 4.49397 8.4041 4.4618 8.41787 4.42048L8.50936 4.14601C8.59293 3.8953 8.61217 3.84416 8.63126 3.8075C8.73177 3.61448 8.91773 3.48045 9.13263 3.44614C9.17345 3.43962 9.22803 3.43754 9.49232 3.43754H12.5077C12.772 3.43754 12.8265 3.43962 12.8674 3.44614C13.0823 3.48045 13.2682 3.61449 13.3687 3.8075C13.3878 3.84416 13.4071 3.89529 13.4906 4.14601L13.5821 4.42031L13.6176 4.52421C13.6535 4.62372 13.6954 4.71994 13.7426 4.81254H8.25739Z"
-                              fill="currentColor"
-                            />
-                            <path
-                              d="M5.42208 7.74597C5.39683 7.36711 5.06923 7.08047 4.69038 7.10572C4.31152 7.13098 4.02487 7.45858 4.05013 7.83743L4.47496 14.2099C4.55333 15.3857 4.61663 16.3355 4.76511 17.0808C4.91947 17.8557 5.18203 18.5029 5.72432 19.0103C6.26662 19.5176 6.92987 19.7365 7.7133 19.839C8.46682 19.9376 9.41871 19.9376 10.5971 19.9375H11.4028C12.5812 19.9376 13.5332 19.9376 14.2867 19.839C15.0701 19.7365 15.7334 19.5176 16.2757 19.0103C16.818 18.5029 17.0805 17.8557 17.2349 17.0808C17.3834 16.3355 17.4467 15.3857 17.525 14.2099L17.9499 7.83743C17.9751 7.45858 17.6885 7.13098 17.3096 7.10572C16.9308 7.08047 16.6032 7.36711 16.5779 7.74597L16.1563 14.0702C16.0739 15.3057 16.0152 16.1654 15.8864 16.8122C15.7614 17.4396 15.5869 17.7717 15.3363 18.0062C15.0857 18.2406 14.7427 18.3926 14.1084 18.4756C13.4544 18.5612 12.5927 18.5625 11.3545 18.5625H10.6455C9.40727 18.5625 8.54559 18.5612 7.89164 18.4756C7.25731 18.3926 6.91433 18.2406 6.6637 18.0062C6.41307 17.7717 6.2386 17.4396 6.11361 16.8122C5.98476 16.1654 5.92607 15.3057 5.8437 14.0702L5.42208 7.74597Z"
-                              fill="currentColor"
-                            />
-                          </svg>
-                        </button>
+                            {/* Remove Button */}
+                            <button
+                              onClick={() => handleRemoveFromCart(item.id)}
+                              className="flex-shrink-0 flex items-center justify-center rounded-lg w-8 h-8 sm:w-9 sm:h-9 bg-gray-2 border border-gray-3 text-dark ease-out duration-200 hover:bg-red-light-6 hover:border-red-light-4 hover:text-red"
+                              aria-label="Remove item"
+                            >
+                              <svg
+                                className="fill-current"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 22 22"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  clipRule="evenodd"
+                                  d="M9.45017 2.06252H12.5498C12.7482 2.06239 12.921 2.06228 13.0842 2.08834C13.7289 2.19129 14.2868 2.59338 14.5883 3.17244C14.6646 3.319 14.7192 3.48298 14.7818 3.6712L14.8841 3.97819C14.9014 4.03015 14.9064 4.04486 14.9105 4.05645C15.0711 4.50022 15.4873 4.80021 15.959 4.81217C15.9714 4.81248 15.9866 4.81254 16.0417 4.81254H18.7917C19.1714 4.81254 19.4792 5.12034 19.4792 5.50004C19.4792 5.87973 19.1714 6.18754 18.7917 6.18754H3.20825C2.82856 6.18754 2.52075 5.87973 2.52075 5.50004C2.52075 5.12034 2.82856 4.81254 3.20825 4.81254H5.95833C6.01337 4.81254 6.02856 4.81248 6.04097 4.81217C6.51273 4.80021 6.92892 4.50024 7.08944 4.05647C7.09366 4.0448 7.09852 4.03041 7.11592 3.97819L7.21823 3.67122C7.28083 3.48301 7.33538 3.319 7.41171 3.17244C7.71324 2.59339 8.27112 2.19129 8.91581 2.08834C9.079 2.06228 9.25181 2.06239 9.45017 2.06252ZM8.25739 4.81254C8.30461 4.71993 8.34645 4.6237 8.38245 4.52419C8.39338 4.49397 8.4041 4.4618 8.41787 4.42048L8.50936 4.14601C8.59293 3.8953 8.61217 3.84416 8.63126 3.8075C8.73177 3.61448 8.91773 3.48045 9.13263 3.44614C9.17345 3.43962 9.22803 3.43754 9.49232 3.43754H12.5077C12.772 3.43754 12.8265 3.43962 12.8674 3.44614C13.0823 3.48045 13.2682 3.61449 13.3687 3.8075C13.3878 3.84416 13.4071 3.89529 13.4906 4.14601L13.5821 4.42031L13.6176 4.52421C13.6535 4.62372 13.6954 4.71994 13.7426 4.81254H8.25739Z"
+                                  fill="currentColor"
+                                />
+                                <path
+                                  d="M5.42208 7.74597C5.39683 7.36711 5.06923 7.08047 4.69038 7.10572C4.31152 7.13098 4.02487 7.45858 4.05013 7.83743L4.47496 14.2099C4.55333 15.3857 4.61663 16.3355 4.76511 17.0808C4.91947 17.8557 5.18203 18.5029 5.72432 19.0103C6.26662 19.5176 6.92987 19.7365 7.7133 19.839C8.46682 19.9376 9.41871 19.9376 10.5971 19.9375H11.4028C12.5812 19.9376 13.5332 19.9376 14.2867 19.839C15.0701 19.7365 15.7334 19.5176 16.2757 19.0103C16.818 18.5029 17.0805 17.8557 17.2349 17.0808C17.3834 16.3355 17.4467 15.3857 17.525 14.2099L17.9499 7.83743C17.9751 7.45858 17.6885 7.13098 17.3096 7.10572C16.9308 7.08047 16.6032 7.36711 16.5779 7.74597L16.1563 14.0702C16.0739 15.3057 16.0152 16.1654 15.8864 16.8122C15.7614 17.4396 15.5869 17.7717 15.3363 18.0062C15.0857 18.2406 14.7427 18.3926 14.1084 18.4756C13.4544 18.5612 12.5927 18.5625 11.3545 18.5625H10.6455C9.40727 18.5625 8.54559 18.5612 7.89164 18.4756C7.25731 18.3926 6.91433 18.2406 6.6637 18.0062C6.41307 17.7717 6.2386 17.4396 6.11361 16.8122C5.98476 16.1654 5.92607 15.3057 5.8437 14.0702L5.42208 7.74597Z"
+                                  fill="currentColor"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+
+                          {/* Quantity Controls and Total */}
+                          <div className="flex items-center justify-between gap-3">
+                            {/* Quantity Controls */}
+                            <div className="flex items-center rounded-md border border-gray-3">
+                              <button
+                                onClick={() =>
+                                  handleDecreaseQuantity(item.id, item.quantity)
+                                }
+                                disabled={item.quantity <= 1}
+                                className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 ease-out duration-200 hover:text-blue disabled:opacity-50 disabled:cursor-not-allowed"
+                                aria-label="Decrease quantity"
+                              >
+                                <svg
+                                  className="fill-current"
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 20 20"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M3.33301 10.0001C3.33301 9.53984 3.7061 9.16675 4.16634 9.16675H15.833C16.2932 9.16675 16.6663 9.53984 16.6663 10.0001C16.6663 10.4603 16.2932 10.8334 15.833 10.8334H4.16634C3.7061 10.8334 3.33301 10.4603 3.33301 10.0001Z"
+                                    fill="currentColor"
+                                  />
+                                </svg>
+                              </button>
+
+                              <span className="flex items-center justify-center w-10 h-8 sm:w-12 sm:h-10 border-x border-gray-4 text-dark text-sm sm:text-base">
+                                {item.quantity}
+                              </span>
+
+                              <button
+                                onClick={() =>
+                                  handleIncreaseQuantity(
+                                    item.id,
+                                    item.quantity,
+                                    item.stock
+                                  )
+                                }
+                                disabled={item.quantity >= item.stock}
+                                className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 ease-out duration-200 hover:text-blue disabled:opacity-50 disabled:cursor-not-allowed"
+                                aria-label="Increase quantity"
+                              >
+                                <svg
+                                  className="fill-current"
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 20 20"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M3.33301 10C3.33301 9.5398 3.7061 9.16671 4.16634 9.16671H15.833C16.2932 9.16671 16.6663 9.5398 16.6663 10C16.6663 10.4603 16.2932 10.8334 15.833 10.8334H4.16634C3.7061 10.8334 3.33301 10.4603 3.33301 10Z"
+                                    fill="currentColor"
+                                  />
+                                  <path
+                                    d="M9.99967 16.6667C9.53944 16.6667 9.16634 16.2936 9.16634 15.8334L9.16634 4.16671C9.16634 3.70647 9.53944 3.33337 9.99967 3.33337C10.4599 3.33337 10.833 3.70647 10.833 4.16671L10.833 15.8334C10.833 16.2936 10.4599 16.6667 9.99967 16.6667Z"
+                                    fill="currentColor"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+
+                            {/* Item Total */}
+                            <div className="text-right">
+                              <p className="font-medium text-dark text-sm sm:text-base">
+                                {locale === "ar" ? "ج.م" : "EGP"}{" "}
+                                {(item.discountedPrice * item.quantity).toFixed(
+                                  2
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -554,7 +657,7 @@ const Checkout = () => {
             </div>
 
             {/* Order Summary Section */}
-            <div className="lg:max-w-[400px] w-full">
+            <div className="lg:col-span-1">
               <div className="bg-white shadow-1 rounded-[10px] sticky top-5">
                 <div className="border-b border-gray-3 py-5 px-4 sm:px-8.5">
                   <h3 className="font-medium text-xl text-dark">
@@ -604,6 +707,141 @@ const Checkout = () => {
                       )}
                     </div>
                   </div>
+
+                  {/* Voucher Code Section */}
+                  <div className="py-5 border-b border-gray-3">
+                    <p className="text-dark mb-3">
+                      {locale === "ar" ? "كود الخصم" : "Discount Code"}
+                    </p>
+
+                    {appliedVoucher ? (
+                      // Applied voucher display
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <svg
+                              className="w-5 h-5 text-green-500"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                            <span className="font-mono font-medium text-green-700">
+                              {appliedVoucher.code}
+                            </span>
+                          </div>
+                          <button
+                            onClick={handleRemoveVoucher}
+                            className="text-gray-400 hover:text-red-500 transition-colors"
+                            title={locale === "ar" ? "إزالة" : "Remove"}
+                          >
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                        <p className="text-sm text-green-600 mt-1">
+                          {appliedVoucher.discount_type === "percentage"
+                            ? `${appliedVoucher.discount_value}% ${
+                                locale === "ar" ? "خصم" : "off"
+                              }`
+                            : `${appliedVoucher.discount_value} ${
+                                locale === "ar" ? "ج.م خصم" : "EGP off"
+                              }`}
+                        </p>
+                      </div>
+                    ) : (
+                      // Voucher input form
+                      <div>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={voucherCode}
+                            onChange={(e) => {
+                              setVoucherCode(e.target.value.toUpperCase());
+                              setVoucherError(null);
+                            }}
+                            placeholder={
+                              locale === "ar"
+                                ? "أدخل كود الخصم"
+                                : "Enter voucher code"
+                            }
+                            className="flex-1 px-4 py-2.5 border border-gray-3 rounded-md text-dark placeholder:text-gray-5 focus:border-blue focus:ring-1 focus:ring-blue outline-none font-mono"
+                            disabled={voucherLoading}
+                          />
+                          <button
+                            onClick={handleApplyVoucher}
+                            disabled={voucherLoading || !voucherCode.trim()}
+                            className="px-4 py-2.5 bg-blue text-white rounded-md hover:bg-blue-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                            {voucherLoading ? (
+                              <svg
+                                className="animate-spin h-5 w-5"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                  fill="none"
+                                />
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                />
+                              </svg>
+                            ) : locale === "ar" ? (
+                              "تطبيق"
+                            ) : (
+                              "Apply"
+                            )}
+                          </button>
+                        </div>
+                        {voucherError && (
+                          <p className="text-sm text-red mt-2">
+                            {voucherError}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Discount (if voucher applied) */}
+                  {appliedVoucher && (
+                    <div className="flex items-center justify-between py-5 border-b border-gray-3">
+                      <div>
+                        <p className="text-green-600">
+                          {locale === "ar" ? "الخصم" : "Discount"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-green-600 text-right">
+                          - {locale === "ar" ? "ج.م" : "EGP"}{" "}
+                          {getDiscountAmount().toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Total */}
                   <div className="flex items-center justify-between pt-5">
@@ -699,6 +937,15 @@ const Checkout = () => {
                 </div>
               </div>
             </div>
+
+            {/* Google Rating Promo Section - Only show if user hasn't received voucher */}
+            {!hasReceivedVoucher && (
+              <div className="lg:col-span-1">
+                <div className="sticky top-5">
+                  <GoogleRatingPromo />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>

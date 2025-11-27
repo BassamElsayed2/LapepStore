@@ -8,7 +8,7 @@ export interface OrderItem {
 
 export interface CreateOrderData {
   user_id?: string | null;
-  total_price: number;
+  // total_price removed - backend calculates it from database prices
   items: OrderItem[];
   payment_method: 'easykash' | 'cod';
   notes?: string;
@@ -20,6 +20,7 @@ export interface CreateOrderData {
   customer_city: string;
   customer_state?: string;
   customer_postcode?: string;
+  voucher_code?: string;
 }
 
 export interface Order {
@@ -27,6 +28,11 @@ export interface Order {
   user_id?: string | null;
   status: 'pending' | 'paid' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
   total_price: number;
+  original_price?: number;
+  discount_amount?: number;
+  voucher_code?: string;
+  voucher_discount_type?: 'percentage' | 'fixed';
+  voucher_discount_value?: number;
   created_at: string;
   updated_at: string;
   customer_first_name?: string;

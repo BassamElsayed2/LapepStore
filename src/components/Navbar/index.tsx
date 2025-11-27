@@ -16,6 +16,7 @@ import UserDropdown from "./UserDropdown";
 import LanguageDropdown from "./LanguageDropdown";
 import CartButton from "./CartButton";
 import NavigationLinks from "./NavigationLinks";
+import VoucherNotification from "@/components/Common/VoucherNotification";
 
 // تحسين الأداء باستخدام React.memo
 const Navbar = React.memo(() => {
@@ -174,6 +175,9 @@ const Navbar = React.memo(() => {
 
                 {/* Language Switcher */}
                 <LanguageDropdown />
+
+                {/* Voucher Notification */}
+                <VoucherNotification className="hidden md:inline-flex" />
 
                 {/* Cart Button */}
                 <CartButton
