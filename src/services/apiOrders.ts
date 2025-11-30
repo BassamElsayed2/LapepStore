@@ -21,6 +21,7 @@ export interface CreateOrderData {
   customer_state?: string;
   customer_postcode?: string;
   voucher_code?: string;
+  shipping_fee?: number;
 }
 
 export interface Order {
@@ -76,21 +77,36 @@ export async function createOrder(
   orderData: CreateOrderData
 ): Promise<{ order: Order | null; error: string | null }> {
   try {
+    console.log('📤 Sending order data:', {
+      itemsCount: orderData.items?.length,
+      payment_method: orderData.payment_method,
+      voucher_code: orderData.voucher_code || 'none',
+      shipping_fee: orderData.shipping_fee,
+    });
+
     const response = await apiClient.post<ApiResponse<Order>>('/orders', orderData);
 
     if (response.data.success && response.data.data) {
+      console.log('✅ Order created successfully:', response.data.data.id);
       return { order: response.data.data, error: null };
     }
 
+    console.error('❌ Order creation failed:', response.data.error);
     return {
       order: null,
       error: response.data.error || 'Failed to create order',
     };
   } catch (error: any) {
-    console.error('Error creating order:', error);
+    console.error('❌ Error creating order:', error);
+    const errorMessage = error.response?.data?.error || error.message || 'حدث خطأ غير متوقع';
+    console.error('Error details:', {
+      message: errorMessage,
+      status: error.response?.status,
+      data: error.response?.data,
+    });
     return {
       order: null,
-      error: error.message || 'حدث خطأ غير متوقع',
+      error: errorMessage,
     };
   }
 }

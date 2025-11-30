@@ -10,7 +10,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000, // 30 seconds timeout (increased for database operations)
+  timeout: 60000, // 60 seconds timeout (increased for complex database operations like order creation with vouchers)
   headers: {
     "Content-Type": "application/json",
   },

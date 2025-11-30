@@ -41,7 +41,7 @@ const Footer = () => {
                   href="https://www.facebook.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-gray-1 dark:bg-gray-800 flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-200"
+                  className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-200"
                   aria-label="Facebook"
                 >
                   <svg
@@ -53,10 +53,10 @@ const Footer = () => {
                   </svg>
                 </a>
                 <a
-                  href="https://www.instagram.com"
+                  href="https://www.instagram.com/Lapip_store_egypt/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-gray-1 dark:bg-gray-800 flex items-center justify-center hover:bg-gradient-to-br hover:from-purple-600 hover:via-pink-600 hover:to-orange-500 hover:text-white transition-all duration-200"
+                  className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-red-light hover:text-white  transition-all duration-200"
                   aria-label="Instagram"
                 >
                   <svg
@@ -68,10 +68,10 @@ const Footer = () => {
                   </svg>
                 </a>
                 <a
-                  href="https://wa.me/201270127380"
+                  href="https://wa.me/20 127 012 7380"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-gray-1 dark:bg-gray-800 flex items-center justify-center hover:bg-[#25D366] hover:text-white transition-all duration-200"
+                  className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-[#25D366] hover:text-white transition-all duration-200"
                   aria-label="WhatsApp"
                 >
                   <svg
@@ -200,7 +200,7 @@ const Footer = () => {
       </div>
 
       {/* Footer Bottom */}
-      <div className="py-5 xl:py-7.5 bg-gray-1 dark:bg-gray-900 border-t border-gray-2 dark:border-gray-800">
+      <div className="py-5 xl:py-7.5 bg-gray-100 dark:bg-gray-900 border-t border-gray-2 dark:border-gray-800">
         <div className="max-w-[1170px] mx-auto px-4 sm:px-8 xl:px-0">
           <div className="flex gap-5 flex-wrap items-center justify-between">
             <p className="text-dark-5 dark:text-gray-400 font-medium text-sm">

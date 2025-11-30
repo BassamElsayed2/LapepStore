@@ -276,6 +276,7 @@ const Checkout = () => {
         customer_city: selectedAddress.city || "",
         customer_state: selectedAddress.area || undefined,
         voucher_code: appliedVoucher?.code || undefined,
+        shipping_fee: shippingFee !== null && shippingFee !== undefined ? shippingFee : 0,
       };
 
       // Create order

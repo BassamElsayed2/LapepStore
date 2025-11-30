@@ -265,7 +265,7 @@ const RegisterPage = () => {
         toast.success(
           locale === "ar" ? "تم التسجيل بنجاح!" : "Registration successful!"
         );
-        router.push(`/${locale}/profile`);
+        router.push(`/${locale}/profile?tab=addresses`);
       }
     } catch (error) {
       console.error("Registration error:", error);

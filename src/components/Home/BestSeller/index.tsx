@@ -10,14 +10,10 @@ import { useBestSellers } from "@/hooks/useProducts";
 const BestSeller = () => {
   const locale = useLocale();
 
-  const {
-    data: products,
-    isLoading,
-    error,
-  } = useBestSellers();
+  const { data: products, isLoading, error } = useBestSellers();
 
   return (
-    <section className="overflow-hidden">
+    <section className="overflow-hidden mb-10">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
         {/* <!-- section title --> */}
         <div className="mb-10 flex items-center justify-between">
