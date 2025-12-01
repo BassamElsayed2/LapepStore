@@ -1,4 +1,4 @@
-import apiClient, { ApiResponse } from './apiClient';
+import apiClient, { ApiResponse } from "./apiClient";
 
 export interface EasykashPaymentRequest {
   order_id: string;
@@ -6,7 +6,7 @@ export interface EasykashPaymentRequest {
   name: string;
   email?: string;
   mobile: string;
-  currency?: 'EGP' | 'USD' | 'SAR' | 'EUR';
+  currency?: "EGP" | "USD" | "SAR" | "EUR";
 }
 
 export interface EasykashPaymentResponse {
@@ -21,7 +21,7 @@ export interface PaymentStatus {
   payment_method: string;
   payment_provider?: string;
   amount: number;
-  payment_status: 'pending' | 'completed' | 'failed';
+  payment_status: "pending" | "completed" | "failed";
   transaction_id?: string;
   easykash_ref?: string;
   easykash_product_code?: string;
@@ -39,7 +39,7 @@ export async function initiateEasykashPayment(
 ): Promise<{ data: EasykashPaymentResponse | null; error: string | null }> {
   try {
     const response = await apiClient.post<ApiResponse<EasykashPaymentResponse>>(
-      '/payment/initiate',
+      "/payment/initiate",
       paymentData
     );
 
@@ -49,13 +49,13 @@ export async function initiateEasykashPayment(
 
     return {
       data: null,
-      error: response.data.error || 'Failed to initiate payment',
+      error: response.data.error || "Failed to initiate payment",
     };
   } catch (error: any) {
-    console.error('Error initiating payment:', error);
+    console.error("Error initiating payment:", error);
     return {
       data: null,
-      error: error.message || 'حدث خطأ في بدء عملية الدفع',
+      error: error.message || "حدث خطأ في بدء عملية الدفع",
     };
   }
 }
@@ -77,15 +77,13 @@ export async function getPaymentStatus(
 
     return {
       payment: null,
-      error: response.data.error || 'Payment not found',
+      error: response.data.error || "Payment not found",
     };
   } catch (error: any) {
-    console.error('Error fetching payment status:', error);
+    console.error("Error fetching payment status:", error);
     return {
       payment: null,
-      error: error.message || 'حدث خطأ في جلب حالة الدفع',
+      error: error.message || "حدث خطأ في جلب حالة الدفع",
     };
   }
 }
-
-

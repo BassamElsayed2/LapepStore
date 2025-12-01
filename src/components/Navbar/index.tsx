@@ -55,7 +55,7 @@ const Navbar = React.memo(() => {
   return (
     <>
       <header
-        className={`relative lg:fixed left-0 top-0 w-full z-[20] bg-white lg:transition-all lg:ease-in-out lg:duration-300`}
+        className={`relative lg:fixed left-1/2 -translate-x-1/2 top-0 lg:max-w-[1300px] w-full mx-auto  z-[20] bg-white lg:transition-all lg:ease-in-out lg:duration-300`}
       >
         {/* Top Green Bar - Only show when not sticky */}
         <div
@@ -65,8 +65,8 @@ const Navbar = React.memo(() => {
               : "lg:max-h-10 lg:opacity-100"
           }`}
         >
-          <div className="w-full mx-auto px-3 sm:px-4 md:px-6 lg:px-30">
-            <div className="flex items-center justify-between py-2 text-xs sm:text-sm">
+          <div className="w-full mx-auto ">
+            <div className="flex items-center justify-between py-2 px-3 sm:px-4 md:px-6 lg:px-8 text-xs sm:text-sm">
               {/* Left Section */}
               <div className="flex items-center gap-3 sm:gap-6">
                 <p className="  transition-all">

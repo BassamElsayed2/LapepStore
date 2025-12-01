@@ -24,11 +24,9 @@ import {
   validateVoucher,
   Voucher,
   calculateDiscount,
-  getMyVouchers,
 } from "@/services/apiVouchers";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import GoogleRatingPromo from "../Home/GoogleRatingPromo";
 
 const Checkout = () => {
   const locale = useLocale();
@@ -51,7 +49,6 @@ const Checkout = () => {
   const [appliedVoucher, setAppliedVoucher] = useState<Voucher | null>(null);
   const [voucherLoading, setVoucherLoading] = useState(false);
   const [voucherError, setVoucherError] = useState<string | null>(null);
-  const [hasReceivedVoucher, setHasReceivedVoucher] = useState(false);
 
   // Fetch user addresses
   useEffect(() => {
@@ -100,24 +97,6 @@ const Checkout = () => {
 
     fetchShippingFee();
   }, [selectedAddress]);
-
-  // Check if user has received any vouchers before
-  useEffect(() => {
-    const checkUserVouchers = async () => {
-      if (!user) return;
-
-      try {
-        const result = await getMyVouchers();
-        if (result.success && result.data && result.data.length > 0) {
-          setHasReceivedVoucher(true);
-        }
-      } catch (error) {
-        console.error("Error checking user vouchers:", error);
-      }
-    };
-
-    checkUserVouchers();
-  }, [user]);
 
   const handleRemoveFromCart = (itemId: number) => {
     dispatch(removeItemFromCart(itemId));
@@ -276,7 +255,8 @@ const Checkout = () => {
         customer_city: selectedAddress.city || "",
         customer_state: selectedAddress.area || undefined,
         voucher_code: appliedVoucher?.code || undefined,
-        shipping_fee: shippingFee !== null && shippingFee !== undefined ? shippingFee : 0,
+        shipping_fee:
+          shippingFee !== null && shippingFee !== undefined ? shippingFee : 0,
       };
 
       // Create order
@@ -360,16 +340,8 @@ const Checkout = () => {
     <>
       <Breadcrumb title={t("checkout")} pages={[t("checkout")]} />
       <section className="overflow-hidden py-20 bg-gray-2 ">
-        <div
-          className={`w-full mx-auto px-4 sm:px-8 xl:px-0 ${
-            hasReceivedVoucher ? "max-w-[1170px]" : "max-w-[1400px]"
-          }`}
-        >
-          <div
-            className={`grid grid-cols-1 gap-7.5 ${
-              hasReceivedVoucher ? "lg:grid-cols-[1fr_400px]" : "lg:grid-cols-3"
-            }`}
-          >
+        <div className="w-full mx-auto px-4 sm:px-8 xl:px-0 max-w-[1170px]">
+          <div className="grid grid-cols-1 gap-7.5 lg:grid-cols-[1fr_400px]">
             {/* Order Items Section */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-[10px] shadow-1 mb-7.5">
@@ -692,10 +664,18 @@ const Checkout = () => {
                             ? "جاري الحساب..."
                             : "Calculating..."}
                         </p>
-                      ) : shippingFee !== null ? (
+                      ) : shippingFee !== null && shippingFee !== undefined ? (
                         <p className="text-dark text-right">
-                          {locale === "ar" ? "ج.م" : "EGP"}{" "}
-                          {shippingFee.toFixed(2)}
+                          {shippingFee === 0 ? (
+                            <span className="text-green-600">
+                              {locale === "ar" ? "مجاني" : "Free"}
+                            </span>
+                          ) : (
+                            <>
+                              {locale === "ar" ? "ج.م" : "EGP"}{" "}
+                              {shippingFee.toFixed(2)}
+                            </>
+                          )}
                         </p>
                       ) : selectedAddress ? (
                         <p className="text-gray-5 text-sm text-right">
@@ -938,15 +918,6 @@ const Checkout = () => {
                 </div>
               </div>
             </div>
-
-            {/* Google Rating Promo Section - Only show if user hasn't received voucher */}
-            {!hasReceivedVoucher && (
-              <div className="lg:col-span-1">
-                <div className="sticky top-5">
-                  <GoogleRatingPromo />
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </section>
