@@ -12,7 +12,10 @@ const OffersSlider = () => {
   const [slidesToShow, setSlidesToShow] = useState(1); // Start with 1 for mobile-first
   const [isMounted, setIsMounted] = useState(false);
 
-  const { data: products, isLoading, error } = useLimitedOffers();
+  const { data: productsData, isLoading, error } = useLimitedOffers();
+
+  // عكس ترتيب المنتجات لعرض الأحدث أولاً
+  const products = productsData ? [...productsData].reverse() : [];
 
   // Calculate initial slidesToShow based on window width
   useEffect(() => {
@@ -62,7 +65,7 @@ const OffersSlider = () => {
                 >
                   <path
                     d="M10 3.33325V9.99992L13.3333 13.3333M17.5 9.99992C17.5 14.1419 14.1421 17.4999 10 17.4999C5.85786 17.4999 2.5 14.1419 2.5 9.99992C2.5 5.85778 5.85786 2.49992 10 2.49992C14.1421 2.49992 17.5 5.85778 17.5 9.99992Z"
-                    stroke="#22AD5C"
+                    stroke="#92b18c"
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"

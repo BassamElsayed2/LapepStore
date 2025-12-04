@@ -5,10 +5,11 @@ import OffersSlider from "./OffersSlider";
 import Categories from "./Categories";
 import BestSeller from "./BestSeller";
 import GoogleRatingPromo from "./GoogleRatingPromo";
+import Footer from "../Footer";
 
 const Home = () => {
   return (
-    <main>
+    <main className="bg-white">
       {/* <Hero /> */}
       <HeroBanner />
       <Categories />
@@ -21,6 +22,7 @@ const Home = () => {
       {/* <GoogleRatingPromo /> */}
       {/* <CounDown /> */}
       {/* <Newsletter /> */}
+      <Footer />
     </main>
   );
 };

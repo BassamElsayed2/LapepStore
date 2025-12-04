@@ -33,11 +33,11 @@ const AgeVerificationModal = () => {
         ? "عذراً، يجب أن تكون 18 عاماً أو أكبر لدخول هذا الموقع."
         : "Sorry, you must be 18 years or older to access this website."
     );
-    
+
     // Try multiple methods to close/redirect
     // Method 1: Try to close the window
     window.close();
-    
+
     // Method 2: If close doesn't work, redirect after a short delay
     setTimeout(() => {
       // Redirect to Google or another safe page
@@ -56,9 +56,9 @@ const AgeVerificationModal = () => {
       >
         {/* Icon */}
         <div className="flex justify-center mb-6">
-          <div className="w-20 h-20 bg-[#22AD5C]/10 rounded-full flex items-center justify-center">
+          <div className="w-20 h-20 bg-[#92b18c]/10 rounded-full flex items-center justify-center">
             <svg
-              className="w-10 h-10 text-[#22AD5C]"
+              className="w-10 h-10 text-[#92b18c]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -88,7 +88,7 @@ const AgeVerificationModal = () => {
         <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={handleYes}
-            className="flex-1 bg-[#22AD5C] hover:bg-[#1e9d52] text-white font-semibold py-3.5 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+            className="flex-1 bg-[#92b18c] hover:bg-[#1e9d52] text-white font-semibold py-3.5 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
           >
             {t("yes")}
           </button>
@@ -101,13 +101,10 @@ const AgeVerificationModal = () => {
         </div>
 
         {/* Footer Note */}
-        <p className="text-center text-xs text-gray-500 mt-6">
-          {t("note")}
-        </p>
+        <p className="text-center text-xs text-gray-500 mt-6">{t("note")}</p>
       </div>
     </div>
   );
 };
 
 export default AgeVerificationModal;
-

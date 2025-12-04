@@ -28,18 +28,17 @@ const CartButton = ({
       className="relative flex items-center gap-1.5 sm:gap-2 hover:bg-gray-50 px-1.5 sm:px-2 md:px-3"
     >
       <div className="relative">
-        <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-[#22AD5C]" />
+        <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-[#92b18c]" />
         {cartItems.length > 0 && (
           <Badge
             variant="default"
-            className="absolute -top-1.5 sm:-top-2 -right-1.5 sm:-right-2 h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center p-0 text-[10px] sm:text-xs bg-[#22AD5C]"
+            className="absolute -top-1.5 sm:-top-2 -right-1.5 sm:-right-2 h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center p-0 text-[10px] sm:text-xs bg-[#92b18c]"
           >
             {cartItems.length}
           </Badge>
         )}
       </div>
       <div className="hidden md:flex flex-col items-start">
-        <span className="text-xs text-gray-500">{commonT("cart")}</span>
         <span className="text-xs sm:text-sm font-medium text-gray-900">
           {totalPrice} {locale === "ar" ? "جنيه" : "EGP"}
         </span>
@@ -49,4 +48,3 @@ const CartButton = ({
 };
 
 export default CartButton;
-

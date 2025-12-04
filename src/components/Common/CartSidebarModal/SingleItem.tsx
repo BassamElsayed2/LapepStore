@@ -58,7 +58,7 @@ const SingleItem = ({
               {t("price")}: {locale === "ar" ? "ج.م" : "EGP"}{" "}
               {item.discountedPrice}
             </p>
-            <p className="text-sm font-medium text-[#22AD5C] mt-1">
+            <p className="text-sm font-medium text-[#92b18c] mt-1">
               {t("itemTotal")}: {locale === "ar" ? "ج.م" : "EGP"}{" "}
               {(item.discountedPrice * quantity).toFixed(2)}
             </p>
@@ -108,7 +108,7 @@ const SingleItem = ({
             onClick={handleDecreaseQuantity}
             disabled={quantity <= 1}
             aria-label="decrease quantity"
-            className="flex items-center justify-center w-8 h-8 ease-out duration-200 hover:text-[#22AD5C] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center w-8 h-8 ease-out duration-200 hover:text-[#92b18c] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg
               className="fill-current"
@@ -132,7 +132,7 @@ const SingleItem = ({
           <button
             onClick={handleIncreaseQuantity}
             aria-label="increase quantity"
-            className="flex items-center justify-center w-8 h-8 ease-out duration-200 hover:text-[#22AD5C]"
+            className="flex items-center justify-center w-8 h-8 ease-out duration-200 hover:text-[#92b18c]"
           >
             <svg
               className="fill-current"

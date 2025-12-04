@@ -68,7 +68,7 @@ const Footer = () => {
                   </svg>
                 </a>
                 <a
-                  href="https://wa.me/20 127 012 7380"
+                  href="https://wa.me/201270127380"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-[#25D366] hover:text-white transition-all duration-200"
@@ -200,21 +200,29 @@ const Footer = () => {
       </div>
 
       {/* Footer Bottom */}
-      <div className="py-5 xl:py-7.5 bg-gray-100 dark:bg-gray-900 border-t border-gray-2 dark:border-gray-800">
+      <div
+        className="text-white py-3  bg-gray-100 dark:bg-gray-900 border-t border-gray-2 dark:border-gray-800"
+        style={{
+          backgroundImage: "url('/menubg.png')",
+          backgroundSize: "contain",
+          backgroundPosition: "center",
+          backgroundRepeat: "repeat",
+        }}
+      >
         <div className="max-w-[1170px] mx-auto px-4 sm:px-8 xl:px-0">
           <div className="flex gap-5 flex-wrap items-center justify-between">
-            <p className="text-dark-5 dark:text-gray-400 font-medium text-sm">
+            <p className="text-white font-medium text-sm">
               &copy; {year} Lapip Store.{" "}
               {locale === "ar" ? "جميع الحقوق محفوظة" : "All rights reserved"}
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
-              <p className="text-dark-5 dark:text-gray-400 text-sm">
+              <p className="text-white text-sm">
                 {locale === "ar" ? "تطوير بواسطة" : "Developed by"}{" "}
                 <Link
                   href="https://ens.eg"
                   target="_blank"
-                  className="text-primary hover:underline font-medium"
+                  className="text-white hover:underline font-medium"
                 >
                   ENS
                 </Link>

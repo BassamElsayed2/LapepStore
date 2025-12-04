@@ -9,6 +9,10 @@
 
   body {
     @apply font-euclid-circular-a font-normal text-base text-dark-3 relative z-1 max-w-[1300px] mx-auto;
+    background-image: url("/menubg.png");
+    background-size: contain;
+    background-position: center;
+    background-repeat: repeat;
   }
 
   /* RTL Support */

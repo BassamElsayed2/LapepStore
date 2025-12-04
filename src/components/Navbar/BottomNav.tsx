@@ -66,7 +66,7 @@ const BottomNav = () => {
     <>
       {/* Cart Summary Bar - Shows when cart has items and not on cart page */}
       <div
-        className={`fixed left-0 right-0 bg-[#22AD5C] text-white z-50 lg:hidden cursor-pointer overflow-hidden transition-all duration-500 ease-out ${
+        className={`fixed left-0 right-0 bg-[#92b18c] text-white z-50 lg:hidden cursor-pointer overflow-hidden transition-all duration-500 ease-out ${
           cartItemsCount > 0 && !isCartPage
             ? "bottom-16 sm:bottom-18 opacity-100 translate-y-0"
             : "bottom-16 sm:bottom-18 opacity-0 translate-y-full pointer-events-none"
@@ -118,8 +118,8 @@ const BottomNav = () => {
                 href={item.href}
                 className={`flex flex-col items-center justify-center gap-1 relative transition-all duration-300 ${
                   isActive
-                    ? "text-[#22AD5C]"
-                    : "text-gray-600 hover:text-[#22AD5C]"
+                    ? "text-[#92b18c]"
+                    : "text-gray-600 hover:text-[#92b18c]"
                 }`}
               >
                 <div className="relative transition-transform hover:scale-110 duration-200">
@@ -129,7 +129,7 @@ const BottomNav = () => {
                   {item.label}
                 </span>
                 {isActive && (
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[#22AD5C] rounded-t-full transition-all duration-300" />
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[#92b18c] rounded-t-full transition-all duration-300" />
                 )}
               </Link>
             );

@@ -59,7 +59,7 @@ const Navbar = React.memo(() => {
       >
         {/* Top Green Bar - Only show when not sticky */}
         <div
-          className={`bg-[#22AD5C] text-white transition-all duration-300 overflow-hidden ${
+          className={`bg-[#77926e] text-white transition-all duration-300 overflow-hidden ${
             stickyMenu
               ? "lg:max-h-0 lg:opacity-0"
               : "lg:max-h-10 lg:opacity-100"
@@ -69,7 +69,10 @@ const Navbar = React.memo(() => {
             <div className="flex items-center justify-between py-2 px-3 sm:px-4 md:px-6 lg:px-8 text-xs sm:text-sm">
               {/* Left Section */}
               <div className="flex items-center gap-3 sm:gap-6">
-                <p className="  transition-all">
+                <p
+                  className="  transition-all text-xs"
+                  style={{ textShadow: "0 0 10px #374e30" }}
+                >
                   {locale === "ar"
                     ? "متجر السجائر الالكتروني والاكسسوارات"
                     : "Vape Store And Accessories"}
@@ -78,7 +81,10 @@ const Navbar = React.memo(() => {
 
               {/* Right Section - Optional Info */}
               <div className="hidden md:flex items-center gap-4 text-xs">
-                <span className="flex items-center gap-1">
+                <span
+                  className="flex items-center gap-1"
+                  style={{ textShadow: "0 0 10px #374e30" }}
+                >
                   <svg
                     width="14"
                     height="14"
@@ -91,7 +97,10 @@ const Navbar = React.memo(() => {
                   </svg>
                   {locale === "ar" ? "الدعم: 24/7" : "Support: 24/7"}
                 </span>
-                <span className="flex items-center gap-1">
+                <span
+                  className="flex items-center gap-1"
+                  style={{ textShadow: "0 0 10px #374e30" }}
+                >
                   <svg
                     width="14"
                     height="14"
@@ -112,27 +121,31 @@ const Navbar = React.memo(() => {
 
         {/* Main Navbar */}
         <div
-          className={`shadow-md lg:shadow-none ${
+          className={`shadow-md lg:shadow-none   ${
             stickyMenu ? "lg:shadow-md" : ""
           }`}
+          style={{
+            backgroundImage: "url('/softbgz.png')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
         >
           <div className="w-full mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
             <div
-              className={`flex items-center lg:justify-center justify-between gap-2 py-3 sm:py-4 lg:transition-all lg:duration-200 ${
-                stickyMenu ? "lg:!py-3" : ""
+              className={`flex items-center py-3  lg:justify-center justify-between gap-2  lg:transition-all lg:duration-200 ${
+                stickyMenu ? "" : ""
               }`}
             >
               {/* Logo */}
-              <Link href={`/${locale}`} className="flex-shrink-0">
+              <Link href={`/${locale}`} className="flex-shrink-0 pr-4">
                 <Image
-                  src={`/images/logo/${
-                    locale === "ar" ? "logoar.png" : "logoen.png"
-                  }`}
+                  src={`/llogo.png`}
                   alt="Lapip Store"
                   width={120}
                   height={60}
                   priority
-                  className="h-8 sm:h-10 md:h-12 w-auto object-contain"
+                  className="h-12 sm:h-10 md:h-15 w-auto object-contain "
                 />
               </Link>
 
@@ -158,15 +171,12 @@ const Navbar = React.memo(() => {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="flex-shrink-0 text-[#22AD5C]"
+                    className="flex-shrink-0 text-[#92b18c]"
                   >
                     <rect width="20" height="16" x="2" y="4" rx="2" />
                     <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                   </svg>
                   <div className="text-left">
-                    <span className="block text-xs text-gray-500">
-                      {t("support")}
-                    </span>
                     <p className="text-sm font-medium text-gray-900">
                       {t("contactUs")}
                     </p>
@@ -206,7 +216,7 @@ const Navbar = React.memo(() => {
       {/* Spacer to prevent content from going under fixed navbar - only on desktop */}
       <div
         className={`hidden lg:block ${
-          stickyMenu ? "lg:h-[130px]" : "lg:h-[170px]"
+          stickyMenu ? "lg:h-[130px]" : "lg:h-[150px]"
         }`}
       />
     </>

@@ -93,7 +93,7 @@ const SearchBar = () => {
   return (
     <div ref={searchRef} className="relative w-full">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#22AD5C]" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#92b18c]" />
         <Input
           type="search"
           placeholder={t("searchPlaceholder")}
@@ -104,7 +104,7 @@ const SearchBar = () => {
               setShowResults(true);
             }
           }}
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#22AD5C] focus:border-transparent"
+          className="w-full placeholder:text-[#92b18c] placeholder:text-[10px] text-[#92b18c] text-[11px] pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#92b18c] focus:border-transparent"
         />
       </div>
 
@@ -113,7 +113,7 @@ const SearchBar = () => {
         <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-[400px] overflow-y-auto z-[99999]">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-[#22AD5C]" />
+              <Loader2 className="h-6 w-6 animate-spin text-[#92b18c]" />
             </div>
           ) : error ? (
             <div className="py-8 text-center">
@@ -167,7 +167,7 @@ const SearchBar = () => {
                         : product.name_en || product.title}
                     </p>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-sm font-semibold text-[#22AD5C]">
+                      <span className="text-sm font-semibold text-[#92b18c]">
                         {product.offer_price || product.price}{" "}
                         {locale === "ar" ? "جنيه" : "EGP"}
                       </span>

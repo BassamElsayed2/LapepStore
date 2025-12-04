@@ -9,7 +9,7 @@ import PreLoader from "@/components/Common/PreLoader";
 import AgeVerificationModal from "@/components/Common/AgeVerificationModal";
 import Navbar from "@/components/Navbar";
 import BottomNav from "@/components/Navbar/BottomNav";
-import Footer from "@/components/Footer";
+
 import { CartModalProvider } from "@/app/context/CartSidebarModalContext";
 import { ModalProvider } from "@/app/context/QuickViewModalContext";
 import { PreviewSliderProvider } from "@/app/context/PreviewSliderContext";
@@ -34,7 +34,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
       window.addEventListener("load", handleLoad);
       // Fallback timeout بعد 800ms كحد أقصى للأداء الأفضل
       const timeout = setTimeout(() => setLoading(false), 800);
-      
+
       return () => {
         window.removeEventListener("load", handleLoad);
         clearTimeout(timeout);
@@ -68,7 +68,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
         </AuthProvider>
       </ReduxProvider>
       <ScrollToTop />
-      <Footer />
+
       <Toaster
         position="bottom-left"
         reverseOrder={false}

@@ -41,14 +41,14 @@ const LanguageDropdown = () => {
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
           size="sm"
           className="flex items-center gap-2 hover:bg-gray-50"
         >
-          <Globe className="h-4 w-4 text-[#22AD5C]" />
+          <Globe className="h-4 w-4 text-[#92b18c]" />
           <span className="hidden md:inline">
             {getLanguageLabel(currentLocale)}
           </span>
@@ -60,7 +60,9 @@ const LanguageDropdown = () => {
             key={locale}
             onClick={() => handleLanguageChange(locale)}
             className={`cursor-pointer ${
-              currentLocale === locale ? "bg-[#22AD5C] bg-opacity-10 text-[#22AD5C]" : ""
+              currentLocale === locale
+                ? "bg-[#92b18c] bg-opacity-10 text-[#92b18c]"
+                : ""
             }`}
           >
             {getLanguageLabel(locale)}
@@ -72,4 +74,3 @@ const LanguageDropdown = () => {
 };
 
 export default LanguageDropdown;
-

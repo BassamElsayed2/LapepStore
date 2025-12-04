@@ -41,14 +41,14 @@ const UserDropdown = () => {
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
           size="icon"
           className="rounded-full hover:bg-gray-50 h-8 w-8 sm:h-10 sm:w-10"
         >
-          <UserCircle className="h-5 w-5 sm:h-6 sm:w-6 text-[#22AD5C]" />
+          <UserCircle className="h-5 w-5 sm:h-6 sm:w-6 text-[#92b18c]" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -82,7 +82,7 @@ const UserDropdown = () => {
                 href={`/${locale}/login`}
                 className="flex items-center cursor-pointer"
               >
-                <User className="mr-2 h-4 w-4 text-[#22AD5C]" />
+                <User className="mr-2 h-4 w-4 text-[#92b18c]" />
                 <span>{t("login")}</span>
               </Link>
             </DropdownMenuItem>
@@ -91,7 +91,7 @@ const UserDropdown = () => {
                 href={`/${locale}/register`}
                 className="flex items-center cursor-pointer"
               >
-                <UserCircle className="mr-2 h-4 w-4 text-[#22AD5C]" />
+                <UserCircle className="mr-2 h-4 w-4 text-[#92b18c]" />
                 <span>{t("register")}</span>
               </Link>
             </DropdownMenuItem>
@@ -103,7 +103,7 @@ const UserDropdown = () => {
                 href={`/${locale}/profile`}
                 className="flex items-center cursor-pointer"
               >
-                <User className="mr-2 h-4 w-4 text-[#22AD5C]" />
+                <User className="mr-2 h-4 w-4 text-[#92b18c]" />
                 <span>{locale === "ar" ? "الملف الشخصي" : "Profile"}</span>
               </Link>
             </DropdownMenuItem>
@@ -113,7 +113,7 @@ const UserDropdown = () => {
                 href={`/${locale}/profile?tab=orders`}
                 className="flex items-center cursor-pointer"
               >
-                <ShoppingBag className="mr-2 h-4 w-4 text-[#22AD5C]" />
+                <ShoppingBag className="mr-2 h-4 w-4 text-[#92b18c]" />
                 <span>{t("orders")}</span>
               </Link>
             </DropdownMenuItem>
