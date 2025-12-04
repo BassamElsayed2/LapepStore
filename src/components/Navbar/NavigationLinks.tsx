@@ -26,7 +26,7 @@ const NavigationLinks = ({ stickyMenu }: NavigationLinksProps) => {
     >
       <div className="w-full mx-auto">
         <nav className="flex items-center justify-center overflow-x-auto scrollbar-hide">
-          <ul className="flex items-center gap-0.5 sm:gap-1 md:gap-2 lg:gap-4 xl:gap-6 py-0 px-2 sm:px-4 md:px-6 lg:px-8 ">
+          <ul className="flex items-center gap-1 py-0 px-2 sm:px-4 md:px-6 lg:px-8 border-l border-gray-300 last:border-l-0">
             {menuData.map((menuItem) => {
               const itemPath = `/${locale}${menuItem.path}`;
               // Check if current path matches or starts with the menu path
@@ -35,7 +35,10 @@ const NavigationLinks = ({ stickyMenu }: NavigationLinksProps) => {
                 (menuItem.path !== "/" && pathname.startsWith(itemPath));
 
               return (
-                <li key={menuItem.id} className="group relative flex-shrink-0 ">
+                <li
+                  key={menuItem.id}
+                  className="group relative flex-shrink-0 border-l border-gray-300 last:border-l-0"
+                >
                   <Link
                     href={itemPath}
                     className={`

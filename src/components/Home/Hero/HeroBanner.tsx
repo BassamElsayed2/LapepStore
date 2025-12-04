@@ -7,14 +7,14 @@ const HeroBanner = () => {
 
   return (
     <section className="w-full relative overflow-hidden">
-      <div className="relative w-full h-full">
+      <div className="relative w-full h-[170px]">
         <video
           src="/lapip.mp4"
           autoPlay
           loop
           muted
           playsInline
-          className="w-full h-auto object-cover"
+          className="w-full h-full object-cover"
         >
           Your browser does not support the video tag.
         </video>
