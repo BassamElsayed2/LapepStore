@@ -7,7 +7,7 @@ const HeroBanner = () => {
 
   return (
     <section className="w-full relative overflow-hidden">
-      <div className="relative w-full h-[170px]">
+      <div className="relative w-full h-[500px]">
         <video
           src="/lapip.mp4"
           autoPlay
