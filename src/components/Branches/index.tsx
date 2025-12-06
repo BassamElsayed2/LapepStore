@@ -120,7 +120,7 @@ const Branches = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container  bg-white px-4 py-8">
       {/* Header */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">{t("title")}</h1>
