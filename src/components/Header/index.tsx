@@ -417,7 +417,7 @@ const Header = React.memo(() => {
                             : menuItem.title_en}
                         </Link>
                       </li>
-                    )
+                    ),
                   )}
                 </ul>
               </nav>

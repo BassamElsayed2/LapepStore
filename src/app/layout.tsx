@@ -10,6 +10,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Root layout should not have html/body when using locale layout
-  return children;
+  return (
+    <html suppressHydrationWarning={true}>
+      <head />
+      <body>{children}</body>
+    </html>
+  );
 }

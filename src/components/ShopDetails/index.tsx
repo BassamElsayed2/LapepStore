@@ -16,6 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { sanitizeRichText } from "@/utils/sanitize";
 import { updateproductDetails } from "@/redux/features/product-details";
 import Categories from "../Home/Categories";
+import Footer from "../Footer";
 
 interface ShopDetailsProps {
   productId?: string;
@@ -28,7 +29,7 @@ const ShopDetails = ({ productId }: ShopDetailsProps) => {
   const [quantity, setQuantity] = useState(1);
   const locale = useLocale();
   const productFromRedux = useAppSelector(
-    (state) => state.productDetailsReducer.value
+    (state) => state.productDetailsReducer.value,
   );
 
   // Fetch product data if productId is provided
@@ -220,11 +221,11 @@ const ShopDetails = ({ productId }: ShopDetailsProps) => {
                     ? "جاري التحميل..."
                     : "Loading..."
                   : locale === "ar"
-                  ? "المنتج غير موجود"
-                  : "Product not found"
+                    ? "المنتج غير موجود"
+                    : "Product not found"
                 : locale === "ar"
-                ? "لا يوجد منتج محدد"
-                : "No product selected"}
+                  ? "لا يوجد منتج محدد"
+                  : "No product selected"}
             </h2>
             <p className="text-dark-4 mb-6">
               {productId
@@ -233,11 +234,11 @@ const ShopDetails = ({ productId }: ShopDetailsProps) => {
                     ? "جاري البحث عن المنتج في قاعدة البيانات..."
                     : "Searching for the product in the database..."
                   : locale === "ar"
-                  ? "المنتج المطلوب غير موجود في قاعدة البيانات"
-                  : "The requested product was not found in the database"
+                    ? "المنتج المطلوب غير موجود في قاعدة البيانات"
+                    : "The requested product was not found in the database"
                 : locale === "ar"
-                ? "يرجى اختيار منتج من صفحة المتجر لعرض تفاصيله"
-                : "Please select a product from the store page to view details"}
+                  ? "يرجى اختيار منتج من صفحة المتجر لعرض تفاصيله"
+                  : "Please select a product from the store page to view details"}
             </p>
             <Link
               href={`/${locale}/shop`}
@@ -346,7 +347,7 @@ const ShopDetails = ({ productId }: ShopDetailsProps) => {
                           {Math.round(
                             ((product.price - product.discountedPrice) /
                               product.price) *
-                              100
+                              100,
                           )}
                           % OFF
                         </div>
@@ -395,8 +396,8 @@ const ShopDetails = ({ productId }: ShopDetailsProps) => {
                             ? `متوفر (${product.stock_quantity || 0})`
                             : `In Stock (${product.stock_quantity || 0})`
                           : locale === "ar"
-                          ? "غير متوفر"
-                          : "Out of Stock"}
+                            ? "غير متوفر"
+                            : "Out of Stock"}
                       </span>
                     </div>
                   </div>
@@ -443,7 +444,7 @@ const ShopDetails = ({ productId }: ShopDetailsProps) => {
                               (locale === "ar"
                                 ? product.description_ar
                                 : product.description_en) ||
-                              ""
+                              "",
                           ),
                         }}
                       />
@@ -554,12 +555,12 @@ const ShopDetails = ({ productId }: ShopDetailsProps) => {
                             ? "غير متوفر"
                             : "Out of Stock"
                           : quantity > product.stock_quantity
-                          ? locale === "ar"
-                            ? "الكمية غير متوفرة"
-                            : "Quantity not available"
-                          : locale === "ar"
-                          ? "إضافة إلى السلة"
-                          : "Add to Cart"}
+                            ? locale === "ar"
+                              ? "الكمية غير متوفرة"
+                              : "Quantity not available"
+                            : locale === "ar"
+                              ? "إضافة إلى السلة"
+                              : "Add to Cart"}
                       </button>
                     </div>
                   </form>
@@ -569,7 +570,7 @@ const ShopDetails = ({ productId }: ShopDetailsProps) => {
           </section>
 
           {/* <RecentlyViewdItems /> */}
-          <Categories />
+          {/* <Categories /> */}
         </>
       )}
     </>

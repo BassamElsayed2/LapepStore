@@ -32,7 +32,7 @@ apiClient.interceptors.request.use(
   },
   (error: AxiosError) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor with retry logic
@@ -41,7 +41,10 @@ apiClient.interceptors.response.use(
     return response;
   },
   async (error: AxiosError<any>) => {
-    const config = error.config as InternalAxiosRequestConfig & { _retry?: boolean; _retryCount?: number };
+    const config = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+      _retryCount?: number;
+    };
 
     // Handle errors
     if (error.code === "ECONNABORTED" || error.message.includes("timeout")) {
@@ -49,15 +52,17 @@ apiClient.interceptors.response.use(
       if (config && config.method === "get" && !config._retry) {
         config._retry = true;
         console.warn("Request timeout - Retrying...");
-        
+
         try {
           return await apiClient.request(config);
         } catch (retryError) {
           console.error("Retry failed");
-          return Promise.reject(new Error("Request timeout. Please try again."));
+          return Promise.reject(
+            new Error("Request timeout. Please try again."),
+          );
         }
       }
-      
+
       console.warn("Request timeout - Backend might be slow or unavailable");
       return Promise.reject(new Error("Request timeout. Please try again."));
     } else if (error.response) {
@@ -79,21 +84,25 @@ apiClient.interceptors.response.use(
 
       // Handle 429 Too Many Requests - don't retry immediately
       if (error.response.status === 429) {
-        const retryAfter = error.response.headers?.['retry-after'] || error.response.headers?.['Retry-After'];
+        const retryAfter =
+          error.response.headers?.["retry-after"] ||
+          error.response.headers?.["Retry-After"];
         const retryDelay = retryAfter ? parseInt(retryAfter) * 1000 : 60000; // Default 60 seconds
-        
-        console.warn(`Rate limit exceeded. Retry after ${retryDelay / 1000} seconds`);
-        
+
+        console.warn(
+          `Rate limit exceeded. Retry after ${retryDelay / 1000} seconds`,
+        );
+
         // Create a custom error that includes retry delay info
-        const rateLimitError = new Error(message) as Error & { 
-          status: number; 
+        const rateLimitError = new Error(message) as Error & {
+          status: number;
           retryAfter: number;
           isRateLimit: boolean;
         };
         rateLimitError.status = 429;
         rateLimitError.retryAfter = retryDelay;
         rateLimitError.isRateLimit = true;
-        
+
         return Promise.reject(rateLimitError);
       }
 
@@ -103,14 +112,14 @@ apiClient.interceptors.response.use(
       console.warn("No response from server - Backend might be offline");
       return Promise.reject(
         new Error(
-          "Cannot connect to server. Please check if backend is running."
-        )
+          "Cannot connect to server. Please check if backend is running.",
+        ),
       );
     } else {
       // Something else happened
       return Promise.reject(error);
     }
-  }
+  },
 );
 
 export default apiClient;

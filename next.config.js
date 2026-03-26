@@ -8,11 +8,35 @@ const nextConfig = {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [320, 375, 425, 640, 750, 828, 1080, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60,
+    // minimumCacheTTL: 60,
     dangerouslyAllowSVG: true,
     contentDispositionType: "attachment",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "lapip.net",
+        port: "",
+        pathname: "/uploads/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.ngrok-free.dev",
+        port: "",
+        pathname: "/uploads/**",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "5000",
+        pathname: "/uploads/**",
+      },
+      {
+        protocol: "https",
+        hostname: "kxbvftijipkulngbfdfv.supabase.co",
+        port: "",
+        pathname: "/storage/v1/object/public/**",
+      },
       {
         protocol: "https",
         hostname: "uniksbqzhdxlarwcyrkj.supabase.co",
@@ -21,7 +45,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "*.supabase.co",
+        hostname: "**.supabase.co",
         port: "",
         pathname: "/storage/v1/object/public/**",
       },

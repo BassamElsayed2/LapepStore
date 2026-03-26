@@ -200,29 +200,21 @@ const Footer = () => {
       </div>
 
       {/* Footer Bottom */}
-      <div
-        className="text-white py-3  bg-gray-100 dark:bg-gray-900 border-t border-gray-2 dark:border-gray-800"
-        style={{
-          backgroundImage: "url('/menubg.png')",
-          backgroundSize: "contain",
-          backgroundPosition: "center",
-          backgroundRepeat: "repeat",
-        }}
-      >
+      <div className="text-dark py-3  bg-gray-100 dark:bg-gray-900 border-t border-gray-2 dark:border-gray-800">
         <div className="max-w-[1170px] mx-auto px-4 sm:px-8 xl:px-0">
           <div className="flex gap-5 flex-wrap items-center justify-between">
-            <p className="text-white font-medium text-sm">
+            <p className="text-dark font-medium text-sm">
               &copy; {year} Lapip Store.{" "}
               {locale === "ar" ? "جميع الحقوق محفوظة" : "All rights reserved"}
             </p>
 
-            <div className="flex flex-wrap items-center gap-4">
-              <p className="text-white text-sm">
+            <div className=" flex flex-wrap items-center gap-4">
+              <p className=" text-sm">
                 {locale === "ar" ? "تطوير بواسطة" : "Developed by"}{" "}
                 <Link
                   href="https://ens.eg"
                   target="_blank"
-                  className="text-white hover:underline font-medium"
+                  className="text-purple-500 hover:underline font-medium"
                 >
                   ENS
                 </Link>

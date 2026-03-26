@@ -38,7 +38,7 @@ const RegisterPage = () => {
   const [emailError, setEmailError] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [showPasswordStrength, setShowPasswordStrength] = useState(false);
-  
+
   // Availability check states
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [isCheckingPhone, setIsCheckingPhone] = useState(false);
@@ -58,8 +58,8 @@ const RegisterPage = () => {
       if (!isRealEmail(formData.email)) {
         setEmailError(
           locale === "ar"
-            ? "الرجاء إدخال بريد إلكتروني حقيقي (ليس مؤقت)"
-            : "Please enter a real email (not disposable)"
+            ? "الرجاء إدخال بريد إلكتروني حقيقي "
+            : "Please enter a real email ",
         );
         setEmailAvailable(null);
         return;
@@ -78,7 +78,7 @@ const RegisterPage = () => {
               setEmailError(
                 locale === "ar"
                   ? "⚠️ هذا البريد الإلكتروني مسجل مسبقاً. هل تريد تسجيل الدخول؟"
-                  : "⚠️ This email is already registered. Would you like to sign in?"
+                  : "⚠️ This email is already registered. Would you like to sign in?",
               );
               setEmailAvailable(false);
             }
@@ -112,7 +112,7 @@ const RegisterPage = () => {
         setPhoneError(
           locale === "ar"
             ? "الرجاء إدخال رقم هاتف صحيح (01xxxxxxxxx)"
-            : "Please enter a valid Egyptian phone number (01xxxxxxxxx)"
+            : "Please enter a valid Egyptian phone number (01xxxxxxxxx)",
         );
         setPhoneAvailable(null);
         return;
@@ -132,7 +132,7 @@ const RegisterPage = () => {
               setPhoneError(
                 locale === "ar"
                   ? "⚠️ هذا الرقم مسجل مسبقاً. هل تريد تسجيل الدخول؟"
-                  : "⚠️ This phone number is already registered. Would you like to sign in?"
+                  : "⚠️ This phone number is already registered. Would you like to sign in?",
               );
               setPhoneAvailable(false);
             }
@@ -181,7 +181,7 @@ const RegisterPage = () => {
       toast.error(
         locale === "ar"
           ? "الرجاء ملء جميع الحقول المطلوبة"
-          : "Please fill all required fields"
+          : "Please fill all required fields",
       );
       return;
     }
@@ -191,7 +191,7 @@ const RegisterPage = () => {
       toast.error(
         locale === "ar"
           ? "هذا البريد الإلكتروني مسجل مسبقاً"
-          : "This email is already registered"
+          : "This email is already registered",
       );
       return;
     }
@@ -201,7 +201,7 @@ const RegisterPage = () => {
       toast.error(
         locale === "ar"
           ? "هذا الرقم مسجل مسبقاً"
-          : "This phone number is already registered"
+          : "This phone number is already registered",
       );
       return;
     }
@@ -211,7 +211,7 @@ const RegisterPage = () => {
       toast.error(
         locale === "ar"
           ? "الرجاء إدخال بريد إلكتروني حقيقي (ليس مؤقت)"
-          : "Please enter a real email (not disposable)"
+          : "Please enter a real email (not disposable)",
       );
       return;
     }
@@ -221,7 +221,7 @@ const RegisterPage = () => {
       toast.error(
         locale === "ar"
           ? "الرجاء إدخال رقم هاتف مصري صحيح"
-          : "Please enter a valid Egyptian phone number"
+          : "Please enter a valid Egyptian phone number",
       );
       return;
     }
@@ -232,14 +232,14 @@ const RegisterPage = () => {
       toast.error(
         locale === "ar"
           ? "كلمة المرور يجب أن تحتوي على: 8 أحرف، حرف كبير، حرف صغير، رقم، ورمز مميز"
-          : "Password must contain: 8 characters, uppercase, lowercase, number, and special character"
+          : "Password must contain: 8 characters, uppercase, lowercase, number, and special character",
       );
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
       toast.error(
-        locale === "ar" ? "كلمات المرور غير متطابقة" : "Passwords do not match"
+        locale === "ar" ? "كلمات المرور غير متطابقة" : "Passwords do not match",
       );
       return;
     }
@@ -263,7 +263,7 @@ const RegisterPage = () => {
 
       if (result.success) {
         toast.success(
-          locale === "ar" ? "تم التسجيل بنجاح!" : "Registration successful!"
+          locale === "ar" ? "تم التسجيل بنجاح!" : "Registration successful!",
         );
         router.push(`/${locale}/profile?tab=addresses`);
       }
@@ -369,8 +369,8 @@ const RegisterPage = () => {
                     emailError
                       ? "border-red-500"
                       : emailAvailable
-                      ? "border-green-500"
-                      : "border-stroke"
+                        ? "border-green-500"
+                        : "border-stroke"
                   } bg-white py-3 px-6 ${
                     locale === "ar" ? "pl-12" : "pr-12"
                   } text-base text-dark outline-none transition focus:border-blue focus:shadow-input`}
@@ -509,8 +509,8 @@ const RegisterPage = () => {
                     phoneError
                       ? "border-red-500"
                       : phoneAvailable
-                      ? "border-green-500"
-                      : "border-stroke"
+                        ? "border-green-500"
+                        : "border-stroke"
                   } bg-white py-3 px-6 pr-12 text-base text-dark outline-none transition focus:border-blue focus:shadow-input`}
                   placeholder="01xxxxxxxxx"
                   dir="ltr"

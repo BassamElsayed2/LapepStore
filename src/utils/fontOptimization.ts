@@ -117,7 +117,7 @@ export function generatePreloadLinks(locale: string = "en") {
     "/fonts/EuclidCircularA-Medium.woff2",
   ];
 
-  return fonts.map(font => ({
+  return fonts.map((font) => ({
     rel: "preload",
     href: font,
     as: "font",
@@ -128,9 +128,13 @@ export function generatePreloadLinks(locale: string = "en") {
 
 export function generateResourceHints() {
   return [
-    { rel: "dns-prefetch", href: "https://kxbvftijipkulngbfdfv.supabase.co" },
-    { rel: "preconnect", href: "https://kxbvftijipkulngbfdfv.supabase.co" },
+    { rel: "dns-prefetch", href: "https://lapip.net" },
+    { rel: "preconnect", href: "https://lapip.net" },
     { rel: "dns-prefetch", href: "https://fonts.googleapis.com" },
-    { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+    {
+      rel: "preconnect",
+      href: "https://fonts.gstatic.com",
+      crossOrigin: "anonymous",
+    },
   ];
 }

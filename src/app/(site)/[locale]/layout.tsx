@@ -4,8 +4,10 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { routing } from "@/app/i18n/routing";
 import { notFound } from "next/navigation";
 import ClientLayout from "@/app/(site)/[locale]/ClientLayout";
+import SetLocaleAttributes from "@/app/(site)/[locale]/SetLocaleAttributes";
 import { Providers } from "@/app/context/QueryProvider";
 import { Cairo } from "next/font/google";
+import Footer from "@/components/Footer";
 
 const cairo = Cairo({
   subsets: ["latin", "arabic"],
@@ -16,7 +18,7 @@ const cairo = Cairo({
   adjustFontFallback: true,
 });
 
-export default async function RootLayout({
+export default async function LocaleLayout({
   children,
   params,
 }: {
@@ -36,20 +38,20 @@ export default async function RootLayout({
   }
 
   return (
-    <html
-      lang={locale}
-      suppressHydrationWarning={true}
-      dir={locale === "ar" ? "rtl" : "ltr"}
-      className={cairo.variable}
-    >
-      <head />
-      <body className={`${locale === "ar" ? "rtl" : "ltr"} ${cairo.className}`}>
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <Providers>
-            <ClientLayout>{children}</ClientLayout>
-          </Providers>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <>
+      <SetLocaleAttributes
+        locale={locale}
+        fontVariable={cairo.variable}
+        fontClassName={cairo.className}
+      />
+      <NextIntlClientProvider locale={locale} messages={messages}>
+        <Providers>
+          <ClientLayout>
+            {children}
+            <Footer />
+          </ClientLayout>
+        </Providers>
+      </NextIntlClientProvider>
+    </>
   );
 }

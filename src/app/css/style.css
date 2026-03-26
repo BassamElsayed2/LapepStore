@@ -8,8 +8,8 @@
   }
 
   body {
-    @apply font-euclid-circular-a font-normal text-base text-dark-3 relative z-1 max-w-[1300px] mx-auto;
-    background-image: url("/menubg.png");
+    @apply font-euclid-circular-a font-normal text-base text-dark-3 relative z-1  mx-auto;
+
     background-size: contain;
     background-position: center;
     background-repeat: repeat;
@@ -164,7 +164,9 @@
   }
 
   .product-card {
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    transition:
+      transform 0.2s ease-in-out,
+      box-shadow 0.2s ease-in-out;
   }
 
   .product-card:hover {

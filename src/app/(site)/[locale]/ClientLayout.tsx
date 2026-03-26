@@ -55,7 +55,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
             <ModalProvider>
               <PreviewSliderProvider>
                 <Navbar />
-                <BottomNav />
+                {/* <BottomNav /> */}
                 {children}
                 {/* <SplashCursor /> */}
                 <QuickViewModal />

@@ -4,8 +4,6 @@ import HeroBanner from "./Hero/HeroBanner";
 import OffersSlider from "./OffersSlider";
 import Categories from "./Categories";
 import BestSeller from "./BestSeller";
-import GoogleRatingPromo from "./GoogleRatingPromo";
-import Footer from "../Footer";
 
 const Home = () => {
   return (
@@ -22,7 +20,6 @@ const Home = () => {
       {/* <GoogleRatingPromo /> */}
       {/* <CounDown /> */}
       {/* <Newsletter /> */}
-      <Footer />
     </main>
   );
 };
