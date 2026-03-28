@@ -7,6 +7,7 @@ import productDetailsReducer from "./features/product-details";
 
 import { TypedUseSelectorHook, useSelector } from "react-redux";
 import { localStorageMiddleware, loadState } from "./middleware/localStorage";
+import { cartToastMiddleware } from "./middleware/cartToastMiddleware";
 
 // Load persisted state from localStorage
 const persistedState = loadState();
@@ -20,7 +21,7 @@ export const store = configureStore({
   },
   preloadedState: persistedState,
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(localStorageMiddleware),
+    getDefaultMiddleware().concat(localStorageMiddleware, cartToastMiddleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

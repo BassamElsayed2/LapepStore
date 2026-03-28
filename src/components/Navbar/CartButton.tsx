@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart } from "lucide-react";
@@ -19,7 +18,7 @@ const CartButton = ({
   locale,
   onOpenCart,
 }: CartButtonProps) => {
-  const commonT = useTranslations("common");
+  const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <Button
@@ -29,12 +28,17 @@ const CartButton = ({
     >
       <div className="relative">
         <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-[#92b18c]" />
-        {cartItems.length > 0 && (
+        {itemCount > 0 && (
           <Badge
             variant="default"
-            className="absolute -top-1.5 sm:-top-2 -right-1.5 sm:-right-2 h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center p-0 text-[10px] sm:text-xs bg-[#92b18c]"
+            className={[
+              "absolute z-10 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-white p-0",
+              "-top-2 -end-2 sm:-top-2.5 sm:-end-2.5",
+              "text-[10px] font-bold leading-none sm:h-5 sm:min-w-[20px] sm:text-[11px]",
+              "bg-[#92b18c] hover:bg-[#92b18c]",
+            ].join(" ")}
           >
-            {cartItems.length}
+            {itemCount > 99 ? "99+" : itemCount}
           </Badge>
         )}
       </div>

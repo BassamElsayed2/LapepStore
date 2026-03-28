@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 
 import { Product } from "@/types/product";
 import { useModalContext } from "@/app/context/QuickViewModalContext";
@@ -12,13 +12,11 @@ import { AppDispatch } from "@/redux/store";
 import { Link } from "@/app/i18n/navigation";
 import Image from "next/image";
 import { useLocale } from "next-intl";
-import toast from "react-hot-toast";
 
 const SingleListItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
   const dispatch = useDispatch<AppDispatch>();
   const locale = useLocale();
-  const [showCartSuccess, setShowCartSuccess] = useState(false);
   // update the QuickView state
   const handleQuickViewUpdate = () => {
     dispatch(updateQuickView({ ...item }));
@@ -74,17 +72,6 @@ const SingleListItem = ({ item }: { item: Product }) => {
     };
 
     dispatch(addItemToCart(cartItem));
-
-    // Show success message
-    toast.success(
-      locale === "ar" ? "تمت إضافة المنتج إلى السلة" : "Product added to cart",
-      {
-        duration: 2000,
-        position: "bottom-left",
-      }
-    );
-    setShowCartSuccess(true);
-    setTimeout(() => setShowCartSuccess(false), 2000);
   };
 
   return (

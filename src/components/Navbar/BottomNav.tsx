@@ -1,136 +1,186 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
-import { useLocale, useTranslations } from "next-intl";
-import { usePathname, useRouter } from "next/navigation";
-import { Home, Store, Tag, ShoppingCart, ArrowRight } from "lucide-react";
+import { useLocale } from "next-intl";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+  Home,
+  Store,
+  ShoppingCart,
+  Tag,
+  User,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { useAppSelector } from "@/redux/store";
 import { useSelector } from "react-redux";
 import { selectTotalPrice } from "@/redux/features/cart-slice";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
-const BottomNav = () => {
+/** ارتفاع منطقة الأيقونات + النصوص (بدون safe-area) — يُستخدم مع شريط السلة */
+const NAV_CONTENT_MIN_PX = 56;
+
+export default function BottomNav() {
   const locale = useLocale();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
-  const t = useTranslations("common");
 
   const cartItems = useAppSelector((state) => state.cartReducer.items);
   const totalPrice = useSelector(selectTotalPrice);
   const cartItemsCount = cartItems.reduce(
     (total, item) => total + item.quantity,
-    0
+    0,
   );
 
-  const isCartPage = pathname === `/${locale}/cart`;
-  const isCheckoutPage = pathname === `/${locale}/checkout`;
+  const { user } = useAuth();
+
+  const base = `/${locale}`;
+  const accountPath = user ? `${base}/profile` : `${base}/login`;
+
+  const isHome = pathname === base || pathname === `${base}/`;
+  const isShopDetails = pathname.includes(`${base}/shop-details`);
+  const filterParam = searchParams.get("filter");
+  const isOffers =
+    !isShopDetails &&
+    pathname.startsWith(`${base}/shop`) &&
+    filterParam === "limited-offers";
+  const isShop =
+    !isShopDetails &&
+    !isOffers &&
+    (pathname.includes("/shop-with-sidebar") ||
+      (pathname.startsWith(`${base}/shop`) &&
+        !pathname.startsWith(`${base}/shop-details`)));
+  const isCartPage = pathname.includes(`${base}/cart`);
+  const isAccount = user
+    ? pathname.includes(`${base}/profile`)
+    : pathname.includes(`${base}/login`) ||
+      pathname.includes(`${base}/register`);
+
+  const isCheckout = pathname.includes(`${base}/checkout`);
 
   const navItems = [
     {
       id: "home",
       label: locale === "ar" ? "الرئيسية" : "Home",
-      href: `/${locale}`,
+      href: base,
       icon: Home,
+      isActive: isHome,
     },
     {
       id: "shop",
       label: locale === "ar" ? "المتجر" : "Shop",
-      href: `/${locale}/shop`,
+      href: `${base}/shop`,
       icon: Store,
-    },
-    {
-      id: "offers",
-      label: locale === "ar" ? "العروض" : "Offers",
-      href: `/${locale}/shop?filter=limited-offers`,
-      icon: Tag,
+      isActive: isShop,
     },
     {
       id: "cart",
       label: locale === "ar" ? "السلة" : "Cart",
-      href: `/${locale}/checkout`,
+      href: `${base}/cart`,
       icon: ShoppingCart,
+      isActive: isCartPage,
       badge: cartItemsCount,
+    },
+    {
+      id: "offers",
+      label: locale === "ar" ? "العروض" : "Offers",
+      href: `${base}/shop?filter=limited-offers`,
+      icon: Tag,
+      isActive: isOffers,
+    },
+    {
+      id: "account",
+      label: locale === "ar" ? "حسابي" : "Account",
+      href: accountPath,
+      icon: User,
+      isActive: isAccount,
     },
   ];
 
   const handleGoToCart = () => {
-    router.push(`/${locale}/checkout`);
+    router.push(`${base}/cart`);
   };
 
-  // Don't show bottom nav in checkout page
-  if (isCheckoutPage) {
+  if (isCheckout) {
     return null;
   }
 
+  const CartChevron = locale === "ar" ? ChevronLeft : ChevronRight;
+
   return (
     <>
-      {/* Cart Summary Bar - Shows when cart has items and not on cart page */}
-      <div
-        className={`fixed left-0 right-0 bg-[#92b18c] text-white z-50 lg:hidden cursor-pointer overflow-hidden transition-all duration-500 ease-out ${
-          cartItemsCount > 0 && !isCartPage
-            ? "bottom-16 sm:bottom-18 opacity-100 translate-y-0"
-            : "bottom-16 sm:bottom-18 opacity-0 translate-y-full pointer-events-none"
-        }`}
-        onClick={handleGoToCart}
+      <nav
+        className={cn(
+          "fixed bottom-0 left-0 right-0 z-[55] lg:hidden",
+          "bg-white",
+          "border-t border-gray-200",
+          "shadow-[0_-2px_10px_rgba(0,0,0,0.05)]",
+          "pb-[env(safe-area-inset-bottom,0px)]",
+        )}
+        aria-label={locale === "ar" ? "التنقل السفلي" : "Bottom navigation"}
       >
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3 animate-slideInLeft">
-            <div className="bg-white/20 rounded-full p-2 transition-transform hover:scale-110">
-              <ShoppingCart className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold">
-                {cartItemsCount} {locale === "ar" ? "منتج" : "items"}
-              </p>
-              <p className="text-xs opacity-90">
-                {locale === "ar" ? "في السلة" : "in cart"}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 animate-slideInRight">
-            <div className="text-right">
-              <p className="text-lg font-bold">
-                {totalPrice.toFixed(2)} {locale === "ar" ? "ج.م" : "EGP"}
-              </p>
-              <p className="text-xs opacity-90">
-                {locale === "ar" ? "إجمالي" : "Total"}
-              </p>
-            </div>
-            <ArrowRight
-              className={`w-5 h-5 transition-transform ${
-                locale === "ar" ? "rotate-180" : ""
-              }`}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 lg:hidden">
-        <div className="grid grid-cols-4 h-16 sm:h-18">
-          {navItems.map((item, index) => {
-            const isActive = pathname === item.href;
+        <div
+          className="flex w-full items-stretch justify-between"
+          style={{ minHeight: NAV_CONTENT_MIN_PX }}
+        >
+          {navItems.map((item) => {
             const Icon = item.icon;
+            const active = item.isActive;
 
             return (
               <Link
                 key={item.id}
                 href={item.href}
-                className={`flex flex-col items-center justify-center gap-1 relative transition-all duration-300 ${
-                  isActive
+                className={cn(
+                  "relative flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-0.5 py-1.5",
+                  "transition-colors duration-200 touch-manipulation select-none",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#92b18c]/40 focus-visible:ring-offset-2",
+                  active
                     ? "text-[#92b18c]"
-                    : "text-gray-600 hover:text-[#92b18c]"
-                }`}
+                    : "text-gray-500 active:text-gray-700",
+                )}
               >
-                <div className="relative transition-transform hover:scale-110 duration-200">
-                  <Icon className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2} />
-                </div>
-                <span className="text-[10px] sm:text-xs font-medium">
+                {active && (
+                  <span
+                    className="absolute top-0 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-full bg-[#92b18c]"
+                    aria-hidden
+                  />
+                )}
+                <span
+                  className={cn(
+                    "relative flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-colors",
+                    active && "bg-[#92b18c]/12",
+                  )}
+                >
+                  <Icon
+                    className="h-[22px] w-[22px]"
+                    strokeWidth={active ? 2.25 : 1.85}
+                  />
+                  {item.badge != null && item.badge > 0 && (
+                    <span
+                      className={cn(
+                        "absolute -top-1 -end-2 z-10 flex h-[18px] min-w-[18px] items-center justify-center",
+                        "rounded-full border-2 border-white px-0.5 text-[10px] font-bold leading-none text-white",
+                        "bg-[#92b18c] shadow-sm",
+                      )}
+                    >
+                      {item.badge > 99 ? "99+" : item.badge}
+                    </span>
+                  )}
+                </span>
+                <span
+                  className={cn(
+                    "w-full px-0.5 text-center text-[10px] leading-tight sm:text-[11px]",
+                    active
+                      ? "font-semibold text-[#92b18c]"
+                      : "font-medium text-gray-600",
+                  )}
+                  style={{ wordBreak: "break-word" }}
+                >
                   {item.label}
                 </span>
-                {isActive && (
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[#92b18c] rounded-t-full transition-all duration-300" />
-                )}
               </Link>
             );
           })}
@@ -138,6 +188,4 @@ const BottomNav = () => {
       </nav>
     </>
   );
-};
-
-export default BottomNav;
+}

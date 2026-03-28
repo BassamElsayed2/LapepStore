@@ -16,7 +16,7 @@ interface PasswordStrengthIndicatorProps {
 
 const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps> = ({
   password,
-  locale = "en",
+  locale = "ar",
   showRequirements = true,
 }) => {
   if (!password) return null;

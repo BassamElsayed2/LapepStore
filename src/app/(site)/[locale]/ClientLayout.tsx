@@ -55,8 +55,10 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
             <ModalProvider>
               <PreviewSliderProvider>
                 <Navbar />
-                {/* <BottomNav /> */}
-                {children}
+                <div className="pb-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
+                  {children}
+                </div>
+                <BottomNav />
                 {/* <SplashCursor /> */}
                 <QuickViewModal />
                 <CartSidebarModal />

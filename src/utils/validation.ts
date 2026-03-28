@@ -208,7 +208,7 @@ export function getPasswordStrengthColor(strength: PasswordStrength): string {
  */
 export function getPasswordStrengthText(
   strength: PasswordStrength,
-  locale: string = 'en'
+  locale: string = 'ar'
 ): string {
   const texts = {
     en: {
@@ -225,7 +225,7 @@ export function getPasswordStrengthText(
     },
   };
 
-  return texts[locale as 'en' | 'ar']?.[strength] || texts.en[strength];
+  return texts[locale as 'en' | 'ar']?.[strength] || texts.ar[strength];
 }
 
 /**

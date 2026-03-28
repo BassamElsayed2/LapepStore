@@ -111,7 +111,7 @@ export const criticalCSS = `
   }
 `;
 
-export function generatePreloadLinks(locale: string = "en") {
+export function generatePreloadLinks(locale: string = "ar") {
   const fonts = [
     "/fonts/EuclidCircularA-Regular.woff2",
     "/fonts/EuclidCircularA-Medium.woff2",

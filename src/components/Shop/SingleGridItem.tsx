@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { Product } from "@/types/product";
 import { useModalContext } from "@/app/context/QuickViewModalContext";
 import { updateQuickView } from "@/redux/features/quickView-slice";
@@ -16,7 +16,6 @@ import toast from "react-hot-toast";
 const SingleGridItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
   const locale = useLocale();
-  const [showCartSuccess, setShowCartSuccess] = useState(false);
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -82,17 +81,6 @@ const SingleGridItem = ({ item }: { item: Product }) => {
     };
 
     dispatch(addItemToCart(cartItem));
-
-    // Show success message
-    toast.success(
-      locale === "ar" ? "تمت إضافة المنتج إلى السلة" : "Product added to cart",
-      {
-        duration: 2000,
-        position: "bottom-left",
-      }
-    );
-    setShowCartSuccess(true);
-    setTimeout(() => setShowCartSuccess(false), 2000);
   };
 
   return (
