@@ -128,8 +128,8 @@ function Navbar() {
       >
         <div
           className={cn(
-            "flex w-full items-center h-[60px] gap-2 sm:gap-3 md:px-[60px]",
-            "justify-between md:justify-start md:gap-4 lg:gap-6",
+            "flex w-full items-center h-[60px] gap-2 sm:gap-3 px-0 lg:px-30",
+            "justify-center md:gap-4 lg:gap-6",
           )}
         >
           {/* اللوجو: موبايل — يمين في العربية (أول عنصر في RTL) ويمين في الإنجليزية (order-2) */}
