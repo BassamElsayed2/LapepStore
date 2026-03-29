@@ -146,7 +146,9 @@ const Profile = () => {
         setAddresses(response.data);
       } else {
         toast.error(
-          locale === "ar" ? "فشل في تحميل العناوين" : "Failed to load addresses"
+          locale === "ar"
+            ? "فشل في تحميل العناوين"
+            : "Failed to load addresses",
         );
       }
     } catch (error) {
@@ -165,7 +167,7 @@ const Profile = () => {
         setOrders(response.orders);
       } else {
         toast.error(
-          locale === "ar" ? "فشل في تحميل الطلبات" : "Failed to load orders"
+          locale === "ar" ? "فشل في تحميل الطلبات" : "Failed to load orders",
         );
       }
     } catch (error) {
@@ -199,7 +201,7 @@ const Profile = () => {
       toast.error(
         locale === "ar"
           ? "الرجاء إدخال الاسم الكامل"
-          : "Please enter your full name"
+          : "Please enter your full name",
       );
       return;
     }
@@ -213,7 +215,7 @@ const Profile = () => {
         toast.success(
           locale === "ar"
             ? "تم تحديث الملف الشخصي بنجاح"
-            : "Profile updated successfully"
+            : "Profile updated successfully",
         );
       }
     } catch (error) {
@@ -235,7 +237,7 @@ const Profile = () => {
       toast.error(
         locale === "ar"
           ? "الرجاء ملء جميع حقول كلمة المرور"
-          : "Please fill all password fields"
+          : "Please fill all password fields",
       );
       return;
     }
@@ -244,7 +246,7 @@ const Profile = () => {
       toast.error(
         locale === "ar"
           ? "كلمة المرور الجديدة غير متطابقة"
-          : "New passwords do not match"
+          : "New passwords do not match",
       );
       return;
     }
@@ -253,7 +255,7 @@ const Profile = () => {
       toast.error(
         locale === "ar"
           ? "يجب أن تكون كلمة المرور 6 أحرف على الأقل"
-          : "Password must be at least 6 characters"
+          : "Password must be at least 6 characters",
       );
       return;
     }
@@ -263,14 +265,14 @@ const Profile = () => {
     try {
       const result = await updatePassword(
         passwordData.currentPassword,
-        passwordData.newPassword
+        passwordData.newPassword,
       );
 
       if (result.success) {
         toast.success(
           locale === "ar"
             ? "تم تغيير كلمة المرور بنجاح"
-            : "Password changed successfully"
+            : "Password changed successfully",
         );
         // Clear password fields
         setPasswordData({
@@ -290,7 +292,7 @@ const Profile = () => {
   const handleAddressInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
@@ -352,7 +354,7 @@ const Profile = () => {
       toast.error(
         locale === "ar"
           ? "الرجاء ملء الحقول المطلوبة (الشارع والمدينة)"
-          : "Please fill required fields (Street and City)"
+          : "Please fill required fields (Street and City)",
       );
       return;
     }
@@ -374,8 +376,8 @@ const Profile = () => {
               ? "تم تحديث العنوان بنجاح"
               : "تم إضافة العنوان بنجاح"
             : editingAddress
-            ? "Address updated successfully"
-            : "Address added successfully"
+              ? "Address updated successfully"
+              : "Address added successfully",
         );
         closeAddressModal();
         loadAddresses();
@@ -397,7 +399,7 @@ const Profile = () => {
     } catch (error) {
       console.error("Address save error:", error);
       toast.error(
-        locale === "ar" ? "حدث خطأ أثناء حفظ العنوان" : "Error saving address"
+        locale === "ar" ? "حدث خطأ أثناء حفظ العنوان" : "Error saving address",
       );
     } finally {
       setIsSubmitting(false);
@@ -409,7 +411,7 @@ const Profile = () => {
       !confirm(
         locale === "ar"
           ? "هل أنت متأكد من حذف هذا العنوان؟"
-          : "Are you sure you want to delete this address?"
+          : "Are you sure you want to delete this address?",
       )
     ) {
       return;
@@ -421,7 +423,7 @@ const Profile = () => {
         toast.success(
           locale === "ar"
             ? "تم حذف العنوان بنجاح"
-            : "Address deleted successfully"
+            : "Address deleted successfully",
         );
         loadAddresses();
       } else {
@@ -430,7 +432,9 @@ const Profile = () => {
     } catch (error) {
       console.error("Address delete error:", error);
       toast.error(
-        locale === "ar" ? "حدث خطأ أثناء حذف العنوان" : "Error deleting address"
+        locale === "ar"
+          ? "حدث خطأ أثناء حذف العنوان"
+          : "Error deleting address",
       );
     }
   };
@@ -442,7 +446,7 @@ const Profile = () => {
         toast.success(
           locale === "ar"
             ? "تم تعيين العنوان كافتراضي"
-            : "Address set as default"
+            : "Address set as default",
         );
         loadAddresses();
       } else {
@@ -453,7 +457,7 @@ const Profile = () => {
       toast.error(
         locale === "ar"
           ? "حدث خطأ أثناء تعيين العنوان الافتراضي"
-          : "Error setting default address"
+          : "Error setting default address",
       );
     }
   };
@@ -691,9 +695,8 @@ const Profile = () => {
                       onClick={async () => {
                         setRefreshingProfile(true);
                         try {
-                          const { getCurrentUser } = await import(
-                            "@/services/apiAuth"
-                          );
+                          const { getCurrentUser } =
+                            await import("@/services/apiAuth");
                           const result = await getCurrentUser();
 
                           if (result.success && result.data) {
@@ -705,7 +708,7 @@ const Profile = () => {
                             toast.success(
                               locale === "ar"
                                 ? "تم تحديث البيانات"
-                                : "Data refreshed"
+                                : "Data refreshed",
                             );
                           }
                         } catch (error) {
@@ -812,8 +815,8 @@ const Profile = () => {
                         ? "جاري الحفظ..."
                         : "Saving..."
                       : locale === "ar"
-                      ? "حفظ التغييرات"
-                      : "Save Changes"}
+                        ? "حفظ التغييرات"
+                        : "Save Changes"}
                   </button>
                 </form>
               </div>
@@ -918,8 +921,8 @@ const Profile = () => {
                         ? "جاري التغيير..."
                         : "Changing..."
                       : locale === "ar"
-                      ? "تغيير كلمة المرور"
-                      : "Change Password"}
+                        ? "تغيير كلمة المرور"
+                        : "Change Password"}
                   </button>
                 </form>
               </div>
@@ -1145,7 +1148,7 @@ const Profile = () => {
                         .filter((order) => order.status !== "pending")
                         .slice(
                           (currentOrderPage - 1) * ordersPerPage,
-                          currentOrderPage * ordersPerPage
+                          currentOrderPage * ordersPerPage,
                         )
                         .map((order) => (
                           <div
@@ -1168,9 +1171,9 @@ const Profile = () => {
                                 </p>
                                 <p className="text-sm text-dark">
                                   {new Date(
-                                    order.created_at
+                                    order.created_at,
                                   ).toLocaleDateString(
-                                    locale === "ar" ? "ar-EG" : "en-US"
+                                    locale === "ar" ? "ar-EG" : "en-US",
                                   )}
                                 </p>
                               </div>
@@ -1251,26 +1254,26 @@ const Profile = () => {
                                     order.status === "delivered"
                                       ? "bg-green-100 text-green-800"
                                       : order.status === "shipped"
-                                      ? "bg-blue-100 text-blue-800"
-                                      : order.status === "paid" ||
-                                        order.status === "confirmed"
-                                      ? "bg-yellow-100 text-yellow-800"
-                                      : order.status === "cancelled"
-                                      ? "bg-red-100 text-red-800"
-                                      : "bg-gray-100 text-gray-800"
+                                        ? "bg-blue-100 text-blue-800"
+                                        : order.status === "paid" ||
+                                            order.status === "confirmed"
+                                          ? "bg-yellow-100 text-yellow-800"
+                                          : order.status === "cancelled"
+                                            ? "bg-red-100 text-red-800"
+                                            : "bg-gray-100 text-gray-800"
                                   }`}
                                 >
                                   {locale === "ar"
                                     ? order.status === "delivered"
                                       ? "تم التوصيل"
                                       : order.status === "shipped"
-                                      ? "قيد الشحن"
-                                      : order.status === "paid" ||
-                                        order.status === "confirmed"
-                                      ? "تم الدفع"
-                                      : order.status === "cancelled"
-                                      ? "ملغي"
-                                      : "قيد الانتظار"
+                                        ? "قيد الشحن"
+                                        : order.status === "paid" ||
+                                            order.status === "confirmed"
+                                          ? "تم الدفع"
+                                          : order.status === "cancelled"
+                                            ? "ملغي"
+                                            : "قيد الانتظار"
                                     : order.status.charAt(0).toUpperCase() +
                                       order.status.slice(1)}
                                 </span>
@@ -1282,8 +1285,8 @@ const Profile = () => {
                                         ? "منتج"
                                         : "منتجات"
                                       : order.order_items.length === 1
-                                      ? "item"
-                                      : "items"}
+                                        ? "item"
+                                        : "items"}
                                   </span>
                                 )}
                               </div>
@@ -1360,11 +1363,11 @@ const Profile = () => {
                             {
                               length: Math.ceil(
                                 orders.filter(
-                                  (order) => order.status !== "pending"
-                                ).length / ordersPerPage
+                                  (order) => order.status !== "pending",
+                                ).length / ordersPerPage,
                               ),
                             },
-                            (_, i) => i + 1
+                            (_, i) => i + 1,
                           ).map((page) => (
                             <button
                               key={page}
@@ -1387,26 +1390,26 @@ const Profile = () => {
                                 prev + 1,
                                 Math.ceil(
                                   orders.filter(
-                                    (order) => order.status !== "pending"
-                                  ).length / ordersPerPage
-                                )
-                              )
+                                    (order) => order.status !== "pending",
+                                  ).length / ordersPerPage,
+                                ),
+                              ),
                             )
                           }
                           disabled={
                             currentOrderPage ===
                             Math.ceil(
                               orders.filter(
-                                (order) => order.status !== "pending"
-                              ).length / ordersPerPage
+                                (order) => order.status !== "pending",
+                              ).length / ordersPerPage,
                             )
                           }
                           className={`w-full sm:w-auto px-6 py-2.5 rounded-lg font-medium transition-all ${
                             currentOrderPage ===
                             Math.ceil(
                               orders.filter(
-                                (order) => order.status !== "pending"
-                              ).length / ordersPerPage
+                                (order) => order.status !== "pending",
+                              ).length / ordersPerPage,
                             )
                               ? "bg-gray-2 text-gray-4 cursor-not-allowed"
                               : "bg-blue text-white hover:bg-blue-dark hover:shadow-md"
@@ -1472,8 +1475,8 @@ const Profile = () => {
                       ? "تعديل العنوان"
                       : "Edit Address"
                     : locale === "ar"
-                    ? "إضافة عنوان جديد"
-                    : "Add New Address"}
+                      ? "إضافة عنوان جديد"
+                      : "Add New Address"}
                 </h3>
                 <button
                   onClick={closeAddressModal}
@@ -1669,12 +1672,12 @@ const Profile = () => {
                       ? "جاري الحفظ..."
                       : "Saving..."
                     : editingAddress
-                    ? locale === "ar"
-                      ? "تحديث العنوان"
-                      : "Update Address"
-                    : locale === "ar"
-                    ? "إضافة العنوان"
-                    : "Add Address"}
+                      ? locale === "ar"
+                        ? "تحديث العنوان"
+                        : "Update Address"
+                      : locale === "ar"
+                        ? "إضافة العنوان"
+                        : "Add Address"}
                 </button>
               </div>
             </form>

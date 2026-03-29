@@ -18,6 +18,14 @@ type CartItem = {
   };
 };
 
+/** null/undefined stock = no numeric cap in cart (unlimited for UI math) */
+function effectiveStockCap(stock: number | null | undefined): number {
+  if (typeof stock === "number" && !Number.isNaN(stock) && stock >= 0) {
+    return stock;
+  }
+  return Number.MAX_SAFE_INTEGER;
+}
+
 const initialState: InitialState = {
   items: [],
 };
@@ -29,28 +37,31 @@ export const cart = createSlice({
     addItemToCart: (state, action: PayloadAction<CartItem>) => {
       const { id, title, price, quantity, discountedPrice, stock, imgs } =
         action.payload;
+      const cap = effectiveStockCap(stock);
       const existingItem = state.items.find((item) => item.id === id);
 
       if (existingItem) {
-        // Check if adding this quantity would exceed stock
-        if (existingItem.quantity + quantity <= stock) {
+        const existingCap = effectiveStockCap(existingItem.stock);
+        const limit = Math.min(cap, existingCap);
+        if (existingItem.quantity + quantity <= limit) {
           existingItem.quantity += quantity;
         }
-        // If stock is exceeded, don't add to cart
       } else {
-        // Check if the requested quantity is available in stock
-        if (quantity <= stock) {
+        if (quantity <= cap) {
+          const storedStock =
+            typeof stock === "number" && !Number.isNaN(stock) && stock >= 0
+              ? stock
+              : Number.MAX_SAFE_INTEGER;
           state.items.push({
             id,
             title,
             price,
             quantity,
             discountedPrice,
-            stock,
+            stock: storedStock,
             imgs,
           });
         }
-        // If stock is insufficient, don't add to cart
       }
     },
     removeItemFromCart: (state, action: PayloadAction<number>) => {
@@ -65,11 +76,9 @@ export const cart = createSlice({
       const existingItem = state.items.find((item) => item.id === id);
 
       if (existingItem) {
-        // Check if the new quantity doesn't exceed stock
-        if (quantity <= existingItem.stock) {
-          existingItem.quantity = quantity;
-        }
-        // If stock is exceeded, don't update quantity
+        const limit = effectiveStockCap(existingItem.stock);
+        const next = Math.min(Math.max(1, quantity), limit);
+        existingItem.quantity = next;
       }
     },
 

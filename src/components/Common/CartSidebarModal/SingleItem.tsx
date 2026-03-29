@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import Image from "next/image";
@@ -18,14 +18,27 @@ const SingleItem = ({
   const locale = useLocale();
   const [quantity, setQuantity] = useState(item.quantity);
 
+  const maxQty =
+    typeof item.stock === "number" &&
+    !Number.isNaN(item.stock) &&
+    item.stock >= 0 &&
+    item.stock < Number.MAX_SAFE_INTEGER
+      ? item.stock
+      : Number.MAX_SAFE_INTEGER;
+
+  useEffect(() => {
+    setQuantity(item.quantity);
+  }, [item.quantity, item.id]);
+
   const handleRemoveFromCart = () => {
     dispatch(removeItemFromCart(item.id));
   };
 
   const handleIncreaseQuantity = () => {
+    if (quantity >= maxQty) return;
     const newQuantity = quantity + 1;
-    setQuantity(newQuantity);
     dispatch(updateCartItemQuantity({ id: item.id, quantity: newQuantity }));
+    setQuantity(newQuantity);
   };
 
   const handleDecreaseQuantity = () => {
@@ -131,8 +144,9 @@ const SingleItem = ({
 
           <button
             onClick={handleIncreaseQuantity}
+            disabled={quantity >= maxQty}
             aria-label="increase quantity"
-            className="flex items-center justify-center w-8 h-8 ease-out duration-200 hover:text-[#92b18c]"
+            className="flex items-center justify-center w-8 h-8 ease-out duration-200 hover:text-[#92b18c] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg
               className="fill-current"

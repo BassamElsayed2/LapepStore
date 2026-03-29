@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AppDispatch } from "@/redux/store";
 import { useDispatch } from "react-redux";
 import {
@@ -16,13 +16,27 @@ const SingleItem = ({ item }: { item: any }) => {
   const dispatch = useDispatch<AppDispatch>();
   const locale = useLocale();
 
+  const maxQty =
+    typeof item.stock === "number" &&
+    !Number.isNaN(item.stock) &&
+    item.stock >= 0 &&
+    item.stock < Number.MAX_SAFE_INTEGER
+      ? item.stock
+      : Number.MAX_SAFE_INTEGER;
+
+  useEffect(() => {
+    setQuantity(item.quantity);
+  }, [item.quantity, item.id]);
+
   const handleRemoveFromCart = () => {
     dispatch(removeItemFromCart(item.id));
   };
 
   const handleIncreaseQuantity = () => {
-    setQuantity(quantity + 1);
-    dispatch(updateCartItemQuantity({ id: item.id, quantity: quantity + 1 }));
+    if (quantity >= maxQty) return;
+    const newQuantity = quantity + 1;
+    dispatch(updateCartItemQuantity({ id: item.id, quantity: newQuantity }));
+    setQuantity(newQuantity);
   };
 
   const handleDecreaseQuantity = () => {
@@ -89,8 +103,9 @@ const SingleItem = ({ item }: { item: any }) => {
 
           <button
             onClick={() => handleIncreaseQuantity()}
+            disabled={quantity >= maxQty}
             aria-label="button for add product"
-            className="flex items-center justify-center w-11.5 h-11.5 ease-out duration-200 hover:text-blue"
+            className="flex items-center justify-center w-11.5 h-11.5 ease-out duration-200 hover:text-blue disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg
               className="fill-current"

@@ -6,6 +6,15 @@ import { routing } from "./src/app/i18n/routing";
 const intlMiddleware = createMiddleware(routing);
 
 export default function middleware(req: NextRequest) {
+  // Normalize paths like //ar/... (from misconfigured FRONTEND_URL + "/ar/...")
+  // so History/replaceState stays same-origin (//ar is parsed as host "ar").
+  const pathname = req.nextUrl.pathname;
+  if (pathname.length > 1 && /^\/\/+/.test(pathname)) {
+    const url = req.nextUrl.clone();
+    url.pathname = pathname.replace(/^\/+/, "/");
+    return NextResponse.redirect(url);
+  }
+
   // Get response from i18n middleware
   const response = intlMiddleware(req);
 

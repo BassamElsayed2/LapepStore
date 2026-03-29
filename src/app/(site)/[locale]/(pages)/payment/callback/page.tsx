@@ -201,6 +201,11 @@ const PaymentCallbackPage = () => {
             if (result.success && result.data) {
               const orderId = result.data.order_id;
 
+              if (result.data.released_from_redirect) {
+                setStatus("failed");
+                return;
+              }
+
               // Store voucher if available (for Aman/Fawry payments)
               if (result.data.voucher) {
                 setVoucher(result.data.voucher);
@@ -219,12 +224,26 @@ const PaymentCallbackPage = () => {
 
         // Fallback: If status is success but no customerReference, or backend failed
         // Try to find the order by polling recent payments
-        if (status === "success" || status === "completed") {
+        const st = (status || "").trim().toLowerCase();
+        if (
+          st === "success" ||
+          st === "completed" ||
+          st === "paid" ||
+          st === "delivered"
+        ) {
           console.log("✅ Payment status is success, polling for order...");
           // Poll for recent successful payment
           // This is a fallback when webhook is received but redirect params are incomplete
           pollForRecentPayment();
-        } else if (status === "failed") {
+        } else if (
+          st === "failed" ||
+          st === "failure" ||
+          st === "declined" ||
+          st === "cancelled" ||
+          st === "canceled" ||
+          st === "refunded" ||
+          st === "expired"
+        ) {
           console.log("❌ Payment status is failed");
           setStatus("failed");
         } else {
