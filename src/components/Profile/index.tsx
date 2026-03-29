@@ -1465,11 +1465,19 @@ const Profile = () => {
 
       {/* Address Modal */}
       {showAddressModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/50"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="address-modal-title"
+        >
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-3 p-6">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-medium text-dark">
+                <h3
+                  id="address-modal-title"
+                  className="text-xl font-medium text-dark"
+                >
                   {editingAddress
                     ? locale === "ar"
                       ? "تعديل العنوان"
