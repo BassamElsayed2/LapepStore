@@ -11,6 +11,46 @@ export interface GetProductsParams {
   limitedTimeOffer?: boolean;
 }
 
+function normalizeProductImageList(product: {
+  images?: unknown;
+  image_url?: unknown;
+}): string | string[] | undefined {
+  const coerce = (raw: unknown): string[] | null => {
+    if (raw == null) return null;
+    if (Array.isArray(raw)) {
+      const urls = raw
+        .map((x) => (typeof x === "string" ? x.trim() : ""))
+        .filter(Boolean);
+      return urls.length ? urls : null;
+    }
+    if (typeof raw === "string") {
+      const t = raw.trim();
+      if (!t) return null;
+      if (t.startsWith("[")) {
+        try {
+          const parsed = JSON.parse(t) as unknown;
+          if (Array.isArray(parsed)) {
+            const urls = parsed
+              .filter((x): x is string => typeof x === "string")
+              .map((x) => x.trim())
+              .filter(Boolean);
+            return urls.length ? urls : null;
+          }
+        } catch {
+          return null;
+        }
+        return null;
+      }
+      return [t];
+    }
+    return null;
+  };
+
+  const list = coerce(product.images) ?? coerce(product.image_url) ?? [];
+  if (list.length === 0) return undefined;
+  return list.length === 1 ? list[0] : list;
+}
+
 // =====================================================
 // Query Functions
 // =====================================================
@@ -25,10 +65,10 @@ const fetchProducts = async (params?: GetProductsParams): Promise<Product[]> => 
     if (response.data.success) {
       let products = 'pagination' in response.data ? response.data.data : (response.data.data || []);
       
-      // Map images to image_url for backward compatibility
+      // Map images to image_url for backward compatibility (avoid [] hiding legacy URLs / string-as-url bugs)
       products = products.map((product: any) => ({
         ...product,
-        image_url: product.images || product.image_url,
+        image_url: normalizeProductImageList(product),
       }));
       
       return products;
@@ -51,10 +91,9 @@ const fetchProductById = async (id: string): Promise<Product> => {
 
   if (response.data.success && response.data.data) {
     const product: any = response.data.data;
-    // Map images to image_url for backward compatibility
     return {
       ...product,
-      image_url: product.images || product.image_url,
+      image_url: normalizeProductImageList(product),
     };
   }
 
@@ -69,7 +108,7 @@ const fetchBestSellers = async (): Promise<Product[]> => {
     // Map images to image_url for backward compatibility
     return products.map((product: any) => ({
       ...product,
-      image_url: product.images || product.image_url,
+      image_url: normalizeProductImageList(product),
     }));
   }
 
@@ -84,7 +123,7 @@ const fetchLimitedOffers = async (): Promise<Product[]> => {
     // Map images to image_url for backward compatibility
     return products.map((product: any) => ({
       ...product,
-      image_url: product.images || product.image_url,
+      image_url: normalizeProductImageList(product),
     }));
   }
 

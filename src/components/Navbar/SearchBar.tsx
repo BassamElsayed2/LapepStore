@@ -128,7 +128,16 @@ const SearchBar = () => {
             </div>
           ) : products && products.length > 0 ? (
             <div className="py-2">
-              {products.map((product) => (
+              {products.map((product) => {
+                const offer = Number(product.offer_price);
+                const hasOffer =
+                  product.offer_price != null &&
+                  !Number.isNaN(offer) &&
+                  offer > 0;
+                const basePrice = Number(product.price);
+                const displayPrice = hasOffer ? offer : basePrice;
+
+                return (
                 <Link
                   key={product.id}
                   href={`/${locale}/shop-details?id=${product.id}`}
@@ -168,18 +177,19 @@ const SearchBar = () => {
                     </p>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-sm font-semibold text-[#92b18c]">
-                        {product.offer_price || product.price}{" "}
+                        {displayPrice}{" "}
                         {locale === "ar" ? "جنيه" : "EGP"}
                       </span>
-                      {product.offer_price && (
+                      {hasOffer && (
                         <span className="text-xs text-gray-500 line-through">
-                          {product.price} {locale === "ar" ? "جنيه" : "EGP"}
+                          {basePrice} {locale === "ar" ? "جنيه" : "EGP"}
                         </span>
                       )}
                     </div>
                   </div>
                 </Link>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="py-8 text-center text-gray-500">
